@@ -52,8 +52,13 @@
       <HintPath>..\packages\FluentAssertions.4.18.0\lib\net45\FluentAssertions.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq, Version=4.5.30.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\packages\Moq.4.5.30\lib\net45\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Ploeh.Albedo, Version=1.0.2.0, Culture=neutral, PublicKeyToken=179ef6dd03497bbd, processorArchitecture=MSIL">
@@ -107,6 +112,7 @@
   <ItemGroup>
     <Compile Include="Messaging\ExplicitMessageHandler_features.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
+    <Compile Include="Messaging\JsonMessageSerializer_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +125,10 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RA.Messaging.Azure\RA.Messaging.Azure.csproj">
+      <Project>{2A5F396F-C3E1-4C37-BB6B-4ED2BF207DE6}</Project>
+      <Name>RA.Messaging.Azure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RA.Messaging.Core\RA.Messaging.Core.csproj">
       <Project>{A158764D-DA9E-4302-8C21-3B71F4E09802}</Project>
       <Name>RA.Messaging.Core</Name>
