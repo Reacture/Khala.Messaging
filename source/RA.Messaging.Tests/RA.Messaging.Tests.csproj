@@ -106,6 +106,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Messaging\ExplicitMessageHandler_features.cs" />
+    <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
