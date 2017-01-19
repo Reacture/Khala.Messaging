@@ -1,26 +1,28 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>ReactiveArchitecture.Messaging.Core</id>
+    <id>ReactiveArchitecture.Messaging.Azure</id>
     <version>0.1.1</version>
-    <title>ReactiveArchitecture.Messaging.Core</title>
+    <title>ReactiveArchitecture.Messaging.Azure</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
     <licenseUrl>https://github.com/ReactiveEssentials/RA.Messaging/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/ReactiveEssentials/RA.Messaging</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Reactive messaging</description>
+    <description>Reactive messaging azure</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright Gyuwon 2017</copyright>
-    <tags>Reactive Messaging Event</tags>
+    <tags>Reactive Messaging Azure EventHub Event</tags>
     <dependencies>
-      <group targetFramework="netstandard1.1">
-        <dependency id="NETStandard.Library" version="1.6.0" />
+      <group targetFramework="net45">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="WindowsAzure.Storage" version="8.0.1" />
+        <dependency id="WindowsAzure.ServiceBus" version="3.4.4" />
+        <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="2.2.8" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\RA.Messaging.Core\bin\Release\RA.Messaging.Core.dll" target="lib\netstandard1.1\RA.Messaging.Core.dll" />
+    <file src="..\source\RA.Messaging.Azure\bin\Release\RA.Messaging.Azure.dll" target="lib\net45\RA.Messaging.Azure.dll" />
   </files>
 </package>
