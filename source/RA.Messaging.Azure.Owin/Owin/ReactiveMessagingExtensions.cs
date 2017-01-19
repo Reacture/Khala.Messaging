@@ -7,7 +7,7 @@
     using ReactiveArchitecture.Messaging;
     using ReactiveArchitecture.Messaging.Azure;
 
-    public static class ReactiveArchitectureMessagingExtensions
+    public static class ReactiveMessagingExtensions
     {
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
