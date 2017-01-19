@@ -1,16 +1,19 @@
 ﻿namespace ReactiveArchitecture.Messaging.Azure
 {
     using System;
+    using System.Threading;
     using Microsoft.ServiceBus.Messaging;
 
     public class EventMessageProcessorFactory : IEventProcessorFactory
     {
         private readonly IMessageHandler _handler;
         private readonly IMessageSerializer _serializer;
+        private readonly CancellationToken _cancellationToken;
 
         public EventMessageProcessorFactory(
             IMessageHandler handler,
-            IMessageSerializer serializer)
+            IMessageSerializer serializer,
+            CancellationToken cancellationToken)
         {
             if (handler == null)
             {
@@ -24,9 +27,15 @@
 
             _handler = handler;
             _serializer = serializer;
+            _cancellationToken = cancellationToken;
         }
 
         public IEventProcessor CreateEventProcessor(PartitionContext context)
-            => new EventMessageProcessor(_handler, _serializer);
+        {
+            return new EventMessageProcessor(
+                _handler,
+                _serializer,
+                _cancellationToken);
+        }
     }
 }

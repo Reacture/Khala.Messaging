@@ -11,10 +11,12 @@
     {
         private readonly IMessageHandler _handler;
         private readonly IMessageSerializer _serializer;
+        private readonly CancellationToken _cancellationToken;
 
         public EventMessageProcessor(
             IMessageHandler handler,
-            IMessageSerializer serializer)
+            IMessageSerializer serializer,
+            CancellationToken cancellationToken)
         {
             if (handler == null)
             {
@@ -28,6 +30,7 @@
 
             _handler = handler;
             _serializer = serializer;
+            _cancellationToken = cancellationToken;
         }
 
         public Task CloseAsync(PartitionContext context, CloseReason reason)
@@ -92,7 +95,7 @@
             byte[] bytes = eventData.GetBytes();
             string value = Encoding.UTF8.GetString(bytes);
             object message = _serializer.Deserialize(value);
-            return _handler.Handle(message, CancellationToken.None);
+            return _handler.Handle(message, _cancellationToken);
         }
     }
 }
