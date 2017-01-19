@@ -25,14 +25,14 @@ namespace ReactiveArchitecture.Messaging.Azure
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var connectionString = (string)context.Properties["eventhub-connectionstring"];
-            var path = (string)context.Properties["eventhub-path"];
+            var connectionString = (string)context.Properties["eventhubmessagebus-eventhub-connectionstring"];
+            var path = (string)context.Properties["eventhubmessagebus-eventhub-path"];
             if (string.IsNullOrWhiteSpace(connectionString) == false &&
                 string.IsNullOrWhiteSpace(path) == false)
             {
                 eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, path);
                 consumerGroupName =
-                    (string)context.Properties["eventhub-consumergroup"] ??
+                    (string)context.Properties["eventhubmessagebus-eventhub-consumergroup"] ??
                     EventHubConsumerGroup.DefaultGroupName;
             }
         }
@@ -48,9 +48,9 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
   <TestRunParameters>
-    <Parameter name=""eventhub-connectionstring"" value=""your event hub connection string for testing"" />
-    <Parameter name=""eventhub-path"" value=""your event hub path for testing"" />
-    <Parameter name=""eventhub-consumergroup"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+    <Parameter name=""eventhubmessagebus-eventhub-connectionstring"" value=""your event hub connection string for testing"" />
+    <Parameter name=""eventhubmessagebus-eventhub-path"" value=""your event hub path for testing"" />
+    <Parameter name=""eventhubmessagebus-eventhub-consumergroup"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
   </TestRunParameters>  
 </RunSettings>
 
