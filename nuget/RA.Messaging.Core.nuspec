@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ReactiveArchitecture.Messaging.Core</id>
+    <version>0.1.0</version>
+    <title>ReactiveArchitecture.Messaging.Core</title>
+    <authors>Gyuwon</authors>
+    <owners>Gyuwon</owners>
+    <licenseUrl>https://github.com/ReactiveEssentials/RA.Messaging/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/ReactiveEssentials/RA.Messaging/blob/master/LICENSE</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Reactive messaging</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright Gyuwon 2017</copyright>
+    <tags>reactive messaging</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.1">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\source\RA.Messaging.Core\bin\Release\RA.Messaging.Core.dll" target="lib\netstandard1.1\RA.Messaging.Core.dll" />
+  </files>
+</package>
