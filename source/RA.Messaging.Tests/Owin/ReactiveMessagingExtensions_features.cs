@@ -41,7 +41,7 @@ namespace Owin
                 string.IsNullOrWhiteSpace(storageConnectionString))
             {
                 Assert.Inconclusive(@"
-EventProcessorHost 연결 정보가 설정되지 않았습니다. OwinMessagingExtensions 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 연결 정보를 설정합니다.
+EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessagingExtensions 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 연결 정보를 설정합니다.
 
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
