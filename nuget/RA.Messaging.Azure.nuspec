@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ReactiveArchitecture.Messaging.Azure</id>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <title>ReactiveArchitecture.Messaging.Azure</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -15,9 +15,9 @@
     <tags>Reactive Messaging Azure EventHub Event</tags>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="ReactiveArchitecture.Messaging.Core" version="0.1.3" />
+        <dependency id="ReactiveArchitecture.Messaging.Core" version="0.1.4" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="WindowsAzure.Storage" version="8.0.1" />
+        <dependency id="WindowsAzure.Storage" version="7.2.1" />
         <dependency id="WindowsAzure.ServiceBus" version="3.4.4" />
         <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="2.2.8" />
       </group>

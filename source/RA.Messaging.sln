@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RA.Messaging.Azure", "RA.Me
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RA.Messaging.Azure.Owin", "RA.Messaging.Azure.Owin\RA.Messaging.Azure.Owin.csproj", "{9B741CD8-B9DB-467B-A630-05D9D6CFBF2D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{8ADE4298-3784-41D0-9516-37F1A00931C7}"
+	ProjectSection(SolutionItems) = preProject
+		..\nuget\RA.Messaging.Azure.nuspec = ..\nuget\RA.Messaging.Azure.nuspec
+		..\nuget\RA.Messaging.Azure.Owin.nuspec = ..\nuget\RA.Messaging.Azure.Owin.nuspec
+		..\nuget\RA.Messaging.Core.nuspec = ..\nuget\RA.Messaging.Core.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
