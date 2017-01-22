@@ -11,18 +11,15 @@
     {
         private readonly IMessageHandler _handler;
         private readonly IMessageSerializer _serializer;
-        private readonly IEventMessageExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         internal EventMessageProcessor(
             IMessageHandler handler,
             IMessageSerializer serializer,
-            IEventMessageExceptionHandler exceptionHandler,
             CancellationToken cancellationToken)
         {
             _handler = handler;
             _serializer = serializer;
-            _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
 
@@ -86,36 +83,9 @@
             PartitionContext context, EventData eventData)
         {
             byte[] bytes = eventData.GetBytes();
-
-            try
-            {
-                string value = Encoding.UTF8.GetString(bytes);
-                object message = _serializer.Deserialize(value);
-
-                try
-                {
-                    await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    var exceptionContext = new HandleMessageExceptionContext(message, exception);
-                    _exceptionHandler.HandleMessageException(exceptionContext);
-                    if (exceptionContext.Handled == false)
-                    {
-                        throw;
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                var exceptionContext = new HandleEventExceptionContext(eventData, bytes, exception);
-                _exceptionHandler.HandleEventException(exceptionContext);
-                if (exceptionContext.Handled == false)
-                {
-                    throw;
-                }
-            }
-
+            string value = Encoding.UTF8.GetString(bytes);
+            object message = _serializer.Deserialize(value);
+            await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
             await context.CheckpointAsync(eventData).ConfigureAwait(false);
         }
     }
