@@ -80,14 +80,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\Azure\CompositeBrokeredMessageExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\CompositeEventMessageExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory.cs" />
+    <Compile Include="Messaging\Azure\HandleBrokeredMessageExceptionContext.cs" />
     <Compile Include="Messaging\Azure\HandleEventExceptionContext.cs" />
     <Compile Include="Messaging\Azure\HandleMessageExceptionContext.cs" />
+    <Compile Include="Messaging\Azure\IBrokeredMessageExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\IEventMessageExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusQueueMessageProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -107,5 +107,92 @@
                 .UnregisterEventProcessorAsync()
                 .Wait();
         }
+
+        public static void UseServiceBusQueueMessageProcessor(
+            this IAppBuilder app,
+            string connectionString,
+            string queueName,
+            IMessageHandler messageHandler,
+            IMessageSerializer messageSerializer,
+            IBrokeredMessageExceptionHandler exceptionHandler)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException(nameof(connectionString));
+            }
+
+            if (queueName == null)
+            {
+                throw new ArgumentNullException(nameof(queueName));
+            }
+
+            if (messageHandler == null)
+            {
+                throw new ArgumentNullException(nameof(messageHandler));
+            }
+
+            if (messageSerializer == null)
+            {
+                throw new ArgumentNullException(nameof(messageSerializer));
+            }
+
+            if (exceptionHandler == null)
+            {
+                throw new ArgumentNullException(nameof(exceptionHandler));
+            }
+
+            ServiceBusQueueMessageProcessor.Process(
+                connectionString,
+                queueName,
+                messageHandler,
+                messageSerializer,
+                exceptionHandler,
+                new AppProperties(app.Properties).OnAppDisposing);
+        }
+
+        public static void UseServiceBusQueueMessageProcessor(
+            this IAppBuilder app,
+            string connectionString,
+            string queueName,
+            IMessageHandler messageHandler,
+            IMessageSerializer messageSerializer)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException(nameof(connectionString));
+            }
+
+            if (queueName == null)
+            {
+                throw new ArgumentNullException(nameof(queueName));
+            }
+
+            if (messageHandler == null)
+            {
+                throw new ArgumentNullException(nameof(messageHandler));
+            }
+
+            if (messageSerializer == null)
+            {
+                throw new ArgumentNullException(nameof(messageSerializer));
+            }
+
+            ServiceBusQueueMessageProcessor.Process(
+                connectionString,
+                queueName,
+                messageHandler,
+                messageSerializer,
+                new AppProperties(app.Properties).OnAppDisposing);
+        }
     }
 }

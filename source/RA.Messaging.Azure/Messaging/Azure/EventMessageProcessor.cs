@@ -78,39 +78,45 @@
         {
             foreach (EventData eventData in messages)
             {
-                byte[] bytes = eventData.GetBytes();
+                await ProcessEvent(context, eventData);
+            }
+        }
+
+        private async Task ProcessEvent(
+            PartitionContext context, EventData eventData)
+        {
+            byte[] bytes = eventData.GetBytes();
+
+            try
+            {
+                string value = Encoding.UTF8.GetString(bytes);
+                object message = _serializer.Deserialize(value);
 
                 try
                 {
-                    string value = Encoding.UTF8.GetString(bytes);
-                    object message = _serializer.Deserialize(value);
-
-                    try
-                    {
-                        await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        var exceptionContext = new HandleMessageExceptionContext(message, exception);
-                        _exceptionHandler.HandleMessageException(exceptionContext);
-                        if (exceptionContext.Handled == false)
-                        {
-                            throw;
-                        }
-                    }
+                    await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
-                    var exceptionContext = new HandleEventExceptionContext(eventData, bytes, exception);
-                    _exceptionHandler.HandleEventException(exceptionContext);
+                    var exceptionContext = new HandleMessageExceptionContext(message, exception);
+                    _exceptionHandler.HandleMessageException(exceptionContext);
                     if (exceptionContext.Handled == false)
                     {
                         throw;
                     }
                 }
-
-                await context.CheckpointAsync(eventData).ConfigureAwait(false);
             }
+            catch (Exception exception)
+            {
+                var exceptionContext = new HandleEventExceptionContext(eventData, bytes, exception);
+                _exceptionHandler.HandleEventException(exceptionContext);
+                if (exceptionContext.Handled == false)
+                {
+                    throw;
+                }
+            }
+
+            await context.CheckpointAsync(eventData).ConfigureAwait(false);
         }
     }
 }
