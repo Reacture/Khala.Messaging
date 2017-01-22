@@ -95,7 +95,7 @@
                 throw new ArgumentNullException(nameof(messageSerializer));
             }
 
-            ServiceBusQueueMessageProcessor.Process(
+            ServiceBusQueueMessageProcessor.Run(
                 connectionString,
                 queueName,
                 messageHandler,

@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\Azure\BrokeredMessageProcessor.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory.cs" />

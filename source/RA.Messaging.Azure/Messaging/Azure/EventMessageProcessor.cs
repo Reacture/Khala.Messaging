@@ -75,7 +75,7 @@
         {
             foreach (EventData eventData in messages)
             {
-                await ProcessEvent(context, eventData);
+                await ProcessEvent(context, eventData).ConfigureAwait(false);
             }
         }
 
@@ -83,9 +83,12 @@
             PartitionContext context, EventData eventData)
         {
             byte[] bytes = eventData.GetBytes();
+
             string value = Encoding.UTF8.GetString(bytes);
             object message = _serializer.Deserialize(value);
+
             await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
+
             await context.CheckpointAsync(eventData).ConfigureAwait(false);
         }
     }
