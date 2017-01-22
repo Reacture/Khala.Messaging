@@ -11,25 +11,18 @@
     {
         private readonly IMessageHandler _handler;
         private readonly IMessageSerializer _serializer;
+        private readonly IEventMessageExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
-        public EventMessageProcessor(
+        internal EventMessageProcessor(
             IMessageHandler handler,
             IMessageSerializer serializer,
+            IEventMessageExceptionHandler exceptionHandler,
             CancellationToken cancellationToken)
         {
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-
-            if (serializer == null)
-            {
-                throw new ArgumentNullException(nameof(serializer));
-            }
-
             _handler = handler;
             _serializer = serializer;
+            _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
 
@@ -85,17 +78,39 @@
         {
             foreach (EventData eventData in messages)
             {
-                await ProcessEvent(eventData).ConfigureAwait(false);
+                byte[] bytes = eventData.GetBytes();
+
+                try
+                {
+                    string value = Encoding.UTF8.GetString(bytes);
+                    object message = _serializer.Deserialize(value);
+
+                    try
+                    {
+                        await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        var exceptionContext = new HandleMessageExceptionContext(message, exception);
+                        _exceptionHandler.HandleMessageException(exceptionContext);
+                        if (exceptionContext.Handled == false)
+                        {
+                            throw;
+                        }
+                    }
+                }
+                catch (Exception exception)
+                {
+                    var exceptionContext = new HandleEventExceptionContext(eventData, bytes, exception);
+                    _exceptionHandler.HandleEventException(exceptionContext);
+                    if (exceptionContext.Handled == false)
+                    {
+                        throw;
+                    }
+                }
+
                 await context.CheckpointAsync(eventData).ConfigureAwait(false);
             }
-        }
-
-        private Task ProcessEvent(EventData eventData)
-        {
-            byte[] bytes = eventData.GetBytes();
-            string value = Encoding.UTF8.GetString(bytes);
-            object message = _serializer.Deserialize(value);
-            return _handler.Handle(message, _cancellationToken);
         }
     }
 }

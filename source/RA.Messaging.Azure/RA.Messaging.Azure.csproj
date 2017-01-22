@@ -80,9 +80,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\Azure\CompositeEventMessageExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory.cs" />
+    <Compile Include="Messaging\Azure\HandleEventExceptionContext.cs" />
+    <Compile Include="Messaging\Azure\HandleMessageExceptionContext.cs" />
+    <Compile Include="Messaging\Azure\IEventMessageExceptionHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
