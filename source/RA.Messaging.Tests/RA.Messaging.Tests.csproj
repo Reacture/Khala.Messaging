@@ -168,6 +168,7 @@
   <ItemGroup>
     <Compile Include="Messaging\Azure\CompositeEventMessageExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_features.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_features.cs" />
     <Compile Include="Messaging\ExplicitMessageHandler_features.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_features.cs" />

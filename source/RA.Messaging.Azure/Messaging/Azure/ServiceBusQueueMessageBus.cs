@@ -2,23 +2,23 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Messaging;
     using Microsoft.ServiceBus.Messaging;
 
-    public class EventHubMessageBus : IMessageBus
+    public class ServiceBusQueueMessageBus : IMessageBus
     {
-        private readonly EventHubClient _eventHubClient;
+        private readonly QueueClient _queueClient;
         private readonly IMessageSerializer _serializer;
 
-        public EventHubMessageBus(
-            EventHubClient eventHubClient, IMessageSerializer serializer)
+        public ServiceBusQueueMessageBus(
+            QueueClient queueClient, IMessageSerializer serializer)
         {
-            if (eventHubClient == null)
+            if (queueClient == null)
             {
-                throw new ArgumentNullException(nameof(eventHubClient));
+                throw new ArgumentNullException(nameof(queueClient));
             }
 
             if (serializer == null)
@@ -26,7 +26,7 @@
                 throw new ArgumentNullException(nameof(serializer));
             }
 
-            _eventHubClient = eventHubClient;
+            _queueClient = queueClient;
             _serializer = serializer;
         }
 
@@ -39,8 +39,8 @@
                 throw new ArgumentNullException(nameof(message));
             }
 
-            EventData eventData = GetEventData(message);
-            return _eventHubClient.SendAsync(eventData);
+            BrokeredMessage brokeredMessage = GetBrokeredMessage(message);
+            return _queueClient.SendAsync(brokeredMessage);
         }
 
         public Task SendBatch(
@@ -52,7 +52,7 @@
                 throw new ArgumentNullException(nameof(messages));
             }
 
-            var eventDataList = new List<EventData>();
+            var brokeredMessages = new List<BrokeredMessage>();
 
             foreach (object message in messages)
             {
@@ -63,25 +63,26 @@
                         nameof(messages));
                 }
 
-                eventDataList.Add(GetEventData(message));
+                brokeredMessages.Add(GetBrokeredMessage(message));
             }
 
-            return _eventHubClient.SendBatchAsync(eventDataList);
+            return _queueClient.SendBatchAsync(brokeredMessages);
         }
 
-        private EventData GetEventData(object message)
+        private BrokeredMessage GetBrokeredMessage(object message)
         {
             string data = _serializer.Serialize(message);
             byte[] bytes = Encoding.UTF8.GetBytes(data);
-            var eventData = new EventData(bytes);
+            var brokeredMessage = new BrokeredMessage(
+                new MemoryStream(bytes), ownsStream: true);
 
             var partitioned = message as IPartitioned;
             if (partitioned != null)
             {
-                eventData.PartitionKey = partitioned.PartitionKey;
+                brokeredMessage.PartitionKey = partitioned.PartitionKey;
             }
 
-            return eventData;
+            return brokeredMessage;
         }
     }
 }

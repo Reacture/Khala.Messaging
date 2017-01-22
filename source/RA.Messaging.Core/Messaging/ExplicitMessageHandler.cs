@@ -20,11 +20,12 @@
 
             var handlers = new Dictionary<Type, Handler>();
 
-            var query = from t in GetType().GetTypeInfo().ImplementedInterfaces
-                        where
-                            t.IsConstructedGenericType &&
-                            t.GetGenericTypeDefinition() == typeof(IHandles<>)
-                        select t;
+            IEnumerable<Type> query =
+                from t in GetType().GetTypeInfo().ImplementedInterfaces
+                where
+                    t.IsConstructedGenericType &&
+                    t.GetGenericTypeDefinition() == typeof(IHandles<>)
+                select t;
 
             foreach (Type t in query)
             {

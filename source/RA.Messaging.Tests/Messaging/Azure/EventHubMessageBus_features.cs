@@ -212,7 +212,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         }
 
         [TestMethod]
-        public async Task SendBatch_sets_partition_key_correctly()
+        public async Task SendBatch_sets_partition_keys_correctly()
         {
             // Arrange
             var sourceId = fixture.Create<string>();
