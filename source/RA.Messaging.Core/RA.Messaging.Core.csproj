@@ -41,6 +41,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\Envelope.cs" />
     <Compile Include="Messaging\ExplicitMessageHandler.cs" />
     <Compile Include="Messaging\IHandles.cs" />
     <Compile Include="Messaging\IMessageBus.cs" />

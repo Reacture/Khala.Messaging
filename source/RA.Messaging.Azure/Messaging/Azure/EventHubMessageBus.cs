@@ -31,51 +31,51 @@
         }
 
         public Task Send(
-            object message,
+            Envelope envelope,
             CancellationToken cancellationToken)
         {
-            if (message == null)
+            if (envelope == null)
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(envelope));
             }
 
-            EventData eventData = GetEventData(message);
+            EventData eventData = GetEventData(envelope);
             return _eventHubClient.SendAsync(eventData);
         }
 
         public Task SendBatch(
-            IEnumerable<object> messages,
+            IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
         {
-            if (messages == null)
+            if (envelopes == null)
             {
-                throw new ArgumentNullException(nameof(messages));
+                throw new ArgumentNullException(nameof(envelopes));
             }
 
             var eventDataList = new List<EventData>();
 
-            foreach (object message in messages)
+            foreach (Envelope envelope in envelopes)
             {
-                if (message == null)
+                if (envelope == null)
                 {
                     throw new ArgumentException(
-                        $"{nameof(messages)} cannot contain null.",
-                        nameof(messages));
+                        $"{nameof(envelopes)} cannot contain null.",
+                        nameof(envelopes));
                 }
 
-                eventDataList.Add(GetEventData(message));
+                eventDataList.Add(GetEventData(envelope));
             }
 
             return _eventHubClient.SendBatchAsync(eventDataList);
         }
 
-        private EventData GetEventData(object message)
+        private EventData GetEventData(Envelope envelope)
         {
-            string data = _serializer.Serialize(message);
+            string data = _serializer.Serialize(envelope);
             byte[] bytes = Encoding.UTF8.GetBytes(data);
             var eventData = new EventData(bytes);
 
-            var partitioned = message as IPartitioned;
+            var partitioned = envelope.Message as IPartitioned;
             if (partitioned != null)
             {
                 eventData.PartitionKey = partitioned.PartitionKey;

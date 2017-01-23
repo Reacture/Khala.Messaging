@@ -112,16 +112,16 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
         [TestMethod]
         public void SendBatch_has_guard_clause_for_null_message()
         {
-            var messages = new object[]
+            var envelopes = new[]
             {
-                fixture.Create<FooMessage>(),
+                fixture.Create<Envelope>(),
                 null,
-                fixture.Create<FooMessage>()
+                fixture.Create<Envelope>()
             };
 
-            Action action = () => sut.SendBatch(messages, CancellationToken.None);
+            Action action = () => sut.SendBatch(envelopes, CancellationToken.None);
 
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "messages");
+            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
         }
 
         [TestMethod]
@@ -132,9 +132,10 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
             try
             {
                 var message = fixture.Create<FooMessage>();
+                var envelope = new Envelope(message);
 
                 // Act
-                await sut.Send(message, CancellationToken.None);
+                await sut.Send(envelope, CancellationToken.None);
 
                 // Assert
                 received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
@@ -144,8 +145,9 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
                 {
                     string value = await reader.ReadToEndAsync();
                     object actual = serializer.Deserialize(value);
-                    actual.Should().BeOfType<FooMessage>();
-                    actual.ShouldBeEquivalentTo(message);
+                    actual.Should().BeOfType<Envelope>();
+                    actual.As<Envelope>().Message.Should().BeOfType<FooMessage>();
+                    actual.ShouldBeEquivalentTo(envelope);
                 }
             }
             finally
@@ -156,14 +158,42 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
         }
 
         [TestMethod]
-        public async Task Send_sets_partition_key_correctly()
+        public async Task Send_sets_PartitionKey_correctly()
         {
             var message = fixture.Create<FooMessage>();
+            var envelope = new Envelope(message);
 
-            await sut.Send(message, CancellationToken.None);
+            await sut.Send(envelope, CancellationToken.None);
 
             BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
             received.PartitionKey.Should().Be(message.SourceId);
+            await received.CompleteAsync();
+        }
+
+        [TestMethod]
+        public async Task Send_sets_MessageId_correctly()
+        {
+            var message = fixture.Create<FooMessage>();
+            var envelope = new Envelope(message);
+
+            await sut.Send(envelope, CancellationToken.None);
+
+            BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
+            received.MessageId.Should().Be($"{envelope.MessageId:n}");
+            await received.CompleteAsync();
+        }
+
+        [TestMethod]
+        public async Task Send_sets_CorrelationId_correctly()
+        {
+            var message = fixture.Create<FooMessage>();
+            var correlationId = Guid.NewGuid();
+            var envelope = new Envelope(correlationId, message);
+
+            await sut.Send(envelope, CancellationToken.None);
+
+            BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
+            received.CorrelationId.Should().Be($"{correlationId:n}");
             await received.CompleteAsync();
         }
 
@@ -172,26 +202,28 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
         {
             // Arrange
             var sourceId = fixture.Create<string>();
-            List<FooMessage> messages = fixture
+            List<Envelope> envelopes = fixture
                 .Build<FooMessage>()
                 .With(x => x.SourceId, sourceId)
                 .CreateMany()
+                .Select(m => new Envelope(m))
                 .ToList();
 
             // Act
-            await sut.SendBatch(messages, CancellationToken.None);
+            await sut.SendBatch(envelopes, CancellationToken.None);
 
             // Assert
             var received = new List<BrokeredMessage>(
-                await queueClient.ReceiveBatchAsync(messages.Count, TimeSpan.FromSeconds(10)) ??
+                await queueClient.ReceiveBatchAsync(envelopes.Count, TimeSpan.FromSeconds(10)) ??
                 Enumerable.Empty<BrokeredMessage>());
 
-            received.Should().HaveCount(messages.Count);
+            received.Should().HaveCount(envelopes.Count);
             List<object> actual = received
                 .Select(Deserialize)
                 .ToList();
-            actual.Should().OnlyContain(x => x is FooMessage);
-            actual.ShouldAllBeEquivalentTo(messages);
+            actual.Should().OnlyContain(x => x is Envelope);
+            actual.Cast<Envelope>().Should().OnlyContain(x => x.Message is FooMessage);
+            actual.ShouldAllBeEquivalentTo(envelopes);
             CompleteAll(received);
         }
 
@@ -200,18 +232,19 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
         {
             // Arrange
             var sourceId = fixture.Create<string>();
-            List<FooMessage> messages = fixture
+            List<Envelope> envelopes = fixture
                 .Build<FooMessage>()
                 .With(x => x.SourceId, sourceId)
                 .CreateMany()
+                .Select(m => new Envelope(m))
                 .ToList();
 
             // Act
-            await sut.SendBatch(messages, CancellationToken.None);
+            await sut.SendBatch(envelopes, CancellationToken.None);
 
             // Assert
             var received = new List<BrokeredMessage>(
-                await queueClient.ReceiveBatchAsync(messages.Count, TimeSpan.FromSeconds(10)) ??
+                await queueClient.ReceiveBatchAsync(envelopes.Count, TimeSpan.FromSeconds(10)) ??
                 Enumerable.Empty<BrokeredMessage>());
 
             received.Should().OnlyContain(x => x.PartitionKey == sourceId);

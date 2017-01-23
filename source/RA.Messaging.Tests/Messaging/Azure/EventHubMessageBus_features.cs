@@ -82,29 +82,26 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         {
             // Arrange
             var message = fixture.Create<FooMessage>();
+            var correlationId = Guid.NewGuid();
+            var envelope = new Envelope(correlationId, message);
 
-            EventHubConsumerGroup consumerGroup =
-                eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo =
-                await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers =
-                await GetReceivers(consumerGroup, runtimeInfo);
+            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
+            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
+            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
 
             try
             {
                 // Act
-                await sut.Send(message, CancellationToken.None);
+                await sut.Send(envelope, CancellationToken.None);
 
                 // Assert
                 var waitTime = TimeSpan.FromSeconds(1);
-                string partition = null;
                 EventData eventData = null;
                 foreach (EventHubReceiver receiver in receivers)
                 {
                     eventData = await receiver.ReceiveAsync(waitTime);
                     if (eventData != null)
                     {
-                        partition = receiver.PartitionId;
                         break;
                     }
                 }
@@ -112,12 +109,10 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 eventData.Should().NotBeNull();
                 byte[] bytes = eventData.GetBytes();
                 string value = Encoding.UTF8.GetString(bytes);
-
-                TestContext.WriteLine("Partition: {0}, Value: {1}", partition, value);
-
                 object actual = serializer.Deserialize(value);
-                actual.Should().BeOfType<FooMessage>();
-                actual.ShouldBeEquivalentTo(message);
+                actual.Should().BeOfType<Envelope>();
+                actual.As<Envelope>().Message.Should().BeOfType<FooMessage>();
+                actual.ShouldBeEquivalentTo(envelope);
             }
             finally
             {
@@ -131,18 +126,17 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         {
             // Arrange
             var message = fixture.Create<FooMessage>();
+            var correlationId = Guid.NewGuid();
+            var envelope = new Envelope(correlationId, message);
 
-            EventHubConsumerGroup consumerGroup =
-                eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo =
-                await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers =
-                await GetReceivers(consumerGroup, runtimeInfo);
+            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
+            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
+            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
 
             try
             {
                 // Act
-                await sut.Send(message, CancellationToken.None);
+                await sut.Send(envelope, CancellationToken.None);
 
                 // Assert
                 var waitTime = TimeSpan.FromSeconds(1);
@@ -170,43 +164,39 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         {
             // Arrange
             var sourceId = fixture.Create<string>();
-            List<FooMessage> messages = fixture
+            List<Envelope> envelopes = fixture
                 .Build<FooMessage>()
                 .With(x => x.SourceId, sourceId)
                 .CreateMany()
+                .Select(m => new Envelope(m))
                 .ToList();
 
-            EventHubConsumerGroup consumerGroup =
-                eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo =
-                await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers =
-                await GetReceivers(consumerGroup, runtimeInfo);
+            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
+            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
+            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
 
             try
             {
                 // Act
-                await sut.SendBatch(messages, CancellationToken.None);
+                await sut.SendBatch(envelopes, CancellationToken.None);
 
                 // Assert
                 var waitTime = TimeSpan.FromSeconds(3);
-                string partition = null;
                 var eventDataList = new List<EventData>();
                 foreach (EventHubReceiver receiver in receivers)
                 {
                     IEnumerable<EventData> eventData = await
-                        receiver.ReceiveAsync(messages.Count, waitTime);
+                        receiver.ReceiveAsync(envelopes.Count, waitTime);
                     if (eventData?.Any() ?? false)
                     {
                         eventDataList.AddRange(eventData);
-                        partition = receiver.PartitionId;
                         break;
                     }
                 }
-                TestContext.WriteLine("Partition: {0}", partition);
                 var actual = new List<object>(eventDataList.Select(x => Deserialize(x)));
-                actual.Should().OnlyContain(x => x is FooMessage);
-                actual.ShouldAllBeEquivalentTo(messages);
+                actual.Should().OnlyContain(x => x is Envelope);
+                actual.Cast<Envelope>().Should().OnlyContain(e => e.Message is FooMessage);
+                actual.ShouldAllBeEquivalentTo(envelopes);
             }
             finally
             {
@@ -220,10 +210,11 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         {
             // Arrange
             var sourceId = fixture.Create<string>();
-            List<FooMessage> messages = fixture
+            List<Envelope> envelopes = fixture
                 .Build<FooMessage>()
                 .With(x => x.SourceId, sourceId)
                 .CreateMany()
+                .Select(m => new Envelope(m))
                 .ToList();
 
             EventHubConsumerGroup consumerGroup =
@@ -236,7 +227,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
             try
             {
                 // Act
-                await sut.SendBatch(messages, CancellationToken.None);
+                await sut.SendBatch(envelopes, CancellationToken.None);
 
                 // Assert
                 var waitTime = TimeSpan.FromSeconds(3);
@@ -244,7 +235,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 foreach (EventHubReceiver receiver in receivers)
                 {
                     IEnumerable<EventData> eventData = await
-                        receiver.ReceiveAsync(messages.Count, waitTime);
+                        receiver.ReceiveAsync(envelopes.Count, waitTime);
                     if (eventData?.Any() ?? false)
                     {
                         eventDataList.AddRange(eventData);

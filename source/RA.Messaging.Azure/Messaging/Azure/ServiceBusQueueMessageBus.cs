@@ -31,52 +31,57 @@
         }
 
         public Task Send(
-            object message,
+            Envelope envelope,
             CancellationToken cancellationToken)
         {
-            if (message == null)
+            if (envelope == null)
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(envelope));
             }
 
-            BrokeredMessage brokeredMessage = GetBrokeredMessage(message);
+            BrokeredMessage brokeredMessage = GetBrokeredMessage(envelope);
             return _queueClient.SendAsync(brokeredMessage);
         }
 
         public Task SendBatch(
-            IEnumerable<object> messages,
+            IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
         {
-            if (messages == null)
+            if (envelopes == null)
             {
-                throw new ArgumentNullException(nameof(messages));
+                throw new ArgumentNullException(nameof(envelopes));
             }
 
             var brokeredMessages = new List<BrokeredMessage>();
 
-            foreach (object message in messages)
+            foreach (Envelope envelope in envelopes)
             {
-                if (message == null)
+                if (envelope == null)
                 {
                     throw new ArgumentException(
-                        $"{nameof(messages)} cannot contain null.",
-                        nameof(messages));
+                        $"{nameof(envelopes)} cannot contain null.",
+                        nameof(envelopes));
                 }
 
-                brokeredMessages.Add(GetBrokeredMessage(message));
+                brokeredMessages.Add(GetBrokeredMessage(envelope));
             }
 
             return _queueClient.SendBatchAsync(brokeredMessages);
         }
 
-        private BrokeredMessage GetBrokeredMessage(object message)
+        private BrokeredMessage GetBrokeredMessage(Envelope envelope)
         {
-            string data = _serializer.Serialize(message);
+            string data = _serializer.Serialize(envelope);
             byte[] bytes = Encoding.UTF8.GetBytes(data);
             var brokeredMessage = new BrokeredMessage(
-                new MemoryStream(bytes), ownsStream: true);
+                messageBodyStream: new MemoryStream(bytes),
+                ownsStream: true)
+            {
+                MessageId = envelope.MessageId.ToString("n"),
+                CorrelationId = envelope.CorrelationId?.ToString("n")
+            };
 
-            var partitioned = message as IPartitioned;
+            var partitioned = envelope.Message as IPartitioned;
             if (partitioned != null)
             {
                 brokeredMessage.PartitionKey = partitioned.PartitionKey;

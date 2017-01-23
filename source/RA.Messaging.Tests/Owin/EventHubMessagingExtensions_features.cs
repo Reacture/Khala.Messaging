@@ -80,6 +80,7 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
         {
             // Arrange
             var message = fixture.Create<FooMessage>();
+            var envelope = new Envelope(message);
 
             object handled = null;
             var messageHandler = Mock.Of<IMessageHandler>();
@@ -112,14 +113,9 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
             }))
             {
                 // Act
-                await messageBus.Send(message, CancellationToken.None);
-                for (int i = 0; i < 10; i++)
+                await messageBus.Send(envelope, CancellationToken.None);
+                for (int i = 0; i < 10 && handled == null; i++)
                 {
-                    if (handled != null)
-                    {
-                        break;
-                    }
-
                     await Task.Delay(TimeSpan.FromMilliseconds(1000));
                 }
 
@@ -128,8 +124,8 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
                     x => x.Handle(It.IsAny<object>(), cancellationToken),
                     Times.Once());
                 handled.Should().NotBeNull();
-                handled.Should().BeOfType<FooMessage>();
-                handled.ShouldBeEquivalentTo(message);
+                handled.Should().BeOfType<Envelope>();
+                handled.ShouldBeEquivalentTo(envelope);
             }
         }
     }

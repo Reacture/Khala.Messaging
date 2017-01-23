@@ -33,13 +33,18 @@
             _cancellationToken = cancellationToken;
         }
 
-        public async Task ProcessMessage(BrokeredMessage brokeredMessage)
+        public Task ProcessMessage(BrokeredMessage brokeredMessage)
         {
             if (brokeredMessage == null)
             {
                 throw new ArgumentNullException(nameof(brokeredMessage));
             }
 
+            return Process(brokeredMessage);
+        }
+
+        private async Task Process(BrokeredMessage brokeredMessage)
+        {
             using (var stream = brokeredMessage.GetBody<Stream>())
             using (var memory = new MemoryStream())
             {

@@ -7,11 +7,11 @@
     public interface IMessageBus
     {
         Task Send(
-            object message,
+            Envelope envelope,
             CancellationToken cancellationToken);
 
         Task SendBatch(
-            IEnumerable<object> messages,
+            IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken);
     }
 }
