@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ReactiveArchitecture.Messaging.Azure.Owin</id>
-    <version>0.1.5</version>
+    <version>0.2.1</version>
     <title>ReactiveArchitecture.Messaging.Azure.Owin</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -15,8 +15,8 @@
     <tags>Reactive Messaging Azure EventHub Event OWIN Katana</tags>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="ReactiveArchitecture.Messaging.Core" version="0.1.5" />
-        <dependency id="ReactiveArchitecture.Messaging.Azure" version="0.1.5" />
+        <dependency id="ReactiveArchitecture.Messaging.Core" version="0.2.1" />
+        <dependency id="ReactiveArchitecture.Messaging.Azure" version="0.2.1" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="WindowsAzure.Storage" version="7.2.1" />
         <dependency id="WindowsAzure.ServiceBus" version="3.4.4" />

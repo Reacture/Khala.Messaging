@@ -5,5 +5,5 @@
 [assembly: AssemblyProduct("Reactive Messaging")]
 [assembly: AssemblyCopyright("Copyright Gyuwon 2017")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyVersion("0.1.5.0")]
-[assembly: AssemblyFileVersion("0.1.5.0")]
+[assembly: AssemblyVersion("0.2.1.0")]
+[assembly: AssemblyFileVersion("0.2.1.0")]
