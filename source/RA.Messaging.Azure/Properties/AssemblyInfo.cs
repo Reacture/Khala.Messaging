@@ -7,5 +7,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright Gyuwon 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: Guid("2a5f396f-c3e1-4c37-bb6b-4ed2bf207de6")]
-[assembly: AssemblyVersion("0.2.1.0")]
-[assembly: AssemblyFileVersion("0.2.1.0")]
+[assembly: AssemblyVersion("0.3.0.0")]
+[assembly: AssemblyFileVersion("0.3.0.0")]
