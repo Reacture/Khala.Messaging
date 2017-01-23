@@ -47,13 +47,14 @@ namespace ReactiveArchitecture.Messaging
             IMessageHandler sut =
                 new CompositeMessageHandler(handler1, handler2);
             var message = new object();
+            var envelope = new Envelope(message);
 
-            await sut.Handle(message, CancellationToken.None);
+            await sut.Handle(envelope, CancellationToken.None);
 
             Mock.Get(handler1).Verify(
-                x => x.Handle(message, CancellationToken.None), Times.Once());
+                x => x.Handle(envelope, CancellationToken.None), Times.Once());
             Mock.Get(handler2).Verify(
-                x => x.Handle(message, CancellationToken.None), Times.Once());
+                x => x.Handle(envelope, CancellationToken.None), Times.Once());
         }
 
         [Fact]
@@ -64,22 +65,23 @@ namespace ReactiveArchitecture.Messaging
             IMessageHandler sut =
                 new CompositeMessageHandler(handler1, handler2);
             var message = new object();
+            var envelope = new Envelope(message);
             Mock.Get(handler1)
-                .Setup(x => x.Handle(message, CancellationToken.None))
+                .Setup(x => x.Handle(envelope, CancellationToken.None))
                 .Throws<InvalidOperationException>();
 
             try
             {
-                await sut.Handle(message, CancellationToken.None);
+                await sut.Handle(envelope, CancellationToken.None);
             }
             catch
             {
             }
 
             Mock.Get(handler1).Verify(
-                x => x.Handle(message, CancellationToken.None), Times.Once());
+                x => x.Handle(envelope, CancellationToken.None), Times.Once());
             Mock.Get(handler2).Verify(
-                x => x.Handle(message, CancellationToken.None), Times.Once());
+                x => x.Handle(envelope, CancellationToken.None), Times.Once());
         }
 
         [Fact]
@@ -93,19 +95,20 @@ namespace ReactiveArchitecture.Messaging
                 new CompositeMessageHandler(handler1, handler2);
 
             var message = new object();
+            var envelope = new Envelope(message);
 
             var exception1 = new InvalidOperationException();
             Mock.Get(handler1)
-                .Setup(x => x.Handle(message, CancellationToken.None))
+                .Setup(x => x.Handle(envelope, CancellationToken.None))
                 .Throws(exception1);
 
             var exception2 = new InvalidOperationException();
             Mock.Get(handler2)
-                .Setup(x => x.Handle(message, CancellationToken.None))
+                .Setup(x => x.Handle(envelope, CancellationToken.None))
                 .Throws(exception2);
 
             // Act
-            Func<Task> action = () => sut.Handle(message, CancellationToken.None);
+            Func<Task> action = () => sut.Handle(envelope, CancellationToken.None);
 
             // Arrange
             action.ShouldThrow<AggregateException>()

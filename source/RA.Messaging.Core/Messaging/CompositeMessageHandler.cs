@@ -32,12 +32,12 @@
         }
 
         async Task IMessageHandler.Handle(
-            object message,
+            Envelope envelope,
             CancellationToken cancellationToken)
         {
-            if (message == null)
+            if (envelope == null)
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(envelope));
             }
 
             List<Exception> exceptions = null;
@@ -46,7 +46,7 @@
             {
                 try
                 {
-                    await handler.Handle(message, cancellationToken);
+                    await handler.Handle(envelope, cancellationToken);
                 }
                 catch (Exception exception)
                 {

@@ -37,17 +37,26 @@
                 throw new ArgumentNullException(nameof(value));
             }
 
-            using (var reader = new StringReader(value))
-            using (var jsonReader = new JsonTextReader(reader))
+            StringReader reader = null;
+            try
             {
-                try
+                reader = new StringReader(value);
+                using (var jsonReader = new JsonTextReader(reader))
                 {
-                    return _serializer.Deserialize(jsonReader);
+                    reader = null;
+                    try
+                    {
+                        return _serializer.Deserialize(jsonReader);
+                    }
+                    catch (JsonSerializationException)
+                    {
+                        return JsonConvert.DeserializeObject(value);
+                    }
                 }
-                catch (JsonSerializationException)
-                {
-                    return JsonConvert.DeserializeObject(value);
-                }
+            }
+            finally
+            {
+                reader?.Dispose();
             }
         }
     }

@@ -5,6 +5,6 @@
 
     public interface IMessageHandler
     {
-        Task Handle(object message, CancellationToken cancellationToken);
+        Task Handle(Envelope envelope, CancellationToken cancellationToken);
     }
 }

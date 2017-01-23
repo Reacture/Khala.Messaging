@@ -52,7 +52,7 @@
                 byte[] bytes = memory.ToArray();
 
                 string value = Encoding.UTF8.GetString(bytes);
-                object message = _serializer.Deserialize(value);
+                var message = (Envelope)_serializer.Deserialize(value);
 
                 await _handler.Handle(message, _cancellationToken).ConfigureAwait(false);
             }

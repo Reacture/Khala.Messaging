@@ -10,15 +10,26 @@
 
     public abstract class ExplicitMessageHandler : IMessageHandler
     {
-        private readonly IReadOnlyDictionary<Type, Handler> _handlers;
+        private readonly IReadOnlyDictionary<Type, MessageHandler> _handlers;
 
         protected ExplicitMessageHandler()
         {
+            var handlers = new Dictionary<Type, MessageHandler>();
+
+            WireupHandlers(handlers);
+
+            _handlers = new ReadOnlyDictionary<Type, MessageHandler>(handlers);
+        }
+
+        private delegate Task MessageHandler(
+            Envelope envelope,
+            CancellationToken cancellationToken);
+
+        private void WireupHandlers(Dictionary<Type, MessageHandler> handlers)
+        {
             MethodInfo factoryTemplate = typeof(ExplicitMessageHandler)
                 .GetTypeInfo()
-                .GetDeclaredMethod(nameof(GetHandler));
-
-            var handlers = new Dictionary<Type, Handler>();
+                .GetDeclaredMethod(nameof(GetMessageHandler));
 
             IEnumerable<Type> query =
                 from t in GetType().GetTypeInfo().ImplementedInterfaces
@@ -32,39 +43,39 @@
                 Type[] typeArguments = t.GenericTypeArguments;
                 MethodInfo factory =
                     factoryTemplate.MakeGenericMethod(typeArguments);
-                var handler = (Handler)factory.Invoke(this, null);
+                var handler = (MessageHandler)factory.Invoke(this, null);
                 handlers[typeArguments[0]] = handler;
             }
-
-            _handlers = new ReadOnlyDictionary<Type, Handler>(handlers);
         }
-
-        private delegate Task Handler(
-            object message,
-            CancellationToken cancellationToken);
 
         async Task IMessageHandler.Handle(
-            object message,
+            Envelope envelope,
             CancellationToken cancellationToken)
         {
-            if (message == null)
+            if (envelope == null)
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(envelope));
             }
 
-            Handler handler;
-            if (_handlers.TryGetValue(message.GetType(), out handler))
+            MessageHandler handler;
+            if (_handlers.TryGetValue(envelope.Message.GetType(), out handler))
             {
-                await handler.Invoke(message, cancellationToken);
+                await handler.Invoke(envelope, cancellationToken);
             }
         }
 
-        private Handler GetHandler<TMessage>()
+        private MessageHandler GetMessageHandler<TMessage>()
             where TMessage : class
         {
             var handler = (IHandles<TMessage>)this;
-            return (message, cancellationToken) =>
-                handler.Handle((TMessage)message, cancellationToken);
+            return (envelope, cancellationToken) =>
+            {
+                return handler.Handle(
+                    envelope.MessageId,
+                    envelope.CorrelationId,
+                    (TMessage)envelope.Message,
+                    cancellationToken);
+            };
         }
     }
 }

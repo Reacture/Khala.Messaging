@@ -82,11 +82,11 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
             var message = fixture.Create<FooMessage>();
             var envelope = new Envelope(message);
 
-            object handled = null;
+            Envelope handled = null;
             var messageHandler = Mock.Of<IMessageHandler>();
             Mock.Get(messageHandler)
-                .Setup(x => x.Handle(It.IsNotNull<object>(), It.IsAny<CancellationToken>()))
-                .Callback<object, CancellationToken>((m, t) => handled = m)
+                .Setup(x => x.Handle(It.IsNotNull<Envelope>(), It.IsAny<CancellationToken>()))
+                .Callback<Envelope, CancellationToken>((m, t) => handled = m)
                 .Returns(Task.FromResult(true));
 
             var messageSerializer = new JsonMessageSerializer();
@@ -121,10 +121,10 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
 
                 // Assert
                 Mock.Get(messageHandler).Verify(
-                    x => x.Handle(It.IsAny<object>(), cancellationToken),
+                    x => x.Handle(It.IsAny<Envelope>(), cancellationToken),
                     Times.Once());
                 handled.Should().NotBeNull();
-                handled.Should().BeOfType<Envelope>();
+                handled.Message.Should().BeOfType<FooMessage>();
                 handled.ShouldBeEquivalentTo(envelope);
             }
         }

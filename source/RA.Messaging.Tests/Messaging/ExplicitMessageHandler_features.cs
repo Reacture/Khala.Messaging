@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -35,10 +36,14 @@ namespace ReactiveArchitecture.Messaging
             IHandles<BarMessage>
         {
             public abstract Task Handle(
+                Guid messageId,
+                Guid? correlationId,
                 FooMessage message,
                 CancellationToken cancellationToken);
 
             public abstract Task Handle(
+                Guid messageId,
+                Guid? correlationId,
                 BarMessage message,
                 CancellationToken cancellationToken);
         }
@@ -47,19 +52,22 @@ namespace ReactiveArchitecture.Messaging
         public async Task sut_invokes_correct_handler_method()
         {
             var mock = new Mock<MessageHandler> { CallBase = true };
-            IMessageHandler sut = mock.Object;
+            MessageHandler sut = mock.Object;
             object message = new FooMessage();
+            Guid correlationId = Guid.NewGuid();
+            var envelope = new Envelope(correlationId, message);
+            IMessageHandler handler = sut;
 
-            await sut.Handle(message, CancellationToken.None);
+            await handler.Handle(envelope, CancellationToken.None);
 
             Mock.Get(sut).Verify(
                 x =>
-                x.Handle((FooMessage)message, CancellationToken.None),
+                x.Handle(
+                    envelope.MessageId,
+                    correlationId,
+                    (FooMessage)message,
+                    CancellationToken.None),
                 Times.Once());
-            Mock.Get(sut).Verify(
-                x =>
-                x.Handle(It.IsAny<BarMessage>(), It.IsAny<CancellationToken>()),
-                Times.Never());
         }
     }
 }
