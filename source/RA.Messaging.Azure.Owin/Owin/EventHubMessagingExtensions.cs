@@ -7,7 +7,7 @@
     using ReactiveArchitecture.Messaging;
     using ReactiveArchitecture.Messaging.Azure;
 
-    public static class ReactiveMessagingExtensions
+    public static class EventHubMessagingExtensions
     {
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
@@ -61,46 +61,6 @@
             eventProcessorHost
                 .UnregisterEventProcessorAsync()
                 .Wait();
-        }
-
-        public static void UseServiceBusQueueMessageProcessor(
-            this IAppBuilder app,
-            string connectionString,
-            string queueName,
-            IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            if (connectionString == null)
-            {
-                throw new ArgumentNullException(nameof(connectionString));
-            }
-
-            if (queueName == null)
-            {
-                throw new ArgumentNullException(nameof(queueName));
-            }
-
-            if (messageHandler == null)
-            {
-                throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
-            }
-
-            ServiceBusQueueMessageProcessor.Run(
-                connectionString,
-                queueName,
-                messageHandler,
-                messageSerializer,
-                new AppProperties(app.Properties).OnAppDisposing);
         }
     }
 }

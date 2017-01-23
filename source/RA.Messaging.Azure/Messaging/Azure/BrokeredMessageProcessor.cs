@@ -13,7 +13,7 @@
         private readonly IMessageSerializer _serializer;
         private readonly CancellationToken _cancellationToken;
 
-        internal BrokeredMessageProcessor(
+        public BrokeredMessageProcessor(
             IMessageHandler handler,
             IMessageSerializer serializer,
             CancellationToken cancellationToken)
@@ -33,7 +33,7 @@
             _cancellationToken = cancellationToken;
         }
 
-        internal async Task ProcessMessage(BrokeredMessage brokeredMessage)
+        public async Task ProcessMessage(BrokeredMessage brokeredMessage)
         {
             if (brokeredMessage == null)
             {

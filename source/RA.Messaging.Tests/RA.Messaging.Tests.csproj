@@ -171,7 +171,7 @@
     <Compile Include="Messaging\ExplicitMessageHandler_features.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_features.cs" />
-    <Compile Include="Owin\ReactiveMessagingExtensions_features.cs" />
+    <Compile Include="Owin\EventHubMessagingExtensions_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

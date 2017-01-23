@@ -14,6 +14,10 @@ namespace ReactiveArchitecture.Messaging.Azure
     [TestClass]
     public class EventHubMessageBus_features
     {
+        public const string EventHubConnectionStringPropertyName = "eventhubmessagebus-eventhub-connectionstring";
+        public const string EventHubPathPropertyName = "eventhubmessagebus-eventhub-path";
+        public const string ConsumerGroupPropertyName = "eventhubmessagebus-eventhub-consumergroup";
+
         private static EventHubClient eventHubClient;
         private static string consumerGroupName;
         private IFixture fixture;
@@ -25,14 +29,14 @@ namespace ReactiveArchitecture.Messaging.Azure
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var connectionString = (string)context.Properties["eventhubmessagebus-eventhub-connectionstring"];
-            var path = (string)context.Properties["eventhubmessagebus-eventhub-path"];
+            var connectionString = (string)context.Properties[EventHubConnectionStringPropertyName];
+            var path = (string)context.Properties[EventHubPathPropertyName];
             if (string.IsNullOrWhiteSpace(connectionString) == false &&
                 string.IsNullOrWhiteSpace(path) == false)
             {
                 eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, path);
                 consumerGroupName =
-                    (string)context.Properties["eventhubmessagebus-eventhub-consumergroup"] ??
+                    (string)context.Properties[ConsumerGroupPropertyName] ??
                     EventHubConsumerGroup.DefaultGroupName;
             }
         }
@@ -42,15 +46,15 @@ namespace ReactiveArchitecture.Messaging.Azure
         {
             if (eventHubClient == null)
             {
-                Assert.Inconclusive(@"
+                Assert.Inconclusive($@"
 Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 Event Hub 연결 정보를 설정합니다.
 
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
   <TestRunParameters>
-    <Parameter name=""eventhubmessagebus-eventhub-connectionstring"" value=""your event hub connection string for testing"" />
-    <Parameter name=""eventhubmessagebus-eventhub-path"" value=""your event hub path for testing"" />
-    <Parameter name=""eventhubmessagebus-eventhub-consumergroup"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
+    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
+    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
   </TestRunParameters>  
 </RunSettings>
 

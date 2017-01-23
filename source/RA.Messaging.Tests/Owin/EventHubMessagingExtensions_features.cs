@@ -14,8 +14,13 @@ using ReactiveArchitecture.Messaging.Azure;
 namespace Owin
 {
     [TestClass]
-    public class ReactiveMessagingExtensions_features
+    public class EventHubMessagingExtensions_features
     {
+        public const string EventHubConnectionStringPropertyName = "eventhubmessagingextensions-eventhub-connectionstring";
+        public const string EventHubPathPropertyName = "eventhubmessagingextensions-eventhub-path";
+        public const string StorageConnectionStringPropertyName = "eventhubmessagingextensions-storage-connectionstring";
+        public const string ConsumerGroupPropertyName = "eventhubmessagingextensions-eventhub-consumergroup";
+
         private IFixture fixture;
         private string eventHubConnectionString;
         private string eventHubPath;
@@ -29,27 +34,27 @@ namespace Owin
         {
             fixture = new Fixture();
 
-            eventHubConnectionString = (string)TestContext.Properties["reactivemessagingextensions-eventhub-connectionstring"];
-            eventHubPath = (string)TestContext.Properties["reactivemessagingextensions-eventhub-path"];
-            storageConnectionString = (string)TestContext.Properties["reactivemessagingextensions-storage-connectionstring"];
+            eventHubConnectionString = (string)TestContext.Properties[EventHubConnectionStringPropertyName];
+            eventHubPath = (string)TestContext.Properties[EventHubPathPropertyName];
+            storageConnectionString = (string)TestContext.Properties[StorageConnectionStringPropertyName];
             consumerGroupName =
-                (string)TestContext.Properties["owinmessagingextensions-eventhub-consumergroup"] ??
+                (string)TestContext.Properties[ConsumerGroupPropertyName] ??
                 EventHubConsumerGroup.DefaultGroupName;
 
             if (string.IsNullOrWhiteSpace(eventHubConnectionString) ||
                 string.IsNullOrWhiteSpace(eventHubPath) ||
                 string.IsNullOrWhiteSpace(storageConnectionString))
             {
-                Assert.Inconclusive(@"
+                Assert.Inconclusive($@"
 EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessagingExtensions 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 연결 정보를 설정합니다.
 
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
   <TestRunParameters>
-    <Parameter name=""reactivemessagingextensions-eventhub-connectionstring"" value=""your event hub connection string for testing"" />
-    <Parameter name=""reactivemessagingextensions-eventhub-path"" value=""your event hub path for testing"" />
-    <Parameter name=""reactivemessagingextensions-storage-connectionstring"" value=""your storage connection string for testing"" />
-    <Parameter name=""reactivemessagingextensions-eventhub-consumergroup"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
+    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
+    <Parameter name=""{StorageConnectionStringPropertyName}"" value=""your storage connection string for testing"" />
+    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
   </TestRunParameters>  
 </RunSettings>
 

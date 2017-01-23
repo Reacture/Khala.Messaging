@@ -92,7 +92,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Owin\ReactiveMessagingExtensions.cs" />
+    <Compile Include="Owin\EventHubMessagingExtensions.cs" />
+    <Compile Include="Owin\ServiceBusQueueMessagingExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
