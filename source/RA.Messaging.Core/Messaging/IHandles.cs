@@ -1,6 +1,5 @@
 ﻿namespace ReactiveArchitecture.Messaging
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -8,9 +7,7 @@
         where TMessage : class
     {
         Task Handle(
-            Guid messageId,
-            Guid? correlationId,
-            TMessage message,
+            ReceivedEnvelope<TMessage> envelope,
             CancellationToken cancellationToken);
     }
 }

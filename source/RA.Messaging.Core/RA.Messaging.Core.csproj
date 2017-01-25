@@ -51,6 +51,7 @@
     <Compile Include="Messaging\IScheduledMessageBus.cs" />
     <Compile Include="Messaging\CompositeMessageHandler.cs" />
     <Compile Include="Messaging\JsonMessageSerializer.cs" />
+    <Compile Include="Messaging\ReceivedEnvelope.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

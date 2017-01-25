@@ -36,15 +36,11 @@ namespace ReactiveArchitecture.Messaging
             IHandles<BarMessage>
         {
             public abstract Task Handle(
-                Guid messageId,
-                Guid? correlationId,
-                FooMessage message,
+                ReceivedEnvelope<FooMessage> envelope,
                 CancellationToken cancellationToken);
 
             public abstract Task Handle(
-                Guid messageId,
-                Guid? correlationId,
-                BarMessage message,
+                ReceivedEnvelope<BarMessage> envelope,
                 CancellationToken cancellationToken);
         }
 
@@ -63,9 +59,11 @@ namespace ReactiveArchitecture.Messaging
             Mock.Get(sut).Verify(
                 x =>
                 x.Handle(
-                    envelope.MessageId,
-                    correlationId,
-                    (FooMessage)message,
+                    It.Is<ReceivedEnvelope<FooMessage>>(
+                        p =>
+                        p.MessageId == envelope.MessageId &&
+                        p.CorrelationId == correlationId &&
+                        p.Message == message),
                     CancellationToken.None),
                 Times.Once());
         }

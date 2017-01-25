@@ -71,9 +71,10 @@
             return (envelope, cancellationToken) =>
             {
                 return handler.Handle(
-                    envelope.MessageId,
-                    envelope.CorrelationId,
-                    (TMessage)envelope.Message,
+                    new ReceivedEnvelope<TMessage>(
+                        envelope.MessageId,
+                        envelope.CorrelationId,
+                        (TMessage)envelope.Message),
                     cancellationToken);
             };
         }
