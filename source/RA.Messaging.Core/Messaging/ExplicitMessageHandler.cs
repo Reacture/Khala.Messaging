@@ -48,22 +48,6 @@
             }
         }
 
-        async Task IMessageHandler.Handle(
-            Envelope envelope,
-            CancellationToken cancellationToken)
-        {
-            if (envelope == null)
-            {
-                throw new ArgumentNullException(nameof(envelope));
-            }
-
-            MessageHandler handler;
-            if (_handlers.TryGetValue(envelope.Message.GetType(), out handler))
-            {
-                await handler.Invoke(envelope, cancellationToken);
-            }
-        }
-
         private MessageHandler GetMessageHandler<TMessage>()
             where TMessage : class
         {
@@ -77,6 +61,27 @@
                         (TMessage)envelope.Message),
                     cancellationToken);
             };
+        }
+
+        public Task Handle(
+            Envelope envelope, CancellationToken cancellationToken)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            return HandleMessage(envelope, cancellationToken);
+        }
+
+        private async Task HandleMessage(
+            Envelope envelope, CancellationToken cancellationToken)
+        {
+            MessageHandler handler;
+            if (_handlers.TryGetValue(envelope.Message.GetType(), out handler))
+            {
+                await handler.Invoke(envelope, cancellationToken);
+            }
         }
     }
 }

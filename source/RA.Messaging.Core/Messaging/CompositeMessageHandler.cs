@@ -31,15 +31,20 @@
             _handlers = new ReadOnlyCollection<IMessageHandler>(handlerList);
         }
 
-        async Task IMessageHandler.Handle(
-            Envelope envelope,
-            CancellationToken cancellationToken)
+        public Task Handle(
+            Envelope envelope, CancellationToken cancellationToken)
         {
             if (envelope == null)
             {
                 throw new ArgumentNullException(nameof(envelope));
             }
 
+            return HandleMessage(envelope, cancellationToken);
+        }
+
+        private async Task HandleMessage(
+            Envelope envelope, CancellationToken cancellationToken)
+        {
             List<Exception> exceptions = null;
 
             foreach (IMessageHandler handler in _handlers)

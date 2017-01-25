@@ -52,9 +52,8 @@ namespace ReactiveArchitecture.Messaging
             object message = new FooMessage();
             Guid correlationId = Guid.NewGuid();
             var envelope = new Envelope(correlationId, message);
-            IMessageHandler handler = sut;
 
-            await handler.Handle(envelope, CancellationToken.None);
+            await sut.Handle(envelope, CancellationToken.None);
 
             Mock.Get(sut).Verify(
                 x =>

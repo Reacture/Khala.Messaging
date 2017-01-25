@@ -44,8 +44,7 @@ namespace ReactiveArchitecture.Messaging
         {
             var handler1 = Mock.Of<IMessageHandler>();
             var handler2 = Mock.Of<IMessageHandler>();
-            IMessageHandler sut =
-                new CompositeMessageHandler(handler1, handler2);
+            var sut = new CompositeMessageHandler(handler1, handler2);
             var message = new object();
             var envelope = new Envelope(message);
 
@@ -62,8 +61,7 @@ namespace ReactiveArchitecture.Messaging
         {
             var handler1 = Mock.Of<IMessageHandler>();
             var handler2 = Mock.Of<IMessageHandler>();
-            IMessageHandler sut =
-                new CompositeMessageHandler(handler1, handler2);
+            var sut = new CompositeMessageHandler(handler1, handler2);
             var message = new object();
             var envelope = new Envelope(message);
             Mock.Get(handler1)
@@ -91,8 +89,7 @@ namespace ReactiveArchitecture.Messaging
             var handler1 = Mock.Of<IMessageHandler>();
             var handler2 = Mock.Of<IMessageHandler>();
 
-            IMessageHandler sut =
-                new CompositeMessageHandler(handler1, handler2);
+            var sut = new CompositeMessageHandler(handler1, handler2);
 
             var message = new object();
             var envelope = new Envelope(message);
