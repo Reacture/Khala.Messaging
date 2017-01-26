@@ -14,7 +14,8 @@
             string connectionString,
             string queueName,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer)
+            IMessageSerializer messageSerializer,
+            IMessageProcessingExceptionHandler<BrokeredMessage> exceptionHandler)
         {
             if (app == null)
             {
@@ -41,6 +42,11 @@
                 throw new ArgumentNullException(nameof(messageSerializer));
             }
 
+            if (exceptionHandler == null)
+            {
+                throw new ArgumentNullException(nameof(exceptionHandler));
+            }
+
             var queueClient = QueueClient.CreateFromConnectionString(connectionString, queueName);
 
             CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
@@ -48,6 +54,7 @@
             var processor = new BrokeredMessageProcessor(
                 messageHandler,
                 messageSerializer,
+                exceptionHandler,
                 cancellationToken);
 
             queueClient.OnMessageAsync(processor.ProcessMessage);

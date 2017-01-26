@@ -99,10 +99,6 @@
                 await _messageHandler
                     .Handle(envelope, _cancellationToken)
                     .ConfigureAwait(false);
-
-                await context
-                    .CheckpointAsync(eventData)
-                    .ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -134,6 +130,8 @@
 
                 throw;
             }
+
+            await context.CheckpointAsync(eventData).ConfigureAwait(false);
         }
     }
 }
