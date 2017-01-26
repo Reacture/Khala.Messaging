@@ -131,6 +131,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Interactive, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Interactive.3.1.1\lib\net45\System.Interactive.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -167,6 +171,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Messaging\Azure\BrokeredMessageProcessor_features.cs" />
+    <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_features.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory_features.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor_features.cs" />

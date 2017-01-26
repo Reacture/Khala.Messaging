@@ -9,6 +9,8 @@
 
     public static class ServiceBusQueueMessagingExtensions
     {
+        private static readonly IMessageProcessingExceptionHandler<BrokeredMessage> _defaultExceptionHandler = new CompositeMessageProcessingExceptionHandler<BrokeredMessage>();
+
         public static void UseServiceBusQueueMessageProcessor(
             this IAppBuilder app,
             string connectionString,
@@ -60,6 +62,21 @@
             queueClient.OnMessageAsync(processor.ProcessMessage);
 
             cancellationToken.Register(queueClient.Close);
+        }
+
+        public static void UseServiceBusQueueMessageProcessor(
+            this IAppBuilder app,
+            string connectionString,
+            string queueName,
+            IMessageHandler messageHandler,
+            IMessageSerializer messageSerializer)
+        {
+            app.UseServiceBusQueueMessageProcessor(
+                connectionString,
+                queueName,
+                messageHandler,
+                messageSerializer,
+                _defaultExceptionHandler);
         }
     }
 }

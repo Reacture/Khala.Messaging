@@ -9,6 +9,8 @@
 
     public static class EventHubMessagingExtensions
     {
+        private static readonly IMessageProcessingExceptionHandler<EventData> _defaultExceptionHandler = new CompositeMessageProcessingExceptionHandler<EventData>();
+
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
@@ -52,6 +54,19 @@
 
             Start(eventProcessorHost, processorFactory);
             cancellationToken.Register(() => Stop(eventProcessorHost));
+        }
+
+        public static void UseEventMessageProcessor(
+            this IAppBuilder app,
+            EventProcessorHost eventProcessorHost,
+            IMessageHandler messageHandler,
+            IMessageSerializer messageSerializer)
+        {
+            app.UseEventMessageProcessor(
+                eventProcessorHost,
+                messageHandler,
+                messageSerializer,
+                _defaultExceptionHandler);
         }
 
         private static void Start(
