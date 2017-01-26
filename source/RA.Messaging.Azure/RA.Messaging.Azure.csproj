@@ -84,6 +84,7 @@
     <Compile Include="Messaging\Azure\EventHubMessageBus.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory.cs" />
+    <Compile Include="Messaging\Azure\IMessageProcessingExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
