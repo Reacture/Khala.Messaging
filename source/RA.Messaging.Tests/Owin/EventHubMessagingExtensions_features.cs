@@ -107,7 +107,8 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
                 app.UseEventMessageProcessor(
                     eventProcessorHost,
                     messageHandler,
-                    messageSerializer);
+                    messageSerializer,
+                    Mock.Of<IMessageProcessingExceptionHandler<EventData>>());
                 var properties = new AppProperties(app.Properties);
                 cancellationToken = properties.OnAppDisposing;
             }))

@@ -13,7 +13,8 @@
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer)
+            IMessageSerializer messageSerializer,
+            IMessageProcessingExceptionHandler<EventData> exceptionHandler)
         {
             if (app == null)
             {
@@ -35,12 +36,18 @@
                 throw new ArgumentNullException(nameof(messageSerializer));
             }
 
+            if (exceptionHandler == null)
+            {
+                throw new ArgumentNullException(nameof(exceptionHandler));
+            }
+
             var properties = new AppProperties(app.Properties);
             CancellationToken cancellationToken = properties.OnAppDisposing;
 
             var processorFactory = new EventMessageProcessorFactory(
                 messageHandler,
                 messageSerializer,
+                exceptionHandler,
                 cancellationToken);
 
             Start(eventProcessorHost, processorFactory);

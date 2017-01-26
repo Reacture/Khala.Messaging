@@ -11,15 +11,18 @@
     {
         private readonly IMessageHandler _handler;
         private readonly IMessageSerializer _serializer;
+        private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         internal EventMessageProcessor(
             IMessageHandler handler,
             IMessageSerializer serializer,
+            IMessageProcessingExceptionHandler<EventData> exceptionHandler,
             CancellationToken cancellationToken)
         {
             _handler = handler;
             _serializer = serializer;
+            _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
 
