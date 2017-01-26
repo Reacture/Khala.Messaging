@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ReactiveArchitecture.Messaging.Azure</id>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <title>ReactiveArchitecture.Messaging.Azure</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
