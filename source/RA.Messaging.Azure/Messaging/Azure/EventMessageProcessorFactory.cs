@@ -6,25 +6,25 @@
 
     public class EventMessageProcessorFactory : IEventProcessorFactory
     {
-        private readonly IMessageHandler _handler;
-        private readonly IMessageSerializer _serializer;
+        private readonly IMessageHandler _messageHandler;
+        private readonly IMessageSerializer _messageSerializer;
         private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         public EventMessageProcessorFactory(
-            IMessageHandler handler,
-            IMessageSerializer serializer,
+            IMessageHandler messageHandler,
+            IMessageSerializer messageSerializer,
             IMessageProcessingExceptionHandler<EventData> exceptionHandler,
             CancellationToken cancellationToken)
         {
-            if (handler == null)
+            if (messageHandler == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(messageHandler));
             }
 
-            if (serializer == null)
+            if (messageSerializer == null)
             {
-                throw new ArgumentNullException(nameof(serializer));
+                throw new ArgumentNullException(nameof(messageSerializer));
             }
 
             if (exceptionHandler == null)
@@ -32,8 +32,8 @@
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            _handler = handler;
-            _serializer = serializer;
+            _messageHandler = messageHandler;
+            _messageSerializer = messageSerializer;
             _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
@@ -46,8 +46,8 @@
             }
 
             return new EventMessageProcessor(
-                _handler,
-                _serializer,
+                _messageHandler,
+                _messageSerializer,
                 _exceptionHandler,
                 _cancellationToken);
         }
