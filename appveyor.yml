@@ -1,0 +1,17 @@
+version: 0.6.{build}
+configuration: Release
+before_build:
+- cmd: nuget restore source\Arcane.Messaging.sln
+build:
+  verbosity: minimal
+after_build:
+- cmd: >-
+    nuget pack nuget\Arcane.Messaging.Abstraction.nuspec
+
+    nuget pack nuget\Arcane.Messaging.Azure.nuspec
+
+    nuget pack nuget\Arcane.Messaging.Azure.Owin.nuspec
+test:
+  assemblies: '**\*.tests.dll'
+artifacts:
+- path: Arcane.Messaging**.nupkg

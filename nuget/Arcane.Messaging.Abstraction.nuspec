@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Arcane.Messaging.Abstraction</id>
+    <version>0.6.0</version>
+    <title>Arcane.Messaging.Abstraction</title>
+    <authors>Gyuwon</authors>
+    <owners>Gyuwon</owners>
+    <licenseUrl>https://github.com/Reacture/Arcane.Messaging/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Reacture/Arcane.Messaging</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Abstraction layer for asynchronous messaging</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright Gyuwon 2017</copyright>
+    <tags>Arcane Reactive Messaging</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.1">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\source\Arcane.Messaging.Azure\bin\Release\Arcane.Messaging.Abstraction.dll" target="lib\netstandard1.1\Arcane.Messaging.Abstraction.dll" />
+  </files>
+</package>

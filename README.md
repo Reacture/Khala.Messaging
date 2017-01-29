@@ -1,15 +1,15 @@
-# Reactive Essentials - Messaging
+# Arcane - Messaging
 
 메시지 중심 아키텍처를 지원하는 도구입니다.
 
 ## 패키지
 
-### Core
+### Abstraction
 
 메시징 추상화 계층을 제공합니다.
 
 ```
-> Install-Package ReactiveArchitecture.Messaging.Core
+> Install-Package Arcane.Messaging.Abstraction
 ```
 
 ### Azure
@@ -21,15 +21,15 @@ Microsoft Azure 메시징 서비스 대상 구현체를 제공합니다. 지원�
 - Service Bus Topics
 
 ```
-> Install-Package ReactiveArchitecture.Messaging.Azure
+> Install-Package Arcane.Messaging.Azure
 ```
 
 ### Azure.Owin
 
-Owin 기반 응용프로그램에 ReactiveArchitecture.Messaging.Azure 패키지를 지원하는 편의성을 제공합니다.
+Owin 기반 응용프로그램에 Arcane.Messaging.Azure 패키지를 지원하는 편의성을 제공합니다.
 
 ```
-> Install-Package ReactiveArchitecture.Messaging.Azure.Owin
+> Install-Package Arcane.Messaging.Azure.Owin
 ```
 
 ## License
@@ -37,7 +37,7 @@ Owin 기반 응용프로그램에 ReactiveArchitecture.Messaging.Azure 패키지
 ```
 MIT License
 
-Copyright (c) 2017 Reactive Essentials
+Copyright (c) 2017 Reacture
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
