@@ -28,5 +28,17 @@
 
             return messageBus.SendBatch(envelopes, CancellationToken.None);
         }
+
+        public static Task Handle(
+            this IMessageHandler messageHandler,
+            Envelope envelope)
+        {
+            if (messageHandler == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            return messageHandler.Handle(envelope, CancellationToken.None);
+        }
     }
 }

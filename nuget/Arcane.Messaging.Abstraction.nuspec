@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Arcane.Messaging.Abstraction</id>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
     <title>Arcane.Messaging.Abstraction</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>

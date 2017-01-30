@@ -37,5 +37,20 @@ namespace Arcane.Messaging
                 x => x.SendBatch(envelopes, CancellationToken.None), Times.Once());
             result.Should().BeSameAs(task);
         }
+
+        [Fact]
+        public void Handle_relays_with_none_cancellation_token()
+        {
+            var task = Task.FromResult(true);
+            var envelope = new Envelope(new object());
+            var messageHandler = Mock.Of<IMessageHandler>(
+                x => x.Handle(envelope, CancellationToken.None) == task);
+
+            Task result = messageHandler.Handle(envelope);
+
+            Mock.Get(messageHandler).Verify(
+                x => x.Handle(envelope, CancellationToken.None), Times.Once());
+            result.Should().BeSameAs(task);
+        }
     }
 }
