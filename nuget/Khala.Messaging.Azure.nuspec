@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Khala.Messaging.Azure</id>
+    <version>0.8.0</version>
+    <title>Khala.Messaging.Azure</title>
+    <authors>Gyuwon</authors>
+    <owners>Gyuwon</owners>
+    <licenseUrl>https://github.com/Reacture/Khala.Messaging/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Reacture/Khala.Messaging</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Asynchronous messaging using Microsoft Azure</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright Gyuwon 2017</copyright>
+    <tags>Khala Reactive Messaging Azure ServiceBus Queue EventHub Event</tags>
+    <dependencies>
+      <group targetFramework="net45">
+        <dependency id="Khala.Messaging.Abstraction" version="0.8.0" />
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="WindowsAzure.ServiceBus" version="3.4.5" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\source\Khala.Messaging.Azure\bin\Release\Khala.Messaging.Azure.dll" target="lib\net45\Khala.Messaging.Azure.dll" />
+  </files>
+</package>
