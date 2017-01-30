@@ -51,6 +51,7 @@
     <Compile Include="Messaging\IMessageSerializer.cs" />
     <Compile Include="Messaging\IPartitioned.cs" />
     <Compile Include="Messaging\JsonMessageSerializer.cs" />
+    <Compile Include="Messaging\MessagingExtensions.cs" />
     <Compile Include="Messaging\ReceivedEnvelope.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
