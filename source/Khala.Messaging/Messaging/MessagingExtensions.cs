@@ -40,5 +40,18 @@
 
             return messageHandler.Handle(envelope, CancellationToken.None);
         }
+
+        public static Task Handle<TMessage>(
+            this IHandles<TMessage> handles,
+            Envelope<TMessage> envelope)
+            where TMessage : class
+        {
+            if (handles == null)
+            {
+                throw new ArgumentNullException(nameof(handles));
+            }
+
+            return handles.Handle(envelope, CancellationToken.None);
+        }
     }
 }
