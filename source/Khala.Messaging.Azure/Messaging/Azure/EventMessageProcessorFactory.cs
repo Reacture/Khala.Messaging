@@ -4,7 +4,7 @@
     using System.Threading;
     using Microsoft.ServiceBus.Messaging;
 
-    public class EventMessageProcessorFactory : IEventProcessorFactory
+    public sealed class EventMessageProcessorFactory : IEventProcessorFactory
     {
         private readonly EventDataSerializer _serializer;
         private readonly IMessageHandler _messageHandler;

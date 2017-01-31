@@ -23,6 +23,23 @@ namespace Khala.Owin
         public const string StorageConnectionStringPropertyName = "eventhubmessagingextensions-storage-connectionstring";
         public const string ConsumerGroupPropertyName = "eventhubmessagingextensions-eventhub-consumergroup";
 
+        private static string ConnectionParametersRequired => $@"
+EventProcessorHost connection information is not set. To run tests on the EventHubMessagingExtensions class, you must set the connection information in the *.runsettings file as follows:
+
+<?xml version=""1.0"" encoding=""utf-8"" ?>
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
+    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
+    <Parameter name=""{StorageConnectionStringPropertyName}"" value=""your storage connection string for testing"" />
+    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+  </TestRunParameters>  
+</RunSettings>
+
+References
+- https://msdn.microsoft.com/en-us/library/jj635153.aspx
+".Trim();
+
         private IFixture fixture;
         private string eventHubConnectionString;
         private string eventHubPath;
@@ -45,22 +62,7 @@ namespace Khala.Owin
                 string.IsNullOrWhiteSpace(eventHubPath) ||
                 string.IsNullOrWhiteSpace(storageConnectionString))
             {
-                Assert.Inconclusive($@"
-EventProcessorHost connection information is not set. To run tests on the EventHubMessagingExtensions class, you must set the connection information in the *.runsettings file as follows:
-
-<?xml version=""1.0"" encoding=""utf-8"" ?>
-<RunSettings>
-  <TestRunParameters>
-    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
-    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
-    <Parameter name=""{StorageConnectionStringPropertyName}"" value=""your storage connection string for testing"" />
-    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
-  </TestRunParameters>  
-</RunSettings>
-
-References
-- https://msdn.microsoft.com/en-us/library/jj635153.aspx
-".Trim());
+                Assert.Inconclusive(ConnectionParametersRequired);
             }
         }
 
@@ -78,9 +80,9 @@ References
                 .Callback<Envelope, CancellationToken>((m, t) => handled = m)
                 .Returns(Task.FromResult(true));
 
-            var messageSerializer = new JsonMessageSerializer();
+            var serializer = new EventDataSerializer();
             var eventHubClient = EventHubClient.CreateFromConnectionString(eventHubConnectionString, eventHubPath);
-            var messageBus = new EventHubMessageBus(messageSerializer, eventHubClient);
+            var messageBus = new EventHubMessageBus(eventHubClient, serializer);
 
             CancellationToken cancellationToken;
             using (TestServer server = TestServer.Create(app =>
@@ -91,7 +93,7 @@ References
                         consumerGroupName,
                         eventHubConnectionString,
                         storageConnectionString),
-                    new EventDataSerializer(messageSerializer),
+                    serializer,
                     messageHandler);
                 var properties = new AppProperties(app.Properties);
                 cancellationToken = properties.OnAppDisposing;

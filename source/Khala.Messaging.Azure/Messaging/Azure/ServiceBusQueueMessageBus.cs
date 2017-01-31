@@ -6,14 +6,14 @@
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
-    public class ServiceBusQueueMessageBus : IMessageBus
+    public sealed class ServiceBusQueueMessageBus : IMessageBus
     {
-        private readonly BrokeredMessageSerializer _serializer;
         private readonly QueueClient _queueClient;
+        private readonly BrokeredMessageSerializer _serializer;
 
         public ServiceBusQueueMessageBus(
-            BrokeredMessageSerializer serializer,
-            QueueClient queueClient)
+            QueueClient queueClient,
+            BrokeredMessageSerializer serializer)
         {
             if (serializer == null)
             {
@@ -30,14 +30,14 @@
         }
 
         public ServiceBusQueueMessageBus(
-            IMessageSerializer messageSerializer,
-            QueueClient queueClient)
-            : this(new BrokeredMessageSerializer(messageSerializer), queueClient)
+            QueueClient queueClient,
+            IMessageSerializer messageSerializer)
+            : this(queueClient, new BrokeredMessageSerializer(messageSerializer))
         {
         }
 
         public ServiceBusQueueMessageBus(QueueClient queueClient)
-            : this(new BrokeredMessageSerializer(), queueClient)
+            : this(queueClient, new BrokeredMessageSerializer())
         {
         }
 

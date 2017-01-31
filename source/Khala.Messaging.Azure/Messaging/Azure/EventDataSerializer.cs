@@ -9,7 +9,7 @@
     /// <summary>
     /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="EventData"/>.
     /// </summary>
-    public class EventDataSerializer
+    public sealed class EventDataSerializer
     {
         private readonly IMessageSerializer _messageSerializer;
 

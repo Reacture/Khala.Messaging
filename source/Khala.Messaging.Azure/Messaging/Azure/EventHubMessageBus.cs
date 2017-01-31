@@ -6,14 +6,17 @@
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
-    public class EventHubMessageBus : IMessageBus
+    /// <summary>
+    /// Provides the implementation of <see cref="IMessageBus"/> for Azure Event hubs.
+    /// </summary>
+    public sealed class EventHubMessageBus : IMessageBus
     {
         private readonly EventDataSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
 
         public EventHubMessageBus(
-            EventDataSerializer serializer,
-            EventHubClient eventHubClient)
+            EventHubClient eventHubClient,
+            EventDataSerializer serializer)
         {
             if (serializer == null)
             {
@@ -30,14 +33,14 @@
         }
 
         public EventHubMessageBus(
-            IMessageSerializer messageSerializer,
-            EventHubClient eventHubClient)
-            : this(new EventDataSerializer(messageSerializer), eventHubClient)
+            EventHubClient eventHubClient,
+            IMessageSerializer messageSerializer)
+            : this(eventHubClient, new EventDataSerializer(messageSerializer))
         {
         }
 
         public EventHubMessageBus(EventHubClient eventHubClient)
-            : this(new EventDataSerializer(), eventHubClient)
+            : this(eventHubClient, new EventDataSerializer())
         {
         }
 

@@ -19,6 +19,21 @@ namespace Khala.Messaging.Azure
         public const string ConnectionStringPropertyName = "servicebusqueuemessagebus-connectionstring";
         public const string QueueNamePropertyName = "servicebusqueuemessagebus-path";
 
+        private static string ConnectionParametersRequired => $@"
+Service Bus Queue connection information is not set. To run tests on the ServiceBusQueueMessageBus class, you must set the connection information in the *.runsettings file as follows:
+
+<?xml version=""1.0"" encoding=""utf-8"" ?>
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name=""{ConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
+    <Parameter name=""{QueueNamePropertyName}"" value=""your event hub path for testing"" />
+  </TestRunParameters>  
+</RunSettings>
+
+References
+- https://msdn.microsoft.com/en-us/library/jj635153.aspx
+".Trim();
+
         private static string connectionString;
         private static string queueName;
         private static QueueClient queueClient;
@@ -68,20 +83,7 @@ namespace Khala.Messaging.Azure
         {
             if (queueClient == null)
             {
-                Assert.Inconclusive($@"
-Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueueMessageBus 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 Service Bus Queue 연결 정보를 설정합니다.
-
-<?xml version=""1.0"" encoding=""utf-8"" ?>
-<RunSettings>
-  <TestRunParameters>
-    <Parameter name=""{ConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
-    <Parameter name=""{QueueNamePropertyName}"" value=""your event hub path for testing"" />
-  </TestRunParameters>  
-</RunSettings>
-
-참고문서
-- https://msdn.microsoft.com/en-us/library/jj635153.aspx
-".Trim());
+                Assert.Inconclusive(ConnectionParametersRequired);
             }
 
             fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -90,7 +92,7 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
             fixture.Inject(queueClient);
             fixture.Inject(serializer);
 
-            sut = new ServiceBusQueueMessageBus(serializer, queueClient);
+            sut = new ServiceBusQueueMessageBus(queueClient, serializer);
         }
 
         [TestMethod]

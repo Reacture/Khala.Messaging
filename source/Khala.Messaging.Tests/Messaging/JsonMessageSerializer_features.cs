@@ -126,8 +126,8 @@ namespace Khala.Messaging
         public void Deserialize_restores_untyped_message_to_dynamic()
         {
             // Arrange
-            string stringProp = $"{Guid.NewGuid()}";
-            var json = $@"{{ ""StringProp"": ""{stringProp}"" }}";
+            string prop = $"{Guid.NewGuid()}";
+            var json = $"{{ \"Prop\": \"{prop}\" }}";
             var sut = new JsonMessageSerializer();
             var actual = default(object);
 
@@ -137,7 +137,7 @@ namespace Khala.Messaging
             // Assert
             action.ShouldNotThrow();
             actual.Should().NotBeNull();
-            ((string)((dynamic)actual).StringProp).Should().Be(stringProp);
+            ((string)((dynamic)actual).Prop).Should().Be(prop);
         }
     }
 }

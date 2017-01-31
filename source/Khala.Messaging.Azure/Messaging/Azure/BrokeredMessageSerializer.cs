@@ -9,7 +9,7 @@
     /// <summary>
     /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="BrokeredMessage"/>.
     /// </summary>
-    public class BrokeredMessageSerializer
+    public sealed class BrokeredMessageSerializer
     {
         private readonly IMessageSerializer _messageSerializer;
 

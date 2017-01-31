@@ -4,7 +4,7 @@
     using System.IO;
     using Newtonsoft.Json;
 
-    public class JsonMessageSerializer : IMessageSerializer
+    public sealed class JsonMessageSerializer : IMessageSerializer
     {
         private readonly JsonSerializer _serializer;
 

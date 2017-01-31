@@ -5,7 +5,7 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
 
-    public class CompositeMessageProcessingExceptionHandler<TSource> :
+    public sealed class CompositeMessageProcessingExceptionHandler<TSource> :
         IMessageProcessingExceptionHandler<TSource>
         where TSource : class
     {

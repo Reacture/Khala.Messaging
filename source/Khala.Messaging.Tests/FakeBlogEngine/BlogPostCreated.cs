@@ -3,7 +3,7 @@ using Khala.Messaging;
 
 namespace FakeBlogEngine
 {
-    public class BlogPostCreated : IPartitioned
+    public sealed class BlogPostCreated : IPartitioned
     {
         public Guid PostId { get; set; }
 

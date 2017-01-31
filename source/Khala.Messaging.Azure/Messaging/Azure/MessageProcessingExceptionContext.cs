@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class MessageProcessingExceptionContext<TSource>
+    public sealed class MessageProcessingExceptionContext<TSource>
         where TSource : class
     {
         public MessageProcessingExceptionContext(

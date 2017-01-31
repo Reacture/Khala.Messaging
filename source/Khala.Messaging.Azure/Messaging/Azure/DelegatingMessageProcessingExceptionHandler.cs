@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
 
-    public class DelegatingMessageProcessingExceptionHandler<TSource> :
+    public sealed class DelegatingMessageProcessingExceptionHandler<TSource> :
         IMessageProcessingExceptionHandler<TSource>
         where TSource : class
     {

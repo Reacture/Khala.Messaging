@@ -6,7 +6,7 @@
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
-    public class BrokeredMessageProcessor
+    public sealed class BrokeredMessageProcessor
     {
         private readonly BrokeredMessageSerializer _serializer;
         private readonly IMessageHandler _messageHandler;

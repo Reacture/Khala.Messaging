@@ -13,7 +13,7 @@ namespace Khala.Messaging
         [Fact]
         public void class_is_abstract()
         {
-            typeof(Messaging.InterfaceAwareHandler).IsAbstract.Should().BeTrue();
+            typeof(InterfaceAwareHandler).IsAbstract.Should().BeTrue();
         }
 
         [Fact]

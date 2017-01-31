@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FakeBlogEngine;
@@ -9,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.AutoMoq;
 using Ploeh.AutoFixture.Idioms;
+using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
 
 namespace Khala.Messaging.Azure
 {
@@ -18,6 +20,22 @@ namespace Khala.Messaging.Azure
         public const string EventHubConnectionStringPropertyName = "eventhubmessagebus-eventhub-connectionstring";
         public const string EventHubPathPropertyName = "eventhubmessagebus-eventhub-path";
         public const string ConsumerGroupPropertyName = "eventhubmessagebus-eventhub-consumergroup";
+
+        private static string ConnectionParametersRequired => $@"
+Event Hub connection information is not set. To run tests on the EventHubMessageBus class, you must set the connection information in the *.runsettings file as follows:
+
+<?xml version=""1.0"" encoding=""utf-8"" ?>
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
+    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
+    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+  </TestRunParameters>  
+</RunSettings>
+
+References
+- https://msdn.microsoft.com/en-us/library/jj635153.aspx
+".Trim();
 
         private static EventHubClient eventHubClient;
         private static string consumerGroupName;
@@ -36,9 +54,7 @@ namespace Khala.Messaging.Azure
                 string.IsNullOrWhiteSpace(path) == false)
             {
                 eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, path);
-                consumerGroupName =
-                    (string)context.Properties[ConsumerGroupPropertyName] ??
-                    EventHubConsumerGroup.DefaultGroupName;
+                consumerGroupName = (string)context.Properties[ConsumerGroupPropertyName] ?? DefaultGroupName;
             }
         }
 
@@ -47,27 +63,13 @@ namespace Khala.Messaging.Azure
         {
             if (eventHubClient == null)
             {
-                Assert.Inconclusive($@"
-Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 Event Hub 연결 정보를 설정합니다.
-
-<?xml version=""1.0"" encoding=""utf-8"" ?>
-<RunSettings>
-  <TestRunParameters>
-    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
-    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
-    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
-  </TestRunParameters>  
-</RunSettings>
-
-참고문서
-- https://msdn.microsoft.com/en-us/library/jj635153.aspx
-".Trim());
+                Assert.Inconclusive(ConnectionParametersRequired);
             }
 
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             fixture.Inject(eventHubClient);
             serializer = new EventDataSerializer();
-            sut = new EventHubMessageBus(serializer, eventHubClient);
+            sut = new EventHubMessageBus(eventHubClient, serializer);
         }
 
         [TestMethod]
@@ -103,20 +105,13 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
 
                 // Assert
                 var waitTime = TimeSpan.FromSeconds(1);
-                EventData eventData = null;
-                foreach (EventHubReceiver receiver in receivers)
-                {
-                    eventData = await receiver.ReceiveAsync(waitTime);
-                    if (eventData != null)
-                    {
-                        break;
-                    }
-                }
+                Task<EventData>[] tasks = receivers.Select(r => r.ReceiveAsync(waitTime)).ToArray();
+                await Task.WhenAll(tasks);
+                EventData eventData = tasks.Select(t => t.Result).FirstOrDefault(r => r != null);
 
                 eventData.Should().NotBeNull();
                 Envelope actual = await serializer.Deserialize(eventData);
-                actual.ShouldBeEquivalentTo(
-                    envelope, opts => opts.RespectingRuntimeTypes());
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -132,11 +127,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
             var receivers = new List<EventHubReceiver>();
             foreach (string partition in runtimeInfo.PartitionIds)
             {
-                EventHubReceiver receiver = await
-                    consumerGroup.CreateReceiverAsync(
-                        partition,
-                        EventHubConsumerGroup.EndOfStream);
-                receivers.Add(receiver);
+                receivers.Add(await consumerGroup.CreateReceiverAsync(partition, EndOfStream));
             }
             return receivers;
         }

@@ -6,7 +6,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class CompositeMessageHandler : IMessageHandler
+    public sealed class CompositeMessageHandler : IMessageHandler
     {
         private readonly IEnumerable<IMessageHandler> _handlers;
 
