@@ -37,7 +37,7 @@ Owin 기반 응용프로그램에 Khala.Messaging.Azure 패키지를 지원하�
 ```
 MIT License
 
-Copyright (c) 2017
+Copyright (c) 2017 Gyuwon Yi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
