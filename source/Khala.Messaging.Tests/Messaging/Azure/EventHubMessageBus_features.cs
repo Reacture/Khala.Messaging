@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using Ploeh.AutoFixture.AutoMoq;
+using Ploeh.AutoFixture.Idioms;
 
 namespace Khala.Messaging.Azure
 {
@@ -21,7 +22,6 @@ namespace Khala.Messaging.Azure
         private static EventHubClient eventHubClient;
         private static string consumerGroupName;
         private IFixture fixture;
-        private IMessageSerializer serializer;
         private EventHubMessageBus sut;
 
         public TestContext TestContext { get; set; }
@@ -63,9 +63,25 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
 ".Trim());
             }
 
-            fixture = new Fixture();
-            serializer = new JsonMessageSerializer();
-            sut = new EventHubMessageBus(eventHubClient, serializer);
+            fixture = new Fixture().Customize(new AutoMoqCustomization());
+            fixture.Inject(eventHubClient);
+            sut = new EventHubMessageBus(eventHubClient, new JsonMessageSerializer());
+        }
+
+        [TestMethod]
+        public void class_has_guard_clauses()
+        {
+            var assertion = new GuardClauseAssertion(fixture);
+            assertion.Verify(typeof(EventHubMessageBus));
+        }
+
+        [TestMethod]
+        public void SendBatch_has_guard_clause_for_null_envelope()
+        {
+            var envelopes = new Envelope[] { null };
+            Func<Task> action = () => sut.SendBatch(envelopes);
+            action.ShouldThrow<ArgumentException>()
+                .Where(x => x.ParamName == "envelopes");
         }
 
         public class FooMessage : IPartitioned
@@ -85,9 +101,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
             var correlationId = Guid.NewGuid();
             var envelope = new Envelope(correlationId, message);
 
-            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
+            List<EventHubReceiver> receivers = await GetReceivers();
 
             try
             {
@@ -107,50 +121,9 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 }
 
                 eventData.Should().NotBeNull();
-                byte[] bytes = eventData.GetBytes();
-                string value = Encoding.UTF8.GetString(bytes);
-                object actual = serializer.Deserialize(value);
-                actual.Should().BeOfType<Envelope>();
-                actual.As<Envelope>().Message.Should().BeOfType<FooMessage>();
-                actual.ShouldBeEquivalentTo(envelope);
-            }
-            finally
-            {
-                // Cleanup
-                receivers.ForEach(r => r.Close());
-            }
-        }
-
-        [TestMethod]
-        public async Task Send_sets_partition_key_correctly()
-        {
-            // Arrange
-            var message = fixture.Create<FooMessage>();
-            var correlationId = Guid.NewGuid();
-            var envelope = new Envelope(correlationId, message);
-
-            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
-
-            try
-            {
-                // Act
-                await sut.Send(envelope, CancellationToken.None);
-
-                // Assert
-                var waitTime = TimeSpan.FromSeconds(1);
-                EventData eventData = null;
-                foreach (EventHubReceiver receiver in receivers)
-                {
-                    eventData = await receiver.ReceiveAsync(waitTime);
-                    if (eventData != null)
-                    {
-                        break;
-                    }
-                }
-
-                eventData.PartitionKey.Should().Be(message.SourceId);
+                Envelope actual = await sut.Serializer.Deserialize(eventData);
+                actual.ShouldBeEquivalentTo(
+                    envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -171,9 +144,7 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 .Select(m => new Envelope(m))
                 .ToList();
 
-            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers = await GetReceivers(consumerGroup, runtimeInfo);
+            List<EventHubReceiver> receivers = await GetReceivers();
 
             try
             {
@@ -193,56 +164,14 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                         break;
                     }
                 }
-                var actual = new List<object>(eventDataList.Select(x => Deserialize(x)));
-                actual.Should().OnlyContain(x => x is Envelope);
-                actual.Cast<Envelope>().Should().OnlyContain(e => e.Message is FooMessage);
-                actual.ShouldAllBeEquivalentTo(envelopes);
-            }
-            finally
-            {
-                // Cleanup
-                receivers.ForEach(r => r.Close());
-            }
-        }
 
-        [TestMethod]
-        public async Task SendBatch_sets_partition_keys_correctly()
-        {
-            // Arrange
-            var sourceId = fixture.Create<string>();
-            List<Envelope> envelopes = fixture
-                .Build<FooMessage>()
-                .With(x => x.SourceId, sourceId)
-                .CreateMany()
-                .Select(m => new Envelope(m))
-                .ToList();
-
-            EventHubConsumerGroup consumerGroup =
-                eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo =
-                await eventHubClient.GetRuntimeInformationAsync();
-            List<EventHubReceiver> receivers =
-                await GetReceivers(consumerGroup, runtimeInfo);
-
-            try
-            {
-                // Act
-                await sut.SendBatch(envelopes, CancellationToken.None);
-
-                // Assert
-                var waitTime = TimeSpan.FromSeconds(3);
-                var eventDataList = new List<EventData>();
-                foreach (EventHubReceiver receiver in receivers)
+                var actual = new List<Envelope>();
+                foreach (EventData eventData in eventDataList)
                 {
-                    IEnumerable<EventData> eventData = await
-                        receiver.ReceiveAsync(envelopes.Count, waitTime);
-                    if (eventData?.Any() ?? false)
-                    {
-                        eventDataList.AddRange(eventData);
-                        break;
-                    }
+                    actual.Add(await sut.Serializer.Deserialize(eventData));
                 }
-                eventDataList.Should().OnlyContain(x => x.PartitionKey == sourceId);
+                actual.ShouldAllBeEquivalentTo(
+                    envelopes, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -251,11 +180,11 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
             }
         }
 
-        private object Deserialize(EventData eventData)
+        private async Task<List<EventHubReceiver>> GetReceivers()
         {
-            byte[] bytes = eventData.GetBytes();
-            string value = Encoding.UTF8.GetString(bytes);
-            return serializer.Deserialize(value);
+            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
+            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
+            return await GetReceivers(consumerGroup, runtimeInfo);
         }
 
         private async Task<List<EventHubReceiver>> GetReceivers(

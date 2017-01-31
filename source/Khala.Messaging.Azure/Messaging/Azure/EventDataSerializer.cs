@@ -39,7 +39,9 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            string value = _messageSerializer.Serialize(envelope.Message);
+            object message = envelope.Message;
+
+            string value = _messageSerializer.Serialize(message);
             byte[] body = Encoding.UTF8.GetBytes(value);
 
             var messageId = envelope.MessageId.ToString("n");
@@ -51,7 +53,8 @@
                 {
                     ["Khala.Envelope.MessageId"] = messageId,
                     ["Khala.Envelope.CorrelationId"] = correlationId
-                }
+                },
+                PartitionKey = (message as IPartitioned)?.PartitionKey
             });
         }
 

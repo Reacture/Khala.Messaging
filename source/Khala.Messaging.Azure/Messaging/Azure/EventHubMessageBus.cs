@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
@@ -10,24 +9,26 @@
     public class EventHubMessageBus : IMessageBus
     {
         private readonly EventHubClient _eventHubClient;
-        private readonly IMessageSerializer _serializer;
+        private readonly EventDataSerializer _serializer;
 
         public EventHubMessageBus(
-            EventHubClient eventHubClient, IMessageSerializer serializer)
+            EventHubClient eventHubClient, IMessageSerializer messageSerializer)
         {
             if (eventHubClient == null)
             {
                 throw new ArgumentNullException(nameof(eventHubClient));
             }
 
-            if (serializer == null)
+            if (messageSerializer == null)
             {
-                throw new ArgumentNullException(nameof(serializer));
+                throw new ArgumentNullException(nameof(messageSerializer));
             }
 
             _eventHubClient = eventHubClient;
-            _serializer = serializer;
+            _serializer = new EventDataSerializer(messageSerializer);
         }
+
+        public EventDataSerializer Serializer => _serializer;
 
         public Task Send(
             Envelope envelope,
@@ -38,8 +39,13 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            EventData eventData = GetEventData(envelope);
-            return _eventHubClient.SendAsync(eventData);
+            return SendMessage(envelope);
+        }
+
+        private async Task SendMessage(Envelope envelope)
+        {
+            EventData eventData = await _serializer.Serialize(envelope);
+            await _eventHubClient.SendAsync(eventData);
         }
 
         public Task SendBatch(
@@ -51,7 +57,7 @@
                 throw new ArgumentNullException(nameof(envelopes));
             }
 
-            var eventDataList = new List<EventData>();
+            var envelopeList = new List<Envelope>();
 
             foreach (Envelope envelope in envelopes)
             {
@@ -62,26 +68,22 @@
                         nameof(envelopes));
                 }
 
-                eventDataList.Add(GetEventData(envelope));
+                envelopeList.Add(envelope);
             }
 
-            return _eventHubClient.SendBatchAsync(eventDataList);
+            return SendMessages(envelopeList);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "GetEventData() returns an instance of EventData.")]
-        private EventData GetEventData(Envelope envelope)
+        private async Task SendMessages(IEnumerable<Envelope> envelopes)
         {
-            string data = _serializer.Serialize(envelope);
-            byte[] bytes = Encoding.UTF8.GetBytes(data);
-            var eventData = new EventData(bytes);
+            var eventDataList = new List<EventData>();
 
-            var partitioned = envelope.Message as IPartitioned;
-            if (partitioned != null)
+            foreach (Envelope envelope in envelopes)
             {
-                eventData.PartitionKey = partitioned.PartitionKey;
+                eventDataList.Add(await _serializer.Serialize(envelope));
             }
 
-            return eventData;
+            await _eventHubClient.SendBatchAsync(eventDataList);
         }
     }
 }

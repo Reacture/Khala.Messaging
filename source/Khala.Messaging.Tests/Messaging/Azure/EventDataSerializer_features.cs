@@ -38,6 +38,11 @@ namespace Khala.Messaging.Azure
             public string Property { get; set; }
         }
 
+        public class PartitionedFakeMessage : FakeMessage, IPartitioned
+        {
+            string IPartitioned.PartitionKey => EntityId.ToString();
+        }
+
         [Fact]
         public async Task Serialize_serializes_message_correctly()
         {
@@ -85,6 +90,15 @@ namespace Khala.Messaging.Azure
             object actual = eventData.Properties[propertyName];
             actual.Should().BeOfType<string>();
             Guid.Parse((string)actual).Should().Be(correlationId);
+        }
+
+        [Fact]
+        public async Task Serialize_sets_PartitionKey_correctly_if_message_is_IPartitioned()
+        {
+            IPartitioned message = fixture.Create<PartitionedFakeMessage>();
+            var envelope = new Envelope(message);
+            EventData eventData = await sut.Serialize(envelope);
+            eventData.PartitionKey.Should().Be(message.PartitionKey);
         }
 
         [Fact]
