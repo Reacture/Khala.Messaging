@@ -170,6 +170,7 @@
   <ItemGroup>
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
     <Compile Include="Messaging\Azure\BrokeredMessageProcessor_features.cs" />
+    <Compile Include="Messaging\Azure\BrokeredMessageSerializer_features.cs" />
     <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_features.cs" />

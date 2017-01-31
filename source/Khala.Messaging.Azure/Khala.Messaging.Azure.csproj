@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Messaging\Azure\BrokeredMessageProcessor.cs" />
+    <Compile Include="Messaging\Azure\BrokeredMessageSerializer.cs" />
     <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer.cs" />

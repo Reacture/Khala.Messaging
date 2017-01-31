@@ -7,17 +7,17 @@
     using Microsoft.ServiceBus.Messaging;
 
     /// <summary>
-    /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="EventData"/>.
+    /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="BrokeredMessage"/>.
     /// </summary>
-    public class EventDataSerializer
+    public class BrokeredMessageSerializer
     {
         private readonly IMessageSerializer _messageSerializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class with an <see cref="IMessageSerializer"/>.
+        /// Initializes a new instance of the <see cref="BrokeredMessageSerializer"/> class with an <see cref="IMessageSerializer"/>.
         /// </summary>
         /// <param name="messageSerializer"><see cref="IMessageSerializer"/> to serialize enveloped messages.</param>
-        public EventDataSerializer(IMessageSerializer messageSerializer)
+        public BrokeredMessageSerializer(IMessageSerializer messageSerializer)
         {
             if (messageSerializer == null)
             {
@@ -28,19 +28,19 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class.
+        /// Initializes a new instance of the <see cref="BrokeredMessageSerializer"/> class.
         /// </summary>
-        public EventDataSerializer()
+        public BrokeredMessageSerializer()
             : this(new JsonMessageSerializer())
         {
         }
 
         /// <summary>
-        /// Serializes <see cref="Envelope"/> instance into <see cref="EventData"/>.
+        /// Serializes <see cref="Envelope"/> instance into <see cref="BrokeredMessage"/>.
         /// </summary>
         /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
-        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="EventData"/> that contains serialized data.</returns>
-        public Task<EventData> Serialize(Envelope envelope)
+        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="BrokeredMessage"/> that contains serialized data.</returns>
+        public Task<BrokeredMessage> Serialize(Envelope envelope)
         {
             if (envelope == null)
             {
@@ -55,8 +55,10 @@
             var messageId = envelope.MessageId.ToString("n");
             var correlationId = envelope.CorrelationId?.ToString("n");
 
-            return Task.FromResult(new EventData(body)
+            return Task.FromResult(new BrokeredMessage(new MemoryStream(body))
             {
+                MessageId = messageId,
+                CorrelationId = correlationId,
                 Properties =
                 {
                     ["Khala.Envelope.MessageId"] = messageId,
@@ -67,18 +69,18 @@
         }
 
         /// <summary>
-        /// Deserializes <see cref="Envelope"/> from <see cref="EventData"/>.
+        /// Deserializes <see cref="Envelope"/> from <see cref="BrokeredMessage"/>.
         /// </summary>
-        /// <param name="eventData"><see cref="EventData"/> that contains serialized data.</param>
+        /// <param name="brokeredMessage"><see cref="BrokeredMessage"/> that contains serialized data.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="Envelope"/> instance deserialized.</returns>
-        public Task<Envelope> Deserialize(EventData eventData)
+        public Task<Envelope> Deserialize(BrokeredMessage brokeredMessage)
         {
-            if (eventData == null)
+            if (brokeredMessage == null)
             {
-                throw new ArgumentNullException(nameof(eventData));
+                throw new ArgumentNullException(nameof(brokeredMessage));
             }
 
-            return DeserialzeEnvelope(eventData);
+            return DeserializeEnvelope(brokeredMessage);
         }
 
         private static Guid? ParseGuid(object property)
@@ -89,17 +91,17 @@
                 : default(Guid?);
         }
 
-        private async Task<Envelope> DeserialzeEnvelope(EventData eventData)
+        private async Task<Envelope> DeserializeEnvelope(BrokeredMessage brokeredMessage)
         {
             object messageId;
-            eventData.Properties.TryGetValue(
+            brokeredMessage.Properties.TryGetValue(
                 "Khala.Envelope.MessageId", out messageId);
 
             object correlationId;
-            eventData.Properties.TryGetValue(
+            brokeredMessage.Properties.TryGetValue(
                 "Khala.Envelope.CorrelationId", out correlationId);
 
-            using (Stream stream = eventData.GetBodyStream())
+            using (var stream = brokeredMessage.GetBody<Stream>())
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 string value = await reader.ReadToEndAsync().ConfigureAwait(false);
