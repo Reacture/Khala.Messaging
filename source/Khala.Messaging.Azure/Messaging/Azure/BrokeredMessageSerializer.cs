@@ -40,6 +40,7 @@
         /// </summary>
         /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="BrokeredMessage"/> that contains serialized data.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The MemoryStream instance is managed by a BrokeredMessage.")]
         public Task<BrokeredMessage> Serialize(Envelope envelope)
         {
             if (envelope == null)

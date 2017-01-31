@@ -43,8 +43,7 @@
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            var properties = new AppProperties(app.Properties);
-            CancellationToken cancellationToken = properties.OnAppDisposing;
+            CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
 
             var processorFactory = new EventMessageProcessorFactory(
                 serializer,
@@ -53,6 +52,7 @@
                 cancellationToken);
 
             Start(eventProcessorHost, processorFactory);
+
             cancellationToken.Register(() => Stop(eventProcessorHost));
         }
 

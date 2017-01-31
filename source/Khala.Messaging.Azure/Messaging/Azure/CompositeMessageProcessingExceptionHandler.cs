@@ -19,8 +19,7 @@
                 throw new ArgumentNullException(nameof(handlers));
             }
 
-            var handlerList = new List
-                <IMessageProcessingExceptionHandler<TSource>>(handlers);
+            var handlerList = new List<IMessageProcessingExceptionHandler<TSource>>(handlers);
 
             for (int i = 0; i < handlerList.Count; i++)
             {
@@ -45,8 +44,7 @@
             return HandleException(context);
         }
 
-        private async Task HandleException(
-            MessageProcessingExceptionContext<TSource> context)
+        private async Task HandleException(MessageProcessingExceptionContext<TSource> context)
         {
             foreach (IMessageProcessingExceptionHandler<TSource> handler in _handlers)
             {

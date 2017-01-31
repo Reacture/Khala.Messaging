@@ -31,8 +31,7 @@
             return InvokeHandler(context);
         }
 
-        private async Task InvokeHandler(
-            MessageProcessingExceptionContext<TSource> context)
+        private async Task InvokeHandler(MessageProcessingExceptionContext<TSource> context)
         {
             try
             {

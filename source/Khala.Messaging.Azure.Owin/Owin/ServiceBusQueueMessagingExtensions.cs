@@ -15,8 +15,8 @@
             this IAppBuilder app,
             string connectionString,
             string queueName,
+            BrokeredMessageSerializer serializer,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer,
             IMessageProcessingExceptionHandler<BrokeredMessage> exceptionHandler)
         {
             if (app == null)
@@ -34,14 +34,14 @@
                 throw new ArgumentNullException(nameof(queueName));
             }
 
+            if (serializer == null)
+            {
+                throw new ArgumentNullException(nameof(serializer));
+            }
+
             if (messageHandler == null)
             {
                 throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
             }
 
             if (exceptionHandler == null)
@@ -54,8 +54,8 @@
             CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
 
             var processor = new BrokeredMessageProcessor(
+                serializer,
                 messageHandler,
-                messageSerializer,
                 exceptionHandler,
                 cancellationToken);
 
@@ -68,14 +68,14 @@
             this IAppBuilder app,
             string connectionString,
             string queueName,
-            IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer)
+            BrokeredMessageSerializer serializer,
+            IMessageHandler messageHandler)
         {
             app.UseServiceBusQueueMessageProcessor(
                 connectionString,
                 queueName,
+                serializer,
                 messageHandler,
-                messageSerializer,
                 _defaultExceptionHandler);
         }
     }

@@ -1,7 +1,6 @@
 ﻿namespace Khala.Messaging
 {
     using System;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Contains a message object and related properties.
@@ -33,7 +32,6 @@
         /// <param name="messageId">The identifier of the message.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="message">The message object.</param>
-        [JsonConstructor]
         public Envelope(Guid messageId, Guid? correlationId, object message)
         {
             if (messageId == Guid.Empty)

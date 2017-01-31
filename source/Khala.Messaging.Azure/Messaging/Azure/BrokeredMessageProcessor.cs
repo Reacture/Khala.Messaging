@@ -2,33 +2,31 @@
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
     public class BrokeredMessageProcessor
     {
+        private readonly BrokeredMessageSerializer _serializer;
         private readonly IMessageHandler _messageHandler;
-        private readonly IMessageSerializer _messageSerializer;
-        private readonly CancellationToken _cancellationToken;
         private readonly IMessageProcessingExceptionHandler<BrokeredMessage> _exceptionHandler;
+        private readonly CancellationToken _cancellationToken;
 
         public BrokeredMessageProcessor(
+            BrokeredMessageSerializer serializer,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer,
             IMessageProcessingExceptionHandler<BrokeredMessage> exceptionHandler,
             CancellationToken cancellationToken)
         {
+            if (serializer == null)
+            {
+                throw new ArgumentNullException(nameof(serializer));
+            }
+
             if (messageHandler == null)
             {
                 throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
             }
 
             if (exceptionHandler == null)
@@ -36,8 +34,8 @@
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
+            _serializer = serializer;
             _messageHandler = messageHandler;
-            _messageSerializer = messageSerializer;
             _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
@@ -54,59 +52,35 @@
 
         private async Task Process(BrokeredMessage brokeredMessage)
         {
-            byte[] body = null;
             Envelope envelope = null;
-
             try
             {
-                using (var stream = brokeredMessage.GetBody<Stream>())
-                using (var memory = new MemoryStream())
-                {
-                    await stream
-                        .CopyToAsync(memory, 81920, _cancellationToken)
-                        .ConfigureAwait(false);
-                    body = memory.ToArray();
-
-                    string value = Encoding.UTF8.GetString(body);
-                    envelope = (Envelope)_messageSerializer.Deserialize(value);
-
-                    await _messageHandler
-                        .Handle(envelope, _cancellationToken)
-                        .ConfigureAwait(false);
-                }
+                envelope = await _serializer.Deserialize(brokeredMessage).ConfigureAwait(false);
+                await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
+                await brokeredMessage.CompleteAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                var exceptionContext =
-                    body == null ?
-                    new MessageProcessingExceptionContext<BrokeredMessage>(
-                        brokeredMessage, exception)
-                        :
-                    envelope == null ?
-                    new MessageProcessingExceptionContext<BrokeredMessage>(
-                        brokeredMessage, body, exception)
-                        :
-                    new MessageProcessingExceptionContext<BrokeredMessage>(
-                        brokeredMessage, body, envelope, exception);
-
                 try
                 {
-                    await _exceptionHandler.Handle(exceptionContext);
-                }
-                catch (Exception exceptionHandlerError)
-                {
-                    Trace.TraceError(exceptionHandlerError.ToString());
-                }
+                    var exceptionContext = envelope == null
+                        ? new MessageProcessingExceptionContext<BrokeredMessage>(brokeredMessage, exception)
+                        : new MessageProcessingExceptionContext<BrokeredMessage>(brokeredMessage, envelope, exception);
 
-                if (exceptionContext.Handled)
+                    await _exceptionHandler.Handle(exceptionContext).ConfigureAwait(false);
+
+                    if (exceptionContext.Handled)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception unhandleable)
                 {
-                    return;
+                    Trace.TraceError(unhandleable.ToString());
                 }
 
                 throw;
             }
-
-            await brokeredMessage.CompleteAsync().ConfigureAwait(false);
         }
     }
 }

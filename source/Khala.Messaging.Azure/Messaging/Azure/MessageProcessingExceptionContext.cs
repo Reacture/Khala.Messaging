@@ -1,7 +1,6 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.Collections.Generic;
 
     public class MessageProcessingExceptionContext<TSource>
         where TSource : class
@@ -26,24 +25,9 @@
 
         public MessageProcessingExceptionContext(
             TSource source,
-            IReadOnlyList<byte> body,
-            Exception exception)
-            : this(source, exception)
-        {
-            if (body == null)
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            Body = body;
-        }
-
-        public MessageProcessingExceptionContext(
-            TSource source,
-            IReadOnlyList<byte> body,
             Envelope envelope,
             Exception exception)
-            : this(source, body, exception)
+            : this(source, exception)
         {
             if (envelope == null)
             {
@@ -54,8 +38,6 @@
         }
 
         public TSource Source { get; }
-
-        public IReadOnlyList<byte> Body { get; }
 
         public Envelope Envelope { get; }
 

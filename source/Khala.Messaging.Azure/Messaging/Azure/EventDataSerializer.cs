@@ -40,6 +40,7 @@
         /// </summary>
         /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="EventData"/> that contains serialized data.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Serialize() method returns EventData asynchronously.")]
         public Task<EventData> Serialize(Envelope envelope)
         {
             if (envelope == null)
