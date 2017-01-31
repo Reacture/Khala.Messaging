@@ -1,24 +1,28 @@
 ﻿namespace Khala.Messaging
 {
     using System;
-    using Newtonsoft.Json;
 
     public class Envelope
     {
         public Envelope(object message)
+            : this(Guid.NewGuid(), null, message)
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            MessageId = Guid.NewGuid();
-            CorrelationId = null;
-            Message = message;
         }
 
         public Envelope(Guid correlationId, object message)
+            : this(Guid.NewGuid(), correlationId, message)
         {
+        }
+
+        public Envelope(Guid messageId, Guid? correlationId, object message)
+        {
+            if (messageId == Guid.Empty)
+            {
+                throw new ArgumentException(
+                    $"{nameof(messageId)} cannot be empty.",
+                    nameof(messageId));
+            }
+
             if (correlationId == Guid.Empty)
             {
                 throw new ArgumentException(
@@ -26,14 +30,11 @@
                     nameof(correlationId));
             }
 
-            MessageId = Guid.NewGuid();
-            CorrelationId = correlationId;
-            Message = message;
-        }
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
-        [JsonConstructor]
-        public Envelope(Guid messageId, Guid? correlationId, object message)
-        {
             MessageId = messageId;
             CorrelationId = correlationId;
             Message = message;
