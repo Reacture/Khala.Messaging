@@ -8,26 +8,26 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public abstract class ExplicitMessageHandler : IMessageHandler
+    public abstract class MessageHandler : IMessageHandler
     {
-        private readonly IReadOnlyDictionary<Type, MessageHandler> _handlers;
+        private readonly IReadOnlyDictionary<Type, Handler> _handlers;
 
-        protected ExplicitMessageHandler()
+        protected MessageHandler()
         {
-            var handlers = new Dictionary<Type, MessageHandler>();
+            var handlers = new Dictionary<Type, Handler>();
 
             WireupHandlers(handlers);
 
-            _handlers = new ReadOnlyDictionary<Type, MessageHandler>(handlers);
+            _handlers = new ReadOnlyDictionary<Type, Handler>(handlers);
         }
 
-        private delegate Task MessageHandler(
+        private delegate Task Handler(
             Envelope envelope,
             CancellationToken cancellationToken);
 
-        private void WireupHandlers(Dictionary<Type, MessageHandler> handlers)
+        private void WireupHandlers(Dictionary<Type, Handler> handlers)
         {
-            MethodInfo factoryTemplate = typeof(ExplicitMessageHandler)
+            MethodInfo factoryTemplate = typeof(MessageHandler)
                 .GetTypeInfo()
                 .GetDeclaredMethod(nameof(GetMessageHandler));
 
@@ -43,12 +43,12 @@
                 Type[] typeArguments = t.GenericTypeArguments;
                 MethodInfo factory =
                     factoryTemplate.MakeGenericMethod(typeArguments);
-                var handler = (MessageHandler)factory.Invoke(this, null);
+                var handler = (Handler)factory.Invoke(this, null);
                 handlers[typeArguments[0]] = handler;
             }
         }
 
-        private MessageHandler GetMessageHandler<TMessage>()
+        private Handler GetMessageHandler<TMessage>()
             where TMessage : class
         {
             var handler = (IHandles<TMessage>)this;
@@ -77,7 +77,7 @@
         private async Task HandleMessage(
             Envelope envelope, CancellationToken cancellationToken)
         {
-            MessageHandler handler;
+            Handler handler;
             if (_handlers.TryGetValue(envelope.Message.GetType(), out handler))
             {
                 await handler.Invoke(envelope, cancellationToken);

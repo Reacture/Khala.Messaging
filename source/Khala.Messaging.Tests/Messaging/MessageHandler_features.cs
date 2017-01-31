@@ -7,18 +7,18 @@ using Xunit;
 
 namespace Khala.Messaging
 {
-    public class ExplicitMessageHandler_features
+    public class MessageHandler_features
     {
         [Fact]
         public void class_is_abstract()
         {
-            typeof(ExplicitMessageHandler).IsAbstract.Should().BeTrue();
+            typeof(Messaging.MessageHandler).IsAbstract.Should().BeTrue();
         }
 
         [Fact]
         public void sut_implements_IMessageHandler()
         {
-            var sut = Mock.Of<ExplicitMessageHandler>();
+            var sut = Mock.Of<Messaging.MessageHandler>();
             sut.Should().BeAssignableTo<IMessageHandler>();
         }
 
@@ -31,7 +31,7 @@ namespace Khala.Messaging
         }
 
         public abstract class MessageHandler :
-            ExplicitMessageHandler,
+            Messaging.MessageHandler,
             IHandles<FooMessage>,
             IHandles<BarMessage>
         {
