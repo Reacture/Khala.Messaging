@@ -171,6 +171,7 @@
     <Compile Include="Messaging\Azure\BrokeredMessageProcessor_features.cs" />
     <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_features.cs" />
+    <Compile Include="Messaging\Azure\EventDataSerializer_features.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_features.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessorFactory_features.cs" />
     <Compile Include="Messaging\Azure\EventMessageProcessor_features.cs" />

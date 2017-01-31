@@ -31,9 +31,8 @@
             Message = message;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "This constructor is used by json deserializing. Refer to the following URL for more information: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm")]
         [JsonConstructor]
-        private Envelope(Guid messageId, Guid? correlationId, object message)
+        public Envelope(Guid messageId, Guid? correlationId, object message)
         {
             MessageId = messageId;
             CorrelationId = correlationId;
