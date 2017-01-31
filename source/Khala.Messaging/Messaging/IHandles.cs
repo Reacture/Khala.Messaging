@@ -7,7 +7,7 @@
         where TMessage : class
     {
         Task Handle(
-            ReceivedEnvelope<TMessage> envelope,
+            Envelope<TMessage> envelope,
             CancellationToken cancellationToken);
     }
 }

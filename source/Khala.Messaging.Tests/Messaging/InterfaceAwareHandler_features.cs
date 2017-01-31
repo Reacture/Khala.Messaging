@@ -8,32 +8,32 @@ using Xunit;
 
 namespace Khala.Messaging
 {
-    public class MessageHandler_features
+    public class InterfaceAwareHandler_features
     {
         [Fact]
         public void class_is_abstract()
         {
-            typeof(Messaging.MessageHandler).IsAbstract.Should().BeTrue();
+            typeof(Messaging.InterfaceAwareHandler).IsAbstract.Should().BeTrue();
         }
 
         [Fact]
         public void sut_implements_IMessageHandler()
         {
-            var sut = Mock.Of<Messaging.MessageHandler>();
+            var sut = Mock.Of<Messaging.InterfaceAwareHandler>();
             sut.Should().BeAssignableTo<IMessageHandler>();
         }
 
         public abstract class BlogEventHandler :
-            MessageHandler,
+            InterfaceAwareHandler,
             IHandles<BlogPostCreated>,
             IHandles<CommentedOnBlogPost>
         {
             public abstract Task Handle(
-                ReceivedEnvelope<BlogPostCreated> envelope,
+                Envelope<BlogPostCreated> envelope,
                 CancellationToken cancellationToken);
 
             public abstract Task Handle(
-                ReceivedEnvelope<CommentedOnBlogPost> envelope,
+                Envelope<CommentedOnBlogPost> envelope,
                 CancellationToken cancellationToken);
         }
 
@@ -51,7 +51,7 @@ namespace Khala.Messaging
             Mock.Get(sut).Verify(
                 x =>
                 x.Handle(
-                    It.Is<ReceivedEnvelope<BlogPostCreated>>(
+                    It.Is<Envelope<BlogPostCreated>>(
                         p =>
                         p.MessageId == envelope.MessageId &&
                         p.CorrelationId == correlationId &&

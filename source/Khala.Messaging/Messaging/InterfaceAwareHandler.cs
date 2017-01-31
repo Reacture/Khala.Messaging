@@ -8,11 +8,11 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public abstract class MessageHandler : IMessageHandler
+    public abstract class InterfaceAwareHandler : IMessageHandler
     {
         private readonly IReadOnlyDictionary<Type, Handler> _handlers;
 
-        protected MessageHandler()
+        protected InterfaceAwareHandler()
         {
             var handlers = new Dictionary<Type, Handler>();
 
@@ -27,7 +27,7 @@
 
         private void WireupHandlers(Dictionary<Type, Handler> handlers)
         {
-            MethodInfo factoryTemplate = typeof(MessageHandler)
+            MethodInfo factoryTemplate = typeof(InterfaceAwareHandler)
                 .GetTypeInfo()
                 .GetDeclaredMethod(nameof(GetMessageHandler));
 
@@ -55,7 +55,7 @@
             return (envelope, cancellationToken) =>
             {
                 return handler.Handle(
-                    new ReceivedEnvelope<TMessage>(
+                    new Envelope<TMessage>(
                         envelope.MessageId,
                         envelope.CorrelationId,
                         (TMessage)envelope.Message),

@@ -3,36 +3,18 @@
     using System;
 
     /// <summary>
-    /// Contains a message object and related properties.
+    /// Contains a strongly-typed message object and related properties. Generally this class is used by <see cref="IMessageHandler"/> implementors.
     /// </summary>
-    public sealed class Envelope
+    /// <typeparam name="TMessage">The type of the message.</typeparam>
+    public sealed class Envelope<TMessage>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the message object.
-        /// </summary>
-        /// <param name="message">The message object.</param>
-        public Envelope(object message)
-            : this(Guid.NewGuid(), null, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the correlation and the message object.
-        /// </summary>
-        /// <param name="correlationId">The identifier of the correlation.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(Guid correlationId, object message)
-            : this(Guid.NewGuid(), correlationId, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the correlation and the message object.
+        /// Initializes a new instance of the <see cref="Envelope{TMessage}"/> class.
         /// </summary>
         /// <param name="messageId">The identifier of the message.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(Guid messageId, Guid? correlationId, object message)
+        /// <param name="message">The strongly-typed message object.</param>
+        public Envelope(Guid messageId, Guid? correlationId, TMessage message)
         {
             if (messageId == Guid.Empty)
             {
@@ -80,6 +62,6 @@
         /// <value>
         /// The message object.
         /// </value>
-        public object Message { get; }
+        public TMessage Message { get; }
     }
 }
