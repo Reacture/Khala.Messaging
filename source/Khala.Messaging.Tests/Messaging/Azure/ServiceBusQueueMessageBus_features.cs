@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FakeBlogEngine;
@@ -10,6 +8,7 @@ using FluentAssertions;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
+using Ploeh.AutoFixture.AutoMoq;
 using Ploeh.AutoFixture.Idioms;
 
 namespace Khala.Messaging.Azure
@@ -24,7 +23,7 @@ namespace Khala.Messaging.Azure
         private static string queueName;
         private static QueueClient queueClient;
         private IFixture fixture;
-        private IMessageSerializer serializer;
+        private BrokeredMessageSerializer serializer;
         private ServiceBusQueueMessageBus sut;
 
         public TestContext TestContext { get; set; }
@@ -85,13 +84,13 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
 ".Trim());
             }
 
-            fixture = new Fixture();
-            serializer = new JsonMessageSerializer();
+            fixture = new Fixture().Customize(new AutoMoqCustomization());
+            serializer = new BrokeredMessageSerializer();
 
             fixture.Inject(queueClient);
             fixture.Inject(serializer);
 
-            sut = new ServiceBusQueueMessageBus(queueClient, serializer);
+            sut = new ServiceBusQueueMessageBus(serializer, queueClient);
         }
 
         [TestMethod]
@@ -104,15 +103,8 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
         [TestMethod]
         public void SendBatch_has_guard_clause_for_null_message()
         {
-            var envelopes = new[]
-            {
-                fixture.Create<Envelope>(),
-                null,
-                fixture.Create<Envelope>()
-            };
-
+            var envelopes = new Envelope[] { null };
             Action action = () => sut.SendBatch(envelopes, CancellationToken.None);
-
             action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
         }
 
@@ -132,71 +124,12 @@ Service Bus Queue 연결 정보가 설정되지 않았습니다. ServiceBusQueue
                 // Assert
                 received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
                 received.Should().NotBeNull();
-                using (var stream = received.GetBody<Stream>())
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
-                {
-                    string value = await reader.ReadToEndAsync();
-                    object actual = serializer.Deserialize(value);
-                    actual.Should().BeOfType<Envelope>();
-                    actual.As<Envelope>().Message.Should().BeOfType<BlogPostCreated>();
-                    actual.ShouldBeEquivalentTo(envelope);
-                }
+                Envelope actual = await serializer.Deserialize(received);
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
                 // Cleanup
-                received?.Complete();
-            }
-        }
-
-        [TestMethod]
-        public async Task Send_sets_PartitionKey_correctly()
-        {
-            var message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(message);
-
-            await sut.Send(envelope, CancellationToken.None);
-
-            BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
-            received.PartitionKey.Should().Be(message.PostId.ToString());
-            await received.CompleteAsync();
-        }
-
-        [TestMethod]
-        public async Task Send_sets_MessageId_correctly()
-        {
-            var message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(message);
-
-            await sut.Send(envelope, CancellationToken.None);
-
-            BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
-            try
-            {
-                received.MessageId.Should().Be($"{envelope.MessageId:n}");
-            }
-            finally
-            {
-                received?.Complete();
-            }
-        }
-
-        [TestMethod]
-        public async Task Send_sets_CorrelationId_correctly()
-        {
-            var message = fixture.Create<BlogPostCreated>();
-            var correlationId = Guid.NewGuid();
-            var envelope = new Envelope(correlationId, message);
-
-            await sut.Send(envelope, CancellationToken.None);
-
-            BrokeredMessage received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
-            try
-            {
-                received.CorrelationId.Should().Be($"{correlationId:n}");
-            }
-            finally
-            {
                 received?.Complete();
             }
         }

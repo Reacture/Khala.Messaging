@@ -55,7 +55,9 @@
             var messageId = envelope.MessageId.ToString("n");
             var correlationId = envelope.CorrelationId?.ToString("n");
 
-            return Task.FromResult(new BrokeredMessage(new MemoryStream(body))
+            return Task.FromResult(new BrokeredMessage(
+                new MemoryStream(body),
+                ownsStream: true)
             {
                 MessageId = messageId,
                 CorrelationId = correlationId,

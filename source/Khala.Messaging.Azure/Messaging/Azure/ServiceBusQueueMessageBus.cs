@@ -2,32 +2,43 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
     public class ServiceBusQueueMessageBus : IMessageBus
     {
+        private readonly BrokeredMessageSerializer _serializer;
         private readonly QueueClient _queueClient;
-        private readonly IMessageSerializer _serializer;
 
         public ServiceBusQueueMessageBus(
-            QueueClient queueClient, IMessageSerializer serializer)
+            BrokeredMessageSerializer serializer,
+            QueueClient queueClient)
         {
-            if (queueClient == null)
-            {
-                throw new ArgumentNullException(nameof(queueClient));
-            }
-
             if (serializer == null)
             {
                 throw new ArgumentNullException(nameof(serializer));
             }
 
-            _queueClient = queueClient;
+            if (queueClient == null)
+            {
+                throw new ArgumentNullException(nameof(queueClient));
+            }
+
             _serializer = serializer;
+            _queueClient = queueClient;
+        }
+
+        public ServiceBusQueueMessageBus(
+            IMessageSerializer messageSerializer,
+            QueueClient queueClient)
+            : this(new BrokeredMessageSerializer(messageSerializer), queueClient)
+        {
+        }
+
+        public ServiceBusQueueMessageBus(QueueClient queueClient)
+            : this(new BrokeredMessageSerializer(), queueClient)
+        {
         }
 
         public Task Send(
@@ -39,8 +50,13 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            BrokeredMessage brokeredMessage = GetBrokeredMessage(envelope);
-            return _queueClient.SendAsync(brokeredMessage);
+            return SendMessage(envelope);
+        }
+
+        private async Task SendMessage(Envelope envelope)
+        {
+            BrokeredMessage brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
+            await _queueClient.SendAsync(brokeredMessage).ConfigureAwait(false);
         }
 
         public Task SendBatch(
@@ -52,7 +68,7 @@
                 throw new ArgumentNullException(nameof(envelopes));
             }
 
-            var brokeredMessages = new List<BrokeredMessage>();
+            var envelopeList = new List<Envelope>();
 
             foreach (Envelope envelope in envelopes)
             {
@@ -63,32 +79,23 @@
                         nameof(envelopes));
                 }
 
-                brokeredMessages.Add(GetBrokeredMessage(envelope));
+                envelopeList.Add(envelope);
             }
 
-            return _queueClient.SendBatchAsync(brokeredMessages);
+            return SendMessages(envelopeList);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "GetBrokeredMessage() returns an instance of BrokeredMessage.")]
-        private BrokeredMessage GetBrokeredMessage(Envelope envelope)
+        private async Task SendMessages(IEnumerable<Envelope> envelopes)
         {
-            string data = _serializer.Serialize(envelope);
-            byte[] bytes = Encoding.UTF8.GetBytes(data);
-            var brokeredMessage = new BrokeredMessage(
-                messageBodyStream: new MemoryStream(bytes),
-                ownsStream: true)
-            {
-                MessageId = envelope.MessageId.ToString("n"),
-                CorrelationId = envelope.CorrelationId?.ToString("n")
-            };
+            var brokeredMessages = new List<BrokeredMessage>();
 
-            var partitioned = envelope.Message as IPartitioned;
-            if (partitioned != null)
+            foreach (Envelope envelope in envelopes)
             {
-                brokeredMessage.PartitionKey = partitioned.PartitionKey;
+                BrokeredMessage brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
+                brokeredMessages.Add(brokeredMessage);
             }
 
-            return brokeredMessage;
+            await _queueClient.SendBatchAsync(brokeredMessages).ConfigureAwait(false);
         }
     }
 }
