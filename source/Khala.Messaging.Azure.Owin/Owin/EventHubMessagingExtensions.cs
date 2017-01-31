@@ -14,8 +14,8 @@
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
+            EventDataSerializer serializer,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer,
             IMessageProcessingExceptionHandler<EventData> exceptionHandler)
         {
             if (app == null)
@@ -28,14 +28,14 @@
                 throw new ArgumentNullException(nameof(eventProcessorHost));
             }
 
+            if (serializer == null)
+            {
+                throw new ArgumentNullException(nameof(serializer));
+            }
+
             if (messageHandler == null)
             {
                 throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
             }
 
             if (exceptionHandler == null)
@@ -47,8 +47,8 @@
             CancellationToken cancellationToken = properties.OnAppDisposing;
 
             var processorFactory = new EventMessageProcessorFactory(
+                serializer,
                 messageHandler,
-                messageSerializer,
                 exceptionHandler,
                 cancellationToken);
 
@@ -59,30 +59,22 @@
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
-            IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer)
+            EventDataSerializer serializer,
+            IMessageHandler messageHandler)
         {
             app.UseEventMessageProcessor(
                 eventProcessorHost,
+                serializer,
                 messageHandler,
-                messageSerializer,
                 _defaultExceptionHandler);
         }
 
         private static void Start(
             EventProcessorHost eventProcessorHost,
-            EventMessageProcessorFactory processorFactory)
-        {
-            eventProcessorHost
-                .RegisterEventProcessorFactoryAsync(processorFactory)
-                .Wait();
-        }
+            EventMessageProcessorFactory processorFactory) =>
+            eventProcessorHost.RegisterEventProcessorFactoryAsync(processorFactory).Wait();
 
-        private static void Stop(EventProcessorHost eventProcessorHost)
-        {
-            eventProcessorHost
-                .UnregisterEventProcessorAsync()
-                .Wait();
-        }
+        private static void Stop(EventProcessorHost eventProcessorHost) =>
+            eventProcessorHost.UnregisterEventProcessorAsync().Wait();
     }
 }

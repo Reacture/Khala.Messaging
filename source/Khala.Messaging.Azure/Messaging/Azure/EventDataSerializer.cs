@@ -16,6 +16,14 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="EventDataSerializer"/> class.
         /// </summary>
+        public EventDataSerializer()
+            : this(new JsonMessageSerializer())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class with an <see cref="IMessageSerializer"/>.
+        /// </summary>
         /// <param name="messageSerializer"><see cref="IMessageSerializer"/> to serialize enveloped messages.</param>
         public EventDataSerializer(IMessageSerializer messageSerializer)
         {
@@ -94,7 +102,7 @@
             using (Stream stream = eventData.GetBodyStream())
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
-                string value = await reader.ReadToEndAsync();
+                string value = await reader.ReadToEndAsync().ConfigureAwait(false);
                 object message = _messageSerializer.Deserialize(value);
 
                 return new Envelope(

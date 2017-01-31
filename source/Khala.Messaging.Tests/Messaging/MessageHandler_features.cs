@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FakeBlogEngine;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -22,34 +23,26 @@ namespace Khala.Messaging
             sut.Should().BeAssignableTo<IMessageHandler>();
         }
 
-        public class FooMessage
-        {
-        }
-
-        public class BarMessage
-        {
-        }
-
-        public abstract class MessageHandler :
-            Messaging.MessageHandler,
-            IHandles<FooMessage>,
-            IHandles<BarMessage>
+        public abstract class BlogEventHandler :
+            MessageHandler,
+            IHandles<BlogPostCreated>,
+            IHandles<CommentedOnBlogPost>
         {
             public abstract Task Handle(
-                ReceivedEnvelope<FooMessage> envelope,
+                ReceivedEnvelope<BlogPostCreated> envelope,
                 CancellationToken cancellationToken);
 
             public abstract Task Handle(
-                ReceivedEnvelope<BarMessage> envelope,
+                ReceivedEnvelope<CommentedOnBlogPost> envelope,
                 CancellationToken cancellationToken);
         }
 
         [Fact]
         public async Task sut_invokes_correct_handler_method()
         {
-            var mock = new Mock<MessageHandler> { CallBase = true };
-            MessageHandler sut = mock.Object;
-            object message = new FooMessage();
+            var mock = new Mock<BlogEventHandler> { CallBase = true };
+            BlogEventHandler sut = mock.Object;
+            object message = new BlogPostCreated();
             Guid correlationId = Guid.NewGuid();
             var envelope = new Envelope(correlationId, message);
 
@@ -58,7 +51,7 @@ namespace Khala.Messaging
             Mock.Get(sut).Verify(
                 x =>
                 x.Handle(
-                    It.Is<ReceivedEnvelope<FooMessage>>(
+                    It.Is<ReceivedEnvelope<BlogPostCreated>>(
                         p =>
                         p.MessageId == envelope.MessageId &&
                         p.CorrelationId == correlationId &&

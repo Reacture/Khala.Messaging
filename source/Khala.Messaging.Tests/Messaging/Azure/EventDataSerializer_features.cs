@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using FakeBlogEngine;
 using FluentAssertions;
 using Microsoft.ServiceBus.Messaging;
 using Ploeh.AutoFixture;
@@ -31,22 +32,10 @@ namespace Khala.Messaging.Azure
             assertion.Verify(typeof(EventDataSerializer));
         }
 
-        public class FakeMessage
-        {
-            public Guid EntityId { get; set; }
-
-            public string Property { get; set; }
-        }
-
-        public class PartitionedFakeMessage : FakeMessage, IPartitioned
-        {
-            string IPartitioned.PartitionKey => EntityId.ToString();
-        }
-
         [Fact]
         public async Task Serialize_serializes_message_correctly()
         {
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = await sut.Serialize(envelope);
@@ -56,7 +45,7 @@ namespace Khala.Messaging.Azure
             {
                 string value = reader.ReadToEnd();
                 object actual = messageSerializer.Deserialize(value);
-                actual.Should().BeOfType<FakeMessage>();
+                actual.Should().BeOfType<BlogPostCreated>();
                 actual.ShouldBeEquivalentTo(message);
             }
         }
@@ -64,7 +53,7 @@ namespace Khala.Messaging.Azure
         [Fact]
         public async Task Serialize_sets_MessageId_property_as_string_correctly()
         {
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = await sut.Serialize(envelope);
@@ -80,7 +69,7 @@ namespace Khala.Messaging.Azure
         public async Task Serialize_sets_CorrelationId_property_as_string_correctly()
         {
             var correlationId = Guid.NewGuid();
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(correlationId, message);
 
             EventData eventData = await sut.Serialize(envelope);
@@ -95,7 +84,7 @@ namespace Khala.Messaging.Azure
         [Fact]
         public async Task Serialize_sets_PartitionKey_correctly_if_message_is_IPartitioned()
         {
-            IPartitioned message = fixture.Create<PartitionedFakeMessage>();
+            IPartitioned message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = await sut.Serialize(envelope);
             eventData.PartitionKey.Should().Be(message.PartitionKey);
@@ -105,7 +94,7 @@ namespace Khala.Messaging.Azure
         public async Task Deserialize_deserializes_envelope_correctly()
         {
             var correlationId = Guid.NewGuid();
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(correlationId, message);
             EventData eventData = await sut.Serialize(envelope);
 
@@ -118,7 +107,7 @@ namespace Khala.Messaging.Azure
         [Fact]
         public async Task Deserialize_creates_new_MessageId_if_property_not_set()
         {
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = await sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Envelope.MessageId");
@@ -132,7 +121,7 @@ namespace Khala.Messaging.Azure
         [Fact]
         public async Task Deserialize_not_fails_even_if_CorrelationId_property_not_set()
         {
-            var message = fixture.Create<FakeMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = await sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Envelope.CorrelationId");

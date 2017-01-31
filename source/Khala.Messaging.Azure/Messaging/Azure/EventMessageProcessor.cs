@@ -2,48 +2,36 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
     public class EventMessageProcessor : IEventProcessor
     {
+        private readonly EventDataSerializer _serializer;
         private readonly IMessageHandler _messageHandler;
-        private readonly IMessageSerializer _messageSerializer;
         private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         internal EventMessageProcessor(
+            EventDataSerializer serializer,
             IMessageHandler messageHandler,
-            IMessageSerializer messageSerializer,
             IMessageProcessingExceptionHandler<EventData> exceptionHandler,
             CancellationToken cancellationToken)
         {
+            _serializer = serializer;
             _messageHandler = messageHandler;
-            _messageSerializer = messageSerializer;
             _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
 
-        public Task CloseAsync(PartitionContext context, CloseReason reason)
+        Task IEventProcessor.CloseAsync(PartitionContext context, CloseReason reason)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             return Task.FromResult(true);
         }
 
-        public Task OpenAsync(PartitionContext context)
+        Task IEventProcessor.OpenAsync(PartitionContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             return Task.FromResult(true);
         }
 
@@ -86,51 +74,8 @@
         private async Task ProcessEvent(
             PartitionContext context, EventData eventData)
         {
-            byte[] body = null;
-            Envelope envelope = null;
-
-            try
-            {
-                body = eventData.GetBytes();
-
-                string value = Encoding.UTF8.GetString(body);
-                envelope = (Envelope)_messageSerializer.Deserialize(value);
-
-                await _messageHandler
-                    .Handle(envelope, _cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                var exceptionContext =
-                    body == null ?
-                    new MessageProcessingExceptionContext<EventData>(
-                        eventData, exception)
-                        :
-                    envelope == null ?
-                    new MessageProcessingExceptionContext<EventData>(
-                        eventData, body, exception)
-                        :
-                    new MessageProcessingExceptionContext<EventData>(
-                        eventData, body, envelope, exception);
-
-                try
-                {
-                    await _exceptionHandler.Handle(exceptionContext);
-                }
-                catch (Exception exceptionHandlerError)
-                {
-                    Trace.TraceError(exceptionHandlerError.ToString());
-                }
-
-                if (exceptionContext.Handled)
-                {
-                    return;
-                }
-
-                throw;
-            }
-
+            Envelope envelope = await _serializer.Deserialize(eventData).ConfigureAwait(false);
+            await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
             await context.CheckpointAsync(eventData).ConfigureAwait(false);
         }
     }

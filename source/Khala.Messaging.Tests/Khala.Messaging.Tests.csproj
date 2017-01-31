@@ -168,13 +168,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
     <Compile Include="Messaging\Azure\BrokeredMessageProcessor_features.cs" />
     <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_features.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_features.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_features.cs" />
-    <Compile Include="Messaging\Azure\EventMessageProcessorFactory_features.cs" />
-    <Compile Include="Messaging\Azure\EventMessageProcessor_features.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_features.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_features.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
@@ -184,6 +183,7 @@
     <Compile Include="Messaging\MessagingExtensions_features.cs" />
     <Compile Include="Owin\EventHubMessagingExtensions_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FakeBlogEngine\BlogPostCreated.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

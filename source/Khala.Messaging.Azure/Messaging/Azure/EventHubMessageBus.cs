@@ -8,27 +8,38 @@
 
     public class EventHubMessageBus : IMessageBus
     {
-        private readonly EventHubClient _eventHubClient;
         private readonly EventDataSerializer _serializer;
+        private readonly EventHubClient _eventHubClient;
 
         public EventHubMessageBus(
-            EventHubClient eventHubClient, IMessageSerializer messageSerializer)
+            EventDataSerializer serializer,
+            EventHubClient eventHubClient)
         {
+            if (serializer == null)
+            {
+                throw new ArgumentNullException(nameof(serializer));
+            }
+
             if (eventHubClient == null)
             {
                 throw new ArgumentNullException(nameof(eventHubClient));
             }
 
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
-            }
-
             _eventHubClient = eventHubClient;
-            _serializer = new EventDataSerializer(messageSerializer);
+            _serializer = serializer;
         }
 
-        public EventDataSerializer Serializer => _serializer;
+        public EventHubMessageBus(
+            IMessageSerializer messageSerializer,
+            EventHubClient eventHubClient)
+            : this(new EventDataSerializer(messageSerializer), eventHubClient)
+        {
+        }
+
+        public EventHubMessageBus(EventHubClient eventHubClient)
+            : this(new EventDataSerializer(), eventHubClient)
+        {
+        }
 
         public Task Send(
             Envelope envelope,
@@ -44,8 +55,8 @@
 
         private async Task SendMessage(Envelope envelope)
         {
-            EventData eventData = await _serializer.Serialize(envelope);
-            await _eventHubClient.SendAsync(eventData);
+            EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
+            await _eventHubClient.SendAsync(eventData).ConfigureAwait(false);
         }
 
         public Task SendBatch(
@@ -80,10 +91,11 @@
 
             foreach (Envelope envelope in envelopes)
             {
-                eventDataList.Add(await _serializer.Serialize(envelope));
+                EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
+                eventDataList.Add(eventData);
             }
 
-            await _eventHubClient.SendBatchAsync(eventDataList);
+            await _eventHubClient.SendBatchAsync(eventDataList).ConfigureAwait(false);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FakeBlogEngine;
 using FluentAssertions;
 using Khala.Messaging;
 using Khala.Messaging.Azure;
@@ -38,16 +39,14 @@ namespace Khala.Owin
             eventHubConnectionString = (string)TestContext.Properties[EventHubConnectionStringPropertyName];
             eventHubPath = (string)TestContext.Properties[EventHubPathPropertyName];
             storageConnectionString = (string)TestContext.Properties[StorageConnectionStringPropertyName];
-            consumerGroupName =
-                (string)TestContext.Properties[ConsumerGroupPropertyName] ??
-                EventHubConsumerGroup.DefaultGroupName;
+            consumerGroupName = (string)TestContext.Properties[ConsumerGroupPropertyName] ?? EventHubConsumerGroup.DefaultGroupName;
 
             if (string.IsNullOrWhiteSpace(eventHubConnectionString) ||
                 string.IsNullOrWhiteSpace(eventHubPath) ||
                 string.IsNullOrWhiteSpace(storageConnectionString))
             {
                 Assert.Inconclusive($@"
-EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessagingExtensions 클래스에 대한 테스트를 실행하려면 *.runsettings 파일에 다음과 같이 연결 정보를 설정합니다.
+EventProcessorHost connection information is not set. To run tests on the EventHubMessagingExtensions class, you must set the connection information in the *.runsettings file as follows:
 
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
@@ -59,28 +58,17 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
   </TestRunParameters>  
 </RunSettings>
 
-참고문서
+References
 - https://msdn.microsoft.com/en-us/library/jj635153.aspx
 ".Trim());
             }
-        }
-
-        public class FooMessage
-        {
-            public Guid Prop1 { get; set; }
-
-            public int Prop2 { get; set; }
-
-            public double Prop3 { get; set; }
-
-            public string Prop4 { get; set; }
         }
 
         [TestMethod]
         public async Task UseEventMessageProcessor_registers_EventMessageProcessorFactory_correctly()
         {
             // Arrange
-            var message = fixture.Create<FooMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             Envelope handled = null;
@@ -91,25 +79,20 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
                 .Returns(Task.FromResult(true));
 
             var messageSerializer = new JsonMessageSerializer();
-
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(eventHubConnectionString, eventHubPath),
-                messageSerializer);
-
-            var eventProcessorHost = new EventProcessorHost(
-                eventHubPath,
-                consumerGroupName,
-                eventHubConnectionString,
-                storageConnectionString);
+            var eventHubClient = EventHubClient.CreateFromConnectionString(eventHubConnectionString, eventHubPath);
+            var messageBus = new EventHubMessageBus(messageSerializer, eventHubClient);
 
             CancellationToken cancellationToken;
             using (TestServer server = TestServer.Create(app =>
             {
                 app.UseEventMessageProcessor(
-                    eventProcessorHost,
-                    messageHandler,
-                    messageSerializer,
-                    Mock.Of<IMessageProcessingExceptionHandler<EventData>>());
+                    new EventProcessorHost(
+                        eventHubPath,
+                        consumerGroupName,
+                        eventHubConnectionString,
+                        storageConnectionString),
+                    new EventDataSerializer(messageSerializer),
+                    messageHandler);
                 var properties = new AppProperties(app.Properties);
                 cancellationToken = properties.OnAppDisposing;
             }))
@@ -122,12 +105,8 @@ EventProcessorHost 연결 정보가 설정되지 않았습니다. ReactiveMessag
                 }
 
                 // Assert
-                Mock.Get(messageHandler).Verify(
-                    x => x.Handle(It.IsAny<Envelope>(), cancellationToken),
-                    Times.Once());
-                handled.Should().NotBeNull();
-                handled.Message.Should().BeOfType<FooMessage>();
-                handled.ShouldBeEquivalentTo(envelope);
+                Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken), Times.Once());
+                handled.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FakeBlogEngine;
 using FluentAssertions;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,6 +22,7 @@ namespace Khala.Messaging.Azure
         private static EventHubClient eventHubClient;
         private static string consumerGroupName;
         private IFixture fixture;
+        private EventDataSerializer serializer;
         private EventHubMessageBus sut;
 
         public TestContext TestContext { get; set; }
@@ -65,7 +66,8 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
 
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             fixture.Inject(eventHubClient);
-            sut = new EventHubMessageBus(eventHubClient, new JsonMessageSerializer());
+            serializer = new EventDataSerializer();
+            sut = new EventHubMessageBus(serializer, eventHubClient);
         }
 
         [TestMethod]
@@ -84,20 +86,11 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 .Where(x => x.ParamName == "envelopes");
         }
 
-        public class FooMessage : IPartitioned
-        {
-            public string SourceId { get; set; }
-
-            public int Value { get; set; }
-
-            string IPartitioned.PartitionKey => SourceId;
-        }
-
         [TestMethod]
         public async Task Send_sends_message_correctly()
         {
             // Arrange
-            var message = fixture.Create<FooMessage>();
+            var message = fixture.Create<BlogPostCreated>();
             var correlationId = Guid.NewGuid();
             var envelope = new Envelope(correlationId, message);
 
@@ -121,57 +114,9 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                 }
 
                 eventData.Should().NotBeNull();
-                Envelope actual = await sut.Serializer.Deserialize(eventData);
+                Envelope actual = await serializer.Deserialize(eventData);
                 actual.ShouldBeEquivalentTo(
                     envelope, opts => opts.RespectingRuntimeTypes());
-            }
-            finally
-            {
-                // Cleanup
-                receivers.ForEach(r => r.Close());
-            }
-        }
-
-        [TestMethod]
-        public async Task SendBatch_sends_messages_correctly()
-        {
-            // Arrange
-            var sourceId = fixture.Create<string>();
-            List<Envelope> envelopes = fixture
-                .Build<FooMessage>()
-                .With(x => x.SourceId, sourceId)
-                .CreateMany()
-                .Select(m => new Envelope(m))
-                .ToList();
-
-            List<EventHubReceiver> receivers = await GetReceivers();
-
-            try
-            {
-                // Act
-                await sut.SendBatch(envelopes, CancellationToken.None);
-
-                // Assert
-                var waitTime = TimeSpan.FromSeconds(10);
-                var eventDataList = new List<EventData>();
-                foreach (EventHubReceiver receiver in receivers)
-                {
-                    IEnumerable<EventData> eventData = await
-                        receiver.ReceiveAsync(envelopes.Count, waitTime);
-                    if (eventData?.Any() ?? false)
-                    {
-                        eventDataList.AddRange(eventData);
-                        break;
-                    }
-                }
-
-                var actual = new List<Envelope>();
-                foreach (EventData eventData in eventDataList)
-                {
-                    actual.Add(await sut.Serializer.Deserialize(eventData));
-                }
-                actual.ShouldAllBeEquivalentTo(
-                    envelopes, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -184,13 +129,6 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
         {
             EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
             EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            return await GetReceivers(consumerGroup, runtimeInfo);
-        }
-
-        private async Task<List<EventHubReceiver>> GetReceivers(
-            EventHubConsumerGroup consumerGroup,
-            EventHubRuntimeInformation runtimeInfo)
-        {
             var receivers = new List<EventHubReceiver>();
             foreach (string partition in runtimeInfo.PartitionIds)
             {
@@ -200,7 +138,6 @@ Event Hub 연결 정보가 설정되지 않았습니다. EventHubMessageBus 클�
                         EventHubConsumerGroup.EndOfStream);
                 receivers.Add(receiver);
             }
-
             return receivers;
         }
     }
