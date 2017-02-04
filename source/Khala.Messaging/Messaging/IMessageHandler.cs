@@ -3,8 +3,17 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents a message handler.
+    /// </summary>
     public interface IMessageHandler
     {
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for a task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         Task Handle(Envelope envelope, CancellationToken cancellationToken);
     }
 }
