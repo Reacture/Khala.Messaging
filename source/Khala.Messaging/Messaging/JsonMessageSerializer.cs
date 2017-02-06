@@ -9,16 +9,25 @@
         private readonly JsonSerializer _serializer;
 
         public JsonMessageSerializer()
+            : this(new JsonSerializerSettings())
         {
-            _serializer = JsonSerializer.Create(new JsonSerializerSettings
+        }
+
+        public JsonMessageSerializer(JsonSerializerSettings settings)
+        {
+            if (settings == null)
             {
-                TypeNameHandling = TypeNameHandling.Objects,
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            settings.TypeNameHandling = TypeNameHandling.Objects;
 #if DEBUG
-                Formatting = Formatting.Indented
+            settings.Formatting = Formatting.Indented;
 #else
-                Formatting = Formatting.None
+            settings.Formatting = Formatting.None;
 #endif
-            });
+
+            _serializer = JsonSerializer.Create(settings);
         }
 
         public string Serialize(object message)
