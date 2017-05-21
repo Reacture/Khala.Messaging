@@ -1,14 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Xunit;
 
 namespace Khala.Messaging
 {
+    [TestClass]
     public class MessagingExtensions_features
     {
-        [Fact]
+        [TestMethod]
         public void Send_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);
@@ -23,7 +24,7 @@ namespace Khala.Messaging
             result.Should().BeSameAs(task);
         }
 
-        [Fact]
+        [TestMethod]
         public void SendBatch_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);
@@ -38,7 +39,7 @@ namespace Khala.Messaging
             result.Should().BeSameAs(task);
         }
 
-        [Fact]
+        [TestMethod]
         public void Handle_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);

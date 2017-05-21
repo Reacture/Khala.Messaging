@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using FakeBlogEngine;
 using FluentAssertions;
 using Microsoft.ServiceBus.Messaging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.AutoMoq;
 using Ploeh.AutoFixture.Idioms;
-using Xunit;
 
 namespace Khala.Messaging.Azure
 {
+    [TestClass]
     public class BrokeredMessageSerializer_features
     {
         private readonly IFixture fixture;
@@ -25,7 +26,7 @@ namespace Khala.Messaging.Azure
             sut = new BrokeredMessageSerializer(messageSerializer);
         }
 
-        [Fact]
+        [TestMethod]
         public void class_has_guard_clauses()
         {
             fixture.OmitAutoProperties = true;
@@ -33,7 +34,7 @@ namespace Khala.Messaging.Azure
             assertion.Verify(typeof(BrokeredMessageSerializer));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Serialize_serializes_message_correctly()
         {
             var message = fixture.Create<BlogPostCreated>();
@@ -51,7 +52,7 @@ namespace Khala.Messaging.Azure
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Serialize_sets_MessageId_property_as_string_correctly()
         {
             var message = fixture.Create<BlogPostCreated>();
@@ -67,7 +68,7 @@ namespace Khala.Messaging.Azure
             Guid.Parse((string)actual).Should().Be(envelope.MessageId);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Serialize_sets_CorrelationId_property_as_string_correctly()
         {
             var correlationId = Guid.NewGuid();
@@ -84,7 +85,7 @@ namespace Khala.Messaging.Azure
             Guid.Parse((string)actual).Should().Be(correlationId);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Serialize_sets_PartitionKey_correctly_if_message_is_IPartitioned()
         {
             IPartitioned message = fixture.Create<BlogPostCreated>();
@@ -93,7 +94,7 @@ namespace Khala.Messaging.Azure
             brokeredMessage.PartitionKey.Should().Be(message.PartitionKey);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Deserialize_deserializes_envelope_correctly()
         {
             var correlationId = Guid.NewGuid();
@@ -107,7 +108,7 @@ namespace Khala.Messaging.Azure
                 envelope, opts => opts.RespectingRuntimeTypes());
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Deserialize_creates_new_MessageId_if_property_not_set()
         {
             var message = fixture.Create<BlogPostCreated>();
@@ -121,7 +122,7 @@ namespace Khala.Messaging.Azure
             (await sut.Deserialize(brokeredMessage)).MessageId.Should().NotBe(actual.MessageId);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task Deserialize_not_fails_even_if_CorrelationId_property_not_set()
         {
             var message = fixture.Create<BlogPostCreated>();

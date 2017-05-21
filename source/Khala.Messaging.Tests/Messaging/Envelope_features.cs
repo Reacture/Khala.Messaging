@@ -1,14 +1,15 @@
 ﻿using System;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Idioms;
-using Xunit;
 
 namespace Khala.Messaging
 {
+    [TestClass]
     public class Envelope_features
     {
-        [Fact]
+        [TestMethod]
         public void class_has_guard_clause()
         {
             var fixture = new Fixture();
@@ -16,7 +17,7 @@ namespace Khala.Messaging
             assertion.Verify(typeof(Envelope));
         }
 
-        [Fact]
+        [TestMethod]
         public void greedy_constructor_has_guard_clause_for_empty_correlationId()
         {
             Action action = () =>
@@ -25,7 +26,7 @@ namespace Khala.Messaging
                 .Where(x => x.ParamName == "correlationId");
         }
 
-        [Fact]
+        [TestMethod]
         public void greedy_constructor_allows_null_correlationId()
         {
             Action action = () =>

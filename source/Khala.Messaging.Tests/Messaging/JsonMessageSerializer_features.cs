@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Reflection;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Idioms;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Khala.Messaging
 {
+    [TestClass]
     public class JsonMessageSerializer_features
     {
-        private ITestOutputHelper output;
         private IFixture fixture;
 
-        public JsonMessageSerializer_features(ITestOutputHelper output)
+        public TestContext TestContext { get; set; }
+
+        [TestInitialize]
+        public void TestInitialize()
         {
-            this.output = output;
             fixture = new Fixture();
         }
 
@@ -53,14 +54,14 @@ namespace Khala.Messaging
             public string StringProp { get; }
         }
 
-        [Fact]
+        [TestMethod]
         public void sut_implements_IMessageSerializer()
         {
             var sut = new JsonMessageSerializer();
             sut.Should().BeAssignableTo<IMessageSerializer>();
         }
 
-        [Fact]
+        [TestMethod]
         public void Deserialize_has_guard_clause()
         {
             var assertion = new GuardClauseAssertion(fixture);
@@ -70,14 +71,14 @@ namespace Khala.Messaging
             assertion.Verify(method);
         }
 
-        [Fact]
+        [TestMethod]
         public void Deserialize_restores_mutable_message_correctly()
         {
             // Arrange
             var sut = new JsonMessageSerializer();
             var message = fixture.Create<MutableMessage>();
             string serialized = sut.Serialize(message);
-            output.WriteLine(serialized);
+            TestContext.WriteLine(serialized);
 
             // Act
             object actual = sut.Deserialize(serialized);
@@ -87,14 +88,14 @@ namespace Khala.Messaging
             actual.ShouldBeEquivalentTo(message);
         }
 
-        [Fact]
+        [TestMethod]
         public void Deserialize_restores_immutable_message_correctly()
         {
             // Arrange
             var sut = new JsonMessageSerializer();
             var message = fixture.Create<ImmutableMessage>();
             string serialized = sut.Serialize(message);
-            output.WriteLine(serialized);
+            TestContext.WriteLine(serialized);
 
             // Act
             object actual = sut.Deserialize(serialized);
@@ -104,7 +105,7 @@ namespace Khala.Messaging
             actual.ShouldBeEquivalentTo(message);
         }
 
-        [Fact]
+        [TestMethod]
         public void Deserialize_restores_message_of_unknown_type_to_dynamic()
         {
             // Arrange
@@ -122,7 +123,7 @@ namespace Khala.Messaging
             ((string)((dynamic)actual).Prop).Should().Be(prop);
         }
 
-        [Fact]
+        [TestMethod]
         public void Deserialize_restores_untyped_message_to_dynamic()
         {
             // Arrange

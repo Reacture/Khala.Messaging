@@ -3,20 +3,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using FakeBlogEngine;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Xunit;
 
 namespace Khala.Messaging
 {
+    [TestClass]
     public class InterfaceAwareHandler_features
     {
-        [Fact]
+        [TestMethod]
         public void class_is_abstract()
         {
             typeof(InterfaceAwareHandler).IsAbstract.Should().BeTrue();
         }
 
-        [Fact]
+        [TestMethod]
         public void sut_implements_IMessageHandler()
         {
             var sut = Mock.Of<Messaging.InterfaceAwareHandler>();
@@ -37,7 +38,7 @@ namespace Khala.Messaging
                 CancellationToken cancellationToken);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task sut_invokes_correct_handler_method()
         {
             var mock = new Mock<BlogEventHandler> { CallBase = true };
