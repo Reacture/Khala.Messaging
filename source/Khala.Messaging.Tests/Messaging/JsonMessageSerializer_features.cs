@@ -54,6 +54,11 @@ namespace Khala.Messaging
             public string StringProp { get; }
         }
 
+        public class MessageWithDateTimeOffsetProperty
+        {
+            public DateTimeOffset DateTimeOffsetProp { get; set; }
+        }
+
         [TestMethod]
         public void sut_implements_IMessageSerializer()
         {
@@ -139,6 +144,26 @@ namespace Khala.Messaging
             action.ShouldNotThrow();
             actual.Should().NotBeNull();
             ((string)((dynamic)actual).Prop).Should().Be(prop);
+        }
+
+        [TestMethod]
+        public void sut_serializes_DateTimeOffset_property_correctly()
+        {
+            // Arrange
+            var message = new MessageWithDateTimeOffsetProperty
+            {
+                DateTimeOffsetProp = fixture.Create<DateTimeOffset>()
+            };
+            var sut = new JsonMessageSerializer();
+
+            // Act
+            string value = sut.Serialize(message);
+            TestContext.WriteLine(value);
+            object actual = sut.Deserialize(value);
+
+            // Assert
+            actual.Should().BeOfType<MessageWithDateTimeOffsetProperty>();
+            actual.ShouldBeEquivalentTo(message);
         }
     }
 }
