@@ -60,7 +60,7 @@ namespace Khala.Messaging.Azure
 
             EventData eventData = await sut.Serialize(envelope);
 
-            string propertyName = "Khala.Envelope.MessageId";
+            string propertyName = "Khala.Messaging.Envelope.MessageId";
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
             actual.Should().BeOfType<string>();
@@ -76,7 +76,7 @@ namespace Khala.Messaging.Azure
 
             EventData eventData = await sut.Serialize(envelope);
 
-            string propertyName = "Khala.Envelope.CorrelationId";
+            string propertyName = "Khala.Messaging.Envelope.CorrelationId";
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
             actual.Should().BeOfType<string>();
@@ -112,7 +112,7 @@ namespace Khala.Messaging.Azure
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = await sut.Serialize(envelope);
-            eventData.Properties.Remove("Khala.Envelope.MessageId");
+            eventData.Properties.Remove("Khala.Messaging.Envelope.MessageId");
 
             Envelope actual = await sut.Deserialize(eventData.Clone());
 
@@ -126,7 +126,7 @@ namespace Khala.Messaging.Azure
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = await sut.Serialize(envelope);
-            eventData.Properties.Remove("Khala.Envelope.CorrelationId");
+            eventData.Properties.Remove("Khala.Messaging.Envelope.CorrelationId");
 
             Envelope actual = null;
             Func<Task> action = async () =>

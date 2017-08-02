@@ -64,8 +64,8 @@
                 CorrelationId = correlationId,
                 Properties =
                 {
-                    ["Khala.Envelope.MessageId"] = messageId,
-                    ["Khala.Envelope.CorrelationId"] = correlationId
+                    ["Khala.Messaging.Envelope.MessageId"] = messageId,
+                    ["Khala.Messaging.Envelope.CorrelationId"] = correlationId
                 },
                 PartitionKey = (message as IPartitioned)?.PartitionKey
             });
@@ -98,11 +98,11 @@
         {
             object messageId;
             brokeredMessage.Properties.TryGetValue(
-                "Khala.Envelope.MessageId", out messageId);
+                "Khala.Messaging.Envelope.MessageId", out messageId);
 
             object correlationId;
             brokeredMessage.Properties.TryGetValue(
-                "Khala.Envelope.CorrelationId", out correlationId);
+                "Khala.Messaging.Envelope.CorrelationId", out correlationId);
 
             using (var stream = brokeredMessage.GetBody<Stream>())
             using (var reader = new StreamReader(stream, Encoding.UTF8))

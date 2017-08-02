@@ -61,7 +61,7 @@ namespace Khala.Messaging.Azure
             BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
 
             brokeredMessage.MessageId.Should().Be(envelope.MessageId.ToString("n"));
-            string propertyName = "Khala.Envelope.MessageId";
+            string propertyName = "Khala.Messaging.Envelope.MessageId";
             brokeredMessage.Properties.Keys.Should().Contain(propertyName);
             object actual = brokeredMessage.Properties[propertyName];
             actual.Should().BeOfType<string>();
@@ -78,7 +78,7 @@ namespace Khala.Messaging.Azure
             BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
 
             brokeredMessage.CorrelationId.Should().Be(envelope.CorrelationId?.ToString("n"));
-            string propertyName = "Khala.Envelope.CorrelationId";
+            string propertyName = "Khala.Messaging.Envelope.CorrelationId";
             brokeredMessage.Properties.Keys.Should().Contain(propertyName);
             object actual = brokeredMessage.Properties[propertyName];
             actual.Should().BeOfType<string>();
@@ -114,7 +114,7 @@ namespace Khala.Messaging.Azure
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
-            brokeredMessage.Properties.Remove("Khala.Envelope.MessageId");
+            brokeredMessage.Properties.Remove("Khala.Messaging.Envelope.MessageId");
 
             Envelope actual = await sut.Deserialize(brokeredMessage.Clone());
 
