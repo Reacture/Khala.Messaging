@@ -77,8 +77,7 @@
         private async Task HandleMessage(
             Envelope envelope, CancellationToken cancellationToken)
         {
-            Handler handler;
-            if (_handlers.TryGetValue(envelope.Message.GetType(), out handler))
+            if (_handlers.TryGetValue(envelope.Message.GetType(), out Handler handler))
             {
                 await handler.Invoke(envelope, cancellationToken);
             }
