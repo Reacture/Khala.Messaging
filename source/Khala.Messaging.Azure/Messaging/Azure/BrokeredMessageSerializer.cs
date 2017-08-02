@@ -19,12 +19,7 @@
         /// <param name="messageSerializer"><see cref="IMessageSerializer"/> to serialize enveloped messages.</param>
         public BrokeredMessageSerializer(IMessageSerializer messageSerializer)
         {
-            if (messageSerializer == null)
-            {
-                throw new ArgumentNullException(nameof(messageSerializer));
-            }
-
-            _messageSerializer = messageSerializer;
+            _messageSerializer = messageSerializer ?? throw new ArgumentNullException(nameof(messageSerializer));
         }
 
         /// <summary>
@@ -88,21 +83,16 @@
 
         private static Guid? ParseGuid(object property)
         {
-            Guid value;
-            return Guid.TryParse(property?.ToString(), out value)
-                ? value
-                : default(Guid?);
+            return Guid.TryParse(property?.ToString(), out Guid value) ? value : default(Guid?);
         }
 
         private async Task<Envelope> DeserializeEnvelope(BrokeredMessage brokeredMessage)
         {
-            object messageId;
             brokeredMessage.Properties.TryGetValue(
-                "Khala.Messaging.Envelope.MessageId", out messageId);
+                "Khala.Messaging.Envelope.MessageId", out object messageId);
 
-            object correlationId;
             brokeredMessage.Properties.TryGetValue(
-                "Khala.Messaging.Envelope.CorrelationId", out correlationId);
+                "Khala.Messaging.Envelope.CorrelationId", out object correlationId);
 
             using (var stream = brokeredMessage.GetBody<Stream>())
             using (var reader = new StreamReader(stream, Encoding.UTF8))

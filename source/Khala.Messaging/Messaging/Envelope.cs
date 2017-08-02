@@ -48,14 +48,9 @@
                     nameof(correlationId));
             }
 
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
             MessageId = messageId;
             CorrelationId = correlationId;
-            Message = message;
+            Message = message ?? throw new ArgumentNullException(nameof(message));
         }
 
         /// <summary>

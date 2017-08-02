@@ -15,18 +15,8 @@
             QueueClient queueClient,
             BrokeredMessageSerializer serializer)
         {
-            if (serializer == null)
-            {
-                throw new ArgumentNullException(nameof(serializer));
-            }
-
-            if (queueClient == null)
-            {
-                throw new ArgumentNullException(nameof(queueClient));
-            }
-
-            _serializer = serializer;
-            _queueClient = queueClient;
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            _queueClient = queueClient ?? throw new ArgumentNullException(nameof(queueClient));
         }
 
         public ServiceBusQueueMessageBus(
