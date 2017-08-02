@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("Reacture")]
 [assembly: AssemblyCopyright("Copyright Gyuwon 2017")]
 [assembly: Guid("56a2971b-ae27-4068-b14a-bd783375bca5")]
-[assembly: AssemblyVersion("0.9.0.0")]
-[assembly: AssemblyFileVersion("0.9.0.0")]
+[assembly: AssemblyVersion("0.10.0.0")]
+[assembly: AssemblyFileVersion("0.10.0.0")]

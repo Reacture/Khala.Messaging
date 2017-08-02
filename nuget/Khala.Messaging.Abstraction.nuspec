@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.Messaging.Abstraction</id>
-    <version>0.9.1</version>
+    <version>0.10.0</version>
     <title>Khala.Messaging.Abstraction</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
