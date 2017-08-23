@@ -7,6 +7,7 @@
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
     public sealed class Envelope<TMessage>
+        where TMessage : class
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Envelope{TMessage}"/> class.
@@ -30,14 +31,9 @@
                     nameof(correlationId));
             }
 
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
             MessageId = messageId;
             CorrelationId = correlationId;
-            Message = message;
+            Message = message ?? throw new ArgumentNullException(nameof(message));
         }
 
         /// <summary>

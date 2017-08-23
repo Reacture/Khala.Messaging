@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Khala</RootNamespace>
     <AssemblyName>Khala.Messaging.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -19,6 +19,7 @@
     <TestProjectType>UnitTest</TestProjectType>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -103,9 +104,8 @@
       <HintPath>..\packages\Moq.4.5.30\lib\net45\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -167,15 +167,16 @@
     <Compile Include="FakeBlogEngine\BlogPostCreated.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj">
+      <Project>{968980e3-999b-46e2-8af6-7754e1ccbf0b}</Project>
+      <Name>Khala.Messaging.Abstraction</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Khala.Messaging.Azure.Owin\Khala.Messaging.Azure.Owin.csproj">
       <Project>{86f451da-8011-4df3-a762-f8517bf0fc54}</Project>
       <Name>Khala.Messaging.Azure.Owin</Name>
@@ -183,10 +184,6 @@
     <ProjectReference Include="..\Khala.Messaging.Azure\Khala.Messaging.Azure.csproj">
       <Project>{56a2971b-ae27-4068-b14a-bd783375bca5}</Project>
       <Name>Khala.Messaging.Azure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Khala.Messaging\Khala.Messaging.csproj">
-      <Project>{989d5de1-b30b-4bc5-9cb1-bf23ec560b84}</Project>
-      <Name>Khala.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
