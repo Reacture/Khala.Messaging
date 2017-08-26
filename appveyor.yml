@@ -7,6 +7,8 @@ build:
   verbosity: minimal
 after_build:
 - cmd: >-
+    nuget pack nuget\Khala.Messaging.Abstraction.nuspec
+
     nuget pack nuget\Khala.Messaging.Azure.nuspec
 
     nuget pack nuget\Khala.Messaging.Azure.Owin.nuspec
