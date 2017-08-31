@@ -13,7 +13,7 @@
     <Description>Abstraction layer for asynchronous messaging</Description>
     <Copyright>Copyright Gyuwon 2017</Copyright>
     <PackageTags>Khala Reactive Messaging</PackageTags>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
