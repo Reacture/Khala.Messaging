@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Khala.Messaging;
     using Khala.Messaging.Azure;
     using Microsoft.Owin.BuilderProperties;
@@ -9,8 +10,6 @@
 
     public static class ServiceBusQueueMessagingExtensions
     {
-        private static readonly IMessageProcessingExceptionHandler<BrokeredMessage> _defaultExceptionHandler = new CompositeMessageProcessingExceptionHandler<BrokeredMessage>();
-
         public static void UseServiceBusQueueMessageProcessor(
             this IAppBuilder app,
             string connectionString,
@@ -69,7 +68,15 @@
                 queueName,
                 serializer,
                 messageHandler,
-                _defaultExceptionHandler);
+                DefaultExceptionHandler.Instance);
+        }
+
+        private class DefaultExceptionHandler : IMessageProcessingExceptionHandler<BrokeredMessage>
+        {
+            public static readonly DefaultExceptionHandler Instance = new DefaultExceptionHandler();
+
+            public Task Handle(MessageProcessingExceptionContext<BrokeredMessage> context)
+                => Task.FromResult(true);
         }
     }
 }

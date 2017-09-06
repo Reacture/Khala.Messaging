@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Khala.Messaging;
     using Khala.Messaging.Azure;
     using Microsoft.Owin.BuilderProperties;
@@ -9,8 +10,6 @@
 
     public static class EventHubMessagingExtensions
     {
-        private static readonly IMessageProcessingExceptionHandler<EventData> _defaultExceptionHandler = new CompositeMessageProcessingExceptionHandler<EventData>();
-
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
@@ -60,7 +59,7 @@
                 eventProcessorHost,
                 serializer,
                 messageHandler,
-                _defaultExceptionHandler);
+                DefaultExceptionHandler.Instance);
         }
 
         private static void Start(
@@ -70,5 +69,13 @@
 
         private static void Stop(EventProcessorHost eventProcessorHost) =>
             eventProcessorHost.UnregisterEventProcessorAsync().Wait();
+
+        private class DefaultExceptionHandler : IMessageProcessingExceptionHandler<EventData>
+        {
+            public static readonly DefaultExceptionHandler Instance = new DefaultExceptionHandler();
+
+            public Task Handle(MessageProcessingExceptionContext<EventData> context)
+                => Task.FromResult(true);
+        }
     }
 }
