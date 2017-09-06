@@ -50,17 +50,10 @@
             }
 
             var queueClient = QueueClient.CreateFromConnectionString(connectionString, queueName);
-
             CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
-
-            var processor = new BrokeredMessageProcessor(
-                serializer,
-                messageHandler,
-                exceptionHandler,
-                cancellationToken);
-
+            var processorCore = new MessageProcessorCore<BrokeredMessage>(messageHandler, serializer, exceptionHandler);
+            var processor = new BrokeredMessageProcessor(processorCore, cancellationToken);
             queueClient.OnMessageAsync(processor.ProcessMessage);
-
             cancellationToken.Register(queueClient.Close);
         }
 

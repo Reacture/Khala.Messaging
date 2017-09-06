@@ -14,7 +14,7 @@
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
-            EventDataSerializer serializer,
+            IMessageDataSerializer<EventData> serializer,
             IMessageHandler messageHandler,
             IMessageProcessingExceptionHandler<EventData> exceptionHandler)
         {
@@ -44,15 +44,9 @@
             }
 
             CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
-
-            var processorFactory = new EventMessageProcessorFactory(
-                serializer,
-                messageHandler,
-                exceptionHandler,
-                cancellationToken);
-
+            var processorCore = new MessageProcessorCore<EventData>(messageHandler, serializer, exceptionHandler);
+            var processorFactory = new EventMessageProcessorFactory(processorCore, cancellationToken);
             Start(eventProcessorHost, processorFactory);
-
             cancellationToken.Register(() => Stop(eventProcessorHost));
         }
 

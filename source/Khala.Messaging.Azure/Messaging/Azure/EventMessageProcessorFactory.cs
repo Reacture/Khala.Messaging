@@ -6,20 +6,14 @@
 
     public sealed class EventMessageProcessorFactory : IEventProcessorFactory
     {
-        private readonly EventDataSerializer _serializer;
-        private readonly IMessageHandler _messageHandler;
-        private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
+        private readonly MessageProcessorCore<EventData> _processorCore;
         private readonly CancellationToken _cancellationToken;
 
         public EventMessageProcessorFactory(
-            EventDataSerializer serializer,
-            IMessageHandler messageHandler,
-            IMessageProcessingExceptionHandler<EventData> exceptionHandler,
+            MessageProcessorCore<EventData> processorCore,
             CancellationToken cancellationToken)
         {
-            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
-            _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
+            _processorCore = processorCore ?? throw new ArgumentNullException(nameof(processorCore));
             _cancellationToken = cancellationToken;
         }
 
@@ -30,7 +24,7 @@
                 throw new ArgumentNullException(nameof(context));
             }
 
-            return new EventMessageProcessor(_serializer, _messageHandler, _exceptionHandler, _cancellationToken);
+            return new EventMessageProcessor(_processorCore, _cancellationToken);
         }
     }
 }

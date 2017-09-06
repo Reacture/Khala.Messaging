@@ -2,27 +2,20 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
 
     public sealed class EventMessageProcessor : IEventProcessor
     {
-        private readonly IMessageDataSerializer<EventData> _serializer;
-        private readonly IMessageHandler _messageHandler;
-        private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
+        private readonly MessageProcessorCore<EventData> _processorCore;
         private readonly CancellationToken _cancellationToken;
 
         internal EventMessageProcessor(
-            IMessageDataSerializer<EventData> serializer,
-            IMessageHandler messageHandler,
-            IMessageProcessingExceptionHandler<EventData> exceptionHandler,
+            MessageProcessorCore<EventData> processorCore,
             CancellationToken cancellationToken)
         {
-            _serializer = serializer;
-            _messageHandler = messageHandler;
-            _exceptionHandler = exceptionHandler;
+            _processorCore = processorCore;
             _cancellationToken = cancellationToken;
         }
 
@@ -72,38 +65,7 @@
             }
         }
 
-        private async Task ProcessEvent(
-            PartitionContext context, EventData eventData)
-        {
-            Envelope envelope = null;
-            try
-            {
-                envelope = await _serializer.Deserialize(eventData).ConfigureAwait(false);
-                await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
-                await context.CheckpointAsync(eventData).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                try
-                {
-                    var exceptionContext = envelope == null
-                        ? new MessageProcessingExceptionContext<EventData>(eventData, exception)
-                        : new MessageProcessingExceptionContext<EventData>(eventData, envelope, exception);
-
-                    await _exceptionHandler.Handle(exceptionContext).ConfigureAwait(false);
-
-                    if (exceptionContext.Handled)
-                    {
-                        return;
-                    }
-                }
-                catch (Exception unhandleable)
-                {
-                    Trace.TraceError(unhandleable.ToString());
-                }
-
-                throw;
-            }
-        }
+        private Task ProcessEvent(PartitionContext context, EventData eventData)
+            => _processorCore.Process(eventData, context.CheckpointAsync, _cancellationToken);
     }
 }
