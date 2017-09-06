@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Khala.Messaging.Tests Rules" ToolsVersion="15.0">
   <IncludeAll Action="Warning" />
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS8019" Action="Warning" />
+  </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
+    <Rule Id="IDE0005" Action="Warning" />
     <Rule Id="IDE1006" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">

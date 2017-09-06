@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Khala.Messaging Rules" ToolsVersion="14.0">
+<RuleSet Name="Khala.Messaging Rules" ToolsVersion="15.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1006" Action="None" />
@@ -8,6 +8,12 @@
     <Rule Id="CA1062" Action="Error" />
     <Rule Id="CA1305" Action="None" />
     <Rule Id="CA2210" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS8019" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
+    <Rule Id="IDE0005" Action="Warning" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA0000" Action="Error" />
