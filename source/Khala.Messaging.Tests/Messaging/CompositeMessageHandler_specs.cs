@@ -11,7 +11,7 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging
 {
     [TestClass]
-    public class CompositeMessageHandler_features
+    public class CompositeMessageHandler_specs
     {
         [TestMethod]
         public void sut_implements_IMessageHandler()

@@ -153,15 +153,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
-    <Compile Include="Messaging\Azure\BrokeredMessageSerializer_features.cs" />
-    <Compile Include="Messaging\Azure\EventDataSerializer_features.cs" />
-    <Compile Include="Messaging\Azure\EventHubMessageBus_features.cs" />
-    <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_features.cs" />
-    <Compile Include="Messaging\CompositeMessageHandler_features.cs" />
-    <Compile Include="Messaging\Envelope_features.cs" />
-    <Compile Include="Messaging\InterfaceAwareHandler_features.cs" />
-    <Compile Include="Messaging\JsonMessageSerializer_features.cs" />
-    <Compile Include="Messaging\MessagingExtensions_features.cs" />
+    <Compile Include="Messaging\Azure\BrokeredMessageSerializer_specs.cs" />
+    <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
+    <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_specs.cs" />
+    <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
+    <Compile Include="Messaging\Envelope_specs.cs" />
+    <Compile Include="Messaging\InterfaceAwareHandler_specs.cs" />
+    <Compile Include="Messaging\JsonMessageSerializer_specs.cs" />
+    <Compile Include="Messaging\MessagingExtensions_specs.cs" />
     <Compile Include="Owin\EventHubMessagingExtensions_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FakeBlogEngine\BlogPostCreated.cs" />

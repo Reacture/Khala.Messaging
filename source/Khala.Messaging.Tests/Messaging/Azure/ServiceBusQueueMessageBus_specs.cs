@@ -14,7 +14,7 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging.Azure
 {
     [TestClass]
-    public class ServiceBusQueueMessageBus_features
+    public class ServiceBusQueueMessageBus_specs
     {
         public const string ConnectionStringPropertyName = "servicebusqueuemessagebus-connectionstring";
         public const string QueueNamePropertyName = "servicebusqueuemessagebus-path";

@@ -7,7 +7,7 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging
 {
     [TestClass]
-    public class Envelope_features
+    public class Envelope_specs
     {
         [TestMethod]
         public void class_has_guard_clause()

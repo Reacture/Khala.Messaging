@@ -15,7 +15,7 @@ using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
 namespace Khala.Messaging.Azure
 {
     [TestClass]
-    public class EventHubMessageBus_features
+    public class EventHubMessageBus_specs
     {
         public const string EventHubConnectionStringPropertyName = "eventhubmessagebus-eventhub-connectionstring";
         public const string EventHubPathPropertyName = "eventhubmessagebus-eventhub-path";

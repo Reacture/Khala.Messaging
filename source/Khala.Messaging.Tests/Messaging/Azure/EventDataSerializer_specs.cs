@@ -13,7 +13,7 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging.Azure
 {
     [TestClass]
-    public class EventDataSerializer_features
+    public class EventDataSerializer_specs
     {
         private IFixture fixture;
         private IMessageSerializer messageSerializer;

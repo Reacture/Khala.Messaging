@@ -8,7 +8,7 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging
 {
     [TestClass]
-    public class JsonMessageSerializer_features
+    public class JsonMessageSerializer_specs
     {
         private IFixture fixture;
 

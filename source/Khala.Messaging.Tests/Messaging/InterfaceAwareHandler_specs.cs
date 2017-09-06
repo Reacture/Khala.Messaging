@@ -9,7 +9,7 @@ using Moq;
 namespace Khala.Messaging
 {
     [TestClass]
-    public class InterfaceAwareHandler_features
+    public class InterfaceAwareHandler_specs
     {
         [TestMethod]
         public void class_is_abstract()

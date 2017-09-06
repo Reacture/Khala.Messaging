@@ -13,13 +13,13 @@ using Ploeh.AutoFixture.Idioms;
 namespace Khala.Messaging.Azure
 {
     [TestClass]
-    public class BrokeredMessageSerializer_features
+    public class BrokeredMessageSerializer_specs
     {
         private readonly IFixture fixture;
         private readonly JsonMessageSerializer messageSerializer;
         private readonly BrokeredMessageSerializer sut;
 
-        public BrokeredMessageSerializer_features()
+        public BrokeredMessageSerializer_specs()
         {
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             messageSerializer = new JsonMessageSerializer();

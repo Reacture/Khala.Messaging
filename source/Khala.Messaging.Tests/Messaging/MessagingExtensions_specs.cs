@@ -7,7 +7,7 @@ using Moq;
 namespace Khala.Messaging
 {
     [TestClass]
-    public class MessagingExtensions_features
+    public class MessagingExtensions_specs
     {
         [TestMethod]
         public void Send_relays_with_none_cancellation_token()
