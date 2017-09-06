@@ -15,6 +15,8 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.AutoMoq;
+    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class EventHubMessagingExtensions_features
@@ -65,6 +67,20 @@ References
             {
                 Assert.Inconclusive(ConnectionParametersRequired);
             }
+        }
+
+        [TestMethod]
+        public void sut_has_guard_clauses()
+        {
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var eventProcessorHost = new EventProcessorHost(
+                eventHubPath,
+                consumerGroupName,
+                eventHubConnectionString,
+                storageConnectionString);
+            fixture.Inject(eventProcessorHost);
+            var assertion = new GuardClauseAssertion(fixture);
+            assertion.Verify(typeof(EventHubMessagingExtensions));
         }
 
         [TestMethod]
