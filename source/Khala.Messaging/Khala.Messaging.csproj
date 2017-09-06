@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Messaging\CompositeMessageHandler.cs" />
+    <Compile Include="Messaging\DelegatingMessageHandler.cs" />
     <Compile Include="Messaging\Envelope.cs" />
     <Compile Include="Messaging\Envelope{TMessage}.cs" />
     <Compile Include="Messaging\InterfaceAwareHandler.cs" />
