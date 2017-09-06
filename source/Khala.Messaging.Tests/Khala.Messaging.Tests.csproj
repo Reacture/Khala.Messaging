@@ -157,6 +157,7 @@
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
+    <Compile Include="Messaging\Azure\EventMessageProcessorFactory_specs.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />

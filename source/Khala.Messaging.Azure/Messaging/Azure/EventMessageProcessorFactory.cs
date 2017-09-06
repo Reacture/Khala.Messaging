@@ -17,28 +17,20 @@
             IMessageProcessingExceptionHandler<EventData> exceptionHandler,
             CancellationToken cancellationToken)
         {
-            if (serializer == null)
-            {
-                throw new ArgumentNullException(nameof(serializer));
-            }
-
-            if (messageHandler == null)
-            {
-                throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (exceptionHandler == null)
-            {
-                throw new ArgumentNullException(nameof(exceptionHandler));
-            }
-
-            _serializer = serializer;
-            _messageHandler = messageHandler;
-            _exceptionHandler = exceptionHandler;
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+            _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
             _cancellationToken = cancellationToken;
         }
 
         public IEventProcessor CreateEventProcessor(PartitionContext context)
-            => new EventMessageProcessor(_serializer, _messageHandler, _exceptionHandler, _cancellationToken);
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            return new EventMessageProcessor(_serializer, _messageHandler, _exceptionHandler, _cancellationToken);
+        }
     }
 }
