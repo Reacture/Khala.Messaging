@@ -30,5 +30,36 @@
         {
             new GuardClauseAssertion(new Fixture()).Verify(typeof(MessageProcessingExceptionContext<>));
         }
+
+        [TestMethod]
+        public void Handled_has_false_initial_value()
+        {
+            var sut = new MessageProcessingExceptionContext<string>("foo", new Exception());
+            sut.Handled.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void constructor_sets_Source_correctly()
+        {
+            var source = new Fixture().Create<string>();
+            var sut = new MessageProcessingExceptionContext<string>(source, new Exception());
+            sut.Source.Should().Be(source);
+        }
+
+        [TestMethod]
+        public void constructor_sets_Envelope_correctly()
+        {
+            var envelope = new Fixture().Create<Envelope>();
+            var sut = new MessageProcessingExceptionContext<string>("foo", envelope, new Exception());
+            sut.Envelope.Should().BeSameAs(envelope);
+        }
+
+        [TestMethod]
+        public void constructor_sets_Exception_correctly()
+        {
+            var exception = new Fixture().Create<Exception>();
+            var sut = new MessageProcessingExceptionContext<string>("foo", new Envelope(new object()), exception);
+            sut.Exception.Should().BeSameAs(exception);
+        }
     }
 }
