@@ -9,18 +9,8 @@
             TSource source,
             Exception exception)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (exception == null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            Source = source;
-            Exception = exception;
+            Source = source ?? throw new ArgumentNullException(nameof(source));
+            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
         }
 
         public MessageProcessingExceptionContext(
@@ -29,12 +19,7 @@
             Exception exception)
             : this(source, exception)
         {
-            if (envelope == null)
-            {
-                throw new ArgumentNullException(nameof(envelope));
-            }
-
-            Envelope = envelope;
+            Envelope = envelope ?? throw new ArgumentNullException(nameof(envelope));
         }
 
         public TSource Source { get; }

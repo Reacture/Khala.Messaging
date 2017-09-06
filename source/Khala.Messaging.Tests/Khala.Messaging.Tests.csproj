@@ -156,6 +156,7 @@
     <Compile Include="Messaging\Azure\BrokeredMessageSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
+    <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
     <Compile Include="Messaging\EnvelopeT_specs.cs" />
