@@ -82,8 +82,15 @@ References
         [TestMethod]
         public void SendBatch_has_guard_clause_for_null_envelope()
         {
-            var envelopes = new Envelope[] { null };
+            var random = new Random();
+            var envelopes = Enumerable
+                .Range(0, 10)
+                .Select(_ => new Envelope(new object()))
+                .Concat(new[] { default(Envelope) })
+                .OrderBy(_ => random.Next());
+
             Func<Task> action = () => sut.SendBatch(envelopes);
+
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "envelopes");
         }
