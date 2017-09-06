@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FakeBlogEngine;
-using FluentAssertions;
-using Microsoft.ServiceBus.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ploeh.AutoFixture;
-using Ploeh.AutoFixture.AutoMoq;
-using Ploeh.AutoFixture.Idioms;
-using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
-
-namespace Khala.Messaging.Azure
+﻿namespace Khala.Messaging.Azure
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using FakeBlogEngine;
+    using FluentAssertions;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.AutoMoq;
+    using Ploeh.AutoFixture.Idioms;
+    using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
+
     [TestClass]
     public class EventHubMessageBus_specs
     {

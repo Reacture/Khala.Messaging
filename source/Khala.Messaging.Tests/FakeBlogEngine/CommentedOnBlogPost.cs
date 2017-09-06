@@ -1,8 +1,8 @@
-﻿using System;
-using Khala.Messaging;
-
-namespace FakeBlogEngine
+﻿namespace FakeBlogEngine
 {
+    using System;
+    using Khala.Messaging;
+
     public sealed class CommentedOnBlogPost : IPartitioned
     {
         public Guid PostId { get; set; }

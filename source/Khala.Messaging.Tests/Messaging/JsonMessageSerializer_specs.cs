@@ -1,12 +1,12 @@
-﻿using System;
-using System.Reflection;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ploeh.AutoFixture;
-using Ploeh.AutoFixture.Idioms;
-
-namespace Khala.Messaging
+﻿namespace Khala.Messaging
 {
+    using System;
+    using System.Reflection;
+    using FluentAssertions;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.Idioms;
+
     [TestClass]
     public class JsonMessageSerializer_specs
     {

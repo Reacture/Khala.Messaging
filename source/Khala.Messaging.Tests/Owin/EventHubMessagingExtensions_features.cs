@@ -1,20 +1,20 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using FakeBlogEngine;
-using FluentAssertions;
-using Khala.Messaging;
-using Khala.Messaging.Azure;
-using Microsoft.Owin.BuilderProperties;
-using Microsoft.Owin.Testing;
-using Microsoft.ServiceBus.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using Owin;
-using Ploeh.AutoFixture;
-
-namespace Khala.Owin
+﻿namespace Khala.Owin
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using FakeBlogEngine;
+    using FluentAssertions;
+    using global::Owin;
+    using Khala.Messaging;
+    using Khala.Messaging.Azure;
+    using Microsoft.Owin.BuilderProperties;
+    using Microsoft.Owin.Testing;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+    using Ploeh.AutoFixture;
+
     [TestClass]
     public class EventHubMessagingExtensions_features
     {
