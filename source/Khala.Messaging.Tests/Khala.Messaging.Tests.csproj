@@ -158,6 +158,7 @@
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
+    <Compile Include="Messaging\EnvelopeT_specs.cs" />
     <Compile Include="Messaging\Envelope_specs.cs" />
     <Compile Include="Messaging\InterfaceAwareHandler_specs.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_specs.cs" />
