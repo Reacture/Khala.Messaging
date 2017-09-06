@@ -8,6 +8,7 @@
     using global::Owin;
     using Khala.Messaging;
     using Khala.Messaging.Azure;
+    using Khala.TransientFaultHandling;
     using Microsoft.Owin.BuilderProperties;
     using Microsoft.Owin.Testing;
     using Microsoft.ServiceBus.Messaging;
@@ -101,13 +102,12 @@ References
             {
                 // Act
                 await messageBus.Send(envelope, CancellationToken.None);
-                for (int i = 0; i < 10 && handled == null; i++)
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(1000));
-                }
+                await RetryPolicy<Envelope>
+                    .LinearTransientDefault(5, TimeSpan.FromMilliseconds(100))
+                    .Run(() => Task.FromResult(handled));
 
                 // Assert
-                Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken), Times.Once());
+                Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken));
                 handled.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
         }
