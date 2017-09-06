@@ -7,6 +7,9 @@
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.AutoMoq;
+    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class InterfaceAwareHandler_specs
@@ -22,6 +25,14 @@
         {
             var sut = Mock.Of<Messaging.InterfaceAwareHandler>();
             sut.Should().BeAssignableTo<IMessageHandler>();
+        }
+
+        [TestMethod]
+        public void sut_has_guard_clauses()
+        {
+            var builder = new Fixture().Customize(new AutoMoqCustomization());
+            var assertion = new GuardClauseAssertion(builder);
+            assertion.Verify(typeof(InterfaceAwareHandler));
         }
 
         public abstract class BlogEventHandler :

@@ -14,6 +14,11 @@
                 throw new ArgumentNullException(nameof(messageBus));
             }
 
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
             return messageBus.Send(envelope, CancellationToken.None);
         }
 
@@ -26,6 +31,11 @@
                 throw new ArgumentNullException(nameof(messageBus));
             }
 
+            if (envelopes == null)
+            {
+                throw new ArgumentNullException(nameof(envelopes));
+            }
+
             return messageBus.SendBatch(envelopes, CancellationToken.None);
         }
 
@@ -34,6 +44,11 @@
             Envelope envelope)
         {
             if (messageHandler == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            if (envelope == null)
             {
                 throw new ArgumentNullException(nameof(envelope));
             }
@@ -49,6 +64,11 @@
             if (handles == null)
             {
                 throw new ArgumentNullException(nameof(handles));
+            }
+
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
             }
 
             return handles.Handle(envelope, CancellationToken.None);

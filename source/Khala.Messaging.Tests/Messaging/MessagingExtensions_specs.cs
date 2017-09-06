@@ -1,14 +1,25 @@
 ﻿namespace Khala.Messaging
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.AutoMoq;
+    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class MessagingExtensions_specs
     {
+        [TestMethod]
+        public void sut_has_guard_clauses()
+        {
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            new GuardClauseAssertion(fixture).Verify(typeof(MessagingExtensions));
+        }
+
         [TestMethod]
         public void Send_relays_with_none_cancellation_token()
         {
@@ -51,6 +62,20 @@
 
             Mock.Get(messageHandler).Verify(
                 x => x.Handle(envelope, CancellationToken.None), Times.Once());
+            result.Should().BeSameAs(task);
+        }
+
+        [TestMethod]
+        public void HandleTMessage_releys_with_non_cancellation_token()
+        {
+            var task = Task.FromResult(true);
+            var envelope = new Envelope<object>(Guid.NewGuid(), null, new object());
+            var handles = Mock.Of<IHandles<object>>(
+                x => x.Handle(envelope, CancellationToken.None) == task);
+
+            Task result = handles.Handle(envelope);
+
+            Mock.Get(handles).Verify(x => x.Handle(envelope, CancellationToken.None), Times.Once());
             result.Should().BeSameAs(task);
         }
     }

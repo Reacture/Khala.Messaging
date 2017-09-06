@@ -67,6 +67,14 @@
         }
 
         [TestMethod]
+        public void constructor_has_guard_clause()
+        {
+            var builder = new Fixture { OmitAutoProperties = true };
+            var assertion = new GuardClauseAssertion(builder);
+            assertion.Verify(typeof(JsonMessageSerializer).GetConstructors());
+        }
+
+        [TestMethod]
         public void Deserialize_has_guard_clause()
         {
             var assertion = new GuardClauseAssertion(fixture);
