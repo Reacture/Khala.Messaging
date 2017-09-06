@@ -9,30 +9,27 @@
         where T : class
     {
         private readonly IMessageHandler _messageHandler;
+        private readonly IMessageDataSerializer<T> _serializer;
         private readonly IMessageProcessingExceptionHandler<T> _exceptionHandler;
 
         public MessageProcessorCore(
             IMessageHandler messageHandler,
+            IMessageDataSerializer<T> serializer,
             IMessageProcessingExceptionHandler<T> exceptionHandler)
         {
             _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
         }
 
         public Task Process(
             T source,
-            Func<T, Task<Envelope>> deserialize,
             Func<T, Task> checkpoint,
             CancellationToken cancellationToken)
         {
             if (source == null)
             {
                 throw new ArgumentNullException(nameof(source));
-            }
-
-            if (deserialize == null)
-            {
-                throw new ArgumentNullException(nameof(deserialize));
             }
 
             if (checkpoint == null)
@@ -45,7 +42,7 @@
                 Envelope envelope = null;
                 try
                 {
-                    envelope = await deserialize.Invoke(source).ConfigureAwait(false);
+                    envelope = await _serializer.Deserialize(source).ConfigureAwait(false);
                     await _messageHandler.Handle(envelope, cancellationToken).ConfigureAwait(false);
                     await checkpoint.Invoke(source).ConfigureAwait(false);
                 }

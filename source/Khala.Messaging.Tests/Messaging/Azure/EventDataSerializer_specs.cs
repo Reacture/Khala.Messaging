@@ -28,6 +28,12 @@
         }
 
         [TestMethod]
+        public void sut_implements_IMessageDataSerializer_of_EventData()
+        {
+            typeof(EventDataSerializer).Should().Implement<IMessageDataSerializer<EventData>>();
+        }
+
+        [TestMethod]
         public void class_has_guard_clauses()
         {
             var assertion = new GuardClauseAssertion(fixture);

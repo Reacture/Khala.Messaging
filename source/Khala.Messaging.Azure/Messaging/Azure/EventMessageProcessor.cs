@@ -9,13 +9,13 @@
 
     public sealed class EventMessageProcessor : IEventProcessor
     {
-        private readonly EventDataSerializer _serializer;
+        private readonly IMessageDataSerializer<EventData> _serializer;
         private readonly IMessageHandler _messageHandler;
         private readonly IMessageProcessingExceptionHandler<EventData> _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         internal EventMessageProcessor(
-            EventDataSerializer serializer,
+            IMessageDataSerializer<EventData> serializer,
             IMessageHandler messageHandler,
             IMessageProcessingExceptionHandler<EventData> exceptionHandler,
             CancellationToken cancellationToken)

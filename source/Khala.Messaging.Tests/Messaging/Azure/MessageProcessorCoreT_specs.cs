@@ -26,15 +26,14 @@
         {
             var envelope = new Envelope(new object());
             var source = new Data(envelope);
-            var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<Data, Task<Envelope>>(source) == Task.FromResult(envelope));
-            var sut = new MessageProcessorCore<Data>(
-                Mock.Of<IMessageHandler>(),
-                Mock.Of<IMessageProcessingExceptionHandler<Data>>());
+            var serializer = Mock.Of<IMessageDataSerializer<Data>>();
+            var messageHandler = Mock.Of<IMessageHandler>();
+            var exceptionHandler = Mock.Of<IMessageProcessingExceptionHandler<Data>>();
+            var sut = new MessageProcessorCore<Data>(messageHandler, serializer, exceptionHandler);
 
-            await sut.Process(source, functionProvider.Func<Data, Task<Envelope>>, Data.Checkpoint, CancellationToken.None);
+            await sut.Process(source, Data.Checkpoint, CancellationToken.None);
 
-            Mock.Get(functionProvider).Verify(x => x.Func<Data, Task<Envelope>>(source), Times.Once());
+            Mock.Get(serializer).Verify(x => x.Deserialize(source), Times.Once());
         }
 
         [TestMethod]
@@ -47,10 +46,11 @@
             var cancellationToken = new CancellationToken(canceled);
             var sut = new MessageProcessorCore<Data>(
                 messageHandler,
+                DataSerializer.Instance,
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
             var source = new Data(envelope);
 
-            await sut.Process(source, Data.Deserialize, Data.Checkpoint, cancellationToken);
+            await sut.Process(source, Data.Checkpoint, cancellationToken);
 
             Mock.Get(messageHandler).Verify(x => x.Handle(envelope, cancellationToken), Times.Once());
         }
@@ -61,11 +61,12 @@
             var messageHandler = Mock.Of<IMessageHandler>();
             var sut = new MessageProcessorCore<Data>(
                 messageHandler,
+                DataSerializer.Instance,
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
             var source = new Data(new Envelope(new object()));
             var functionProvider = Mock.Of<IFunctionProvider>();
 
-            await sut.Process(source, Data.Deserialize, functionProvider.Func<Data, Task>, CancellationToken.None);
+            await sut.Process(source, functionProvider.Func<Data, Task>, CancellationToken.None);
 
             Mock.Get(functionProvider).Verify(x => x.Func<Data, Task>(source), Times.Once());
         }
@@ -84,10 +85,13 @@
                 .Throws(exception);
             var exceptionHandler = Mock.Of<IMessageProcessingExceptionHandler<Data>>();
 
-            var sut = new MessageProcessorCore<Data>(messageHandler, exceptionHandler);
+            var sut = new MessageProcessorCore<Data>(
+                messageHandler,
+                DataSerializer.Instance,
+                exceptionHandler);
 
             // Act
-            Func<Task> action = () => sut.Process(source, Data.Deserialize, Data.Checkpoint, CancellationToken.None);
+            Func<Task> action = () => sut.Process(source, Data.Checkpoint, CancellationToken.None);
 
             // Assert
             action.ShouldThrow<InvalidOperationException>().Where(x => x == exception);
@@ -120,11 +124,14 @@
                 .Callback<MessageProcessingExceptionContext<Data>>(context => context.Handled = true)
                 .Returns(Task.FromResult(true));
 
-            var sut = new MessageProcessorCore<Data>(messageHandler, exceptionHandler);
+            var sut = new MessageProcessorCore<Data>(
+                messageHandler,
+                DataSerializer.Instance,
+                exceptionHandler);
 
             // Act
             Func<Task> action = () =>
-            sut.Process(new Data(envelope), Data.Deserialize, Data.Checkpoint, CancellationToken.None);
+            sut.Process(new Data(envelope), Data.Checkpoint, CancellationToken.None);
 
             // Assert
             action.ShouldNotThrow();
@@ -148,11 +155,14 @@
                 .Setup(x => x.Handle(It.IsAny<MessageProcessingExceptionContext<Data>>()))
                 .Throws(exceptionHandlerException);
 
-            var sut = new MessageProcessorCore<Data>(messageHandler, exceptionHandler);
+            var sut = new MessageProcessorCore<Data>(
+                messageHandler,
+                DataSerializer.Instance,
+                exceptionHandler);
 
             // Act
             Func<Task> action = () =>
-            sut.Process(new Data(envelope), Data.Deserialize, Data.Checkpoint, CancellationToken.None);
+            sut.Process(new Data(envelope), Data.Checkpoint, CancellationToken.None);
 
             // Assert
             action.ShouldNotThrow<InvalidOperationException>();
@@ -163,12 +173,18 @@
         public void given_deserializer_fails_Process_invokes_exception_handler()
         {
             var source = new Data(new Envelope(new object()));
+            var messageHandler = Mock.Of<IMessageHandler>();
+            var serializer = Mock.Of<IMessageDataSerializer<Data>>();
             var exception = new Exception();
             var exceptionHandler = Mock.Of<IMessageProcessingExceptionHandler<Data>>();
-            var sut = new MessageProcessorCore<Data>(Mock.Of<IMessageHandler>(), exceptionHandler);
+            Mock.Get(serializer).Setup(x => x.Deserialize(source)).Throws(exception);
+            var sut = new MessageProcessorCore<Data>(
+                messageHandler,
+                serializer,
+                exceptionHandler);
 
             Func<Task> action = () =>
-            sut.Process(source, x => throw exception, Data.Checkpoint, CancellationToken.None);
+            sut.Process(source, Data.Checkpoint, CancellationToken.None);
 
             action.ShouldThrow<Exception>().Where(x => x == exception);
             Mock.Get(exceptionHandler).Verify(
@@ -190,10 +206,13 @@
             var source = new Data(envelope);
             var exception = new Exception();
             var exceptionHandler = Mock.Of<IMessageProcessingExceptionHandler<Data>>();
-            var sut = new MessageProcessorCore<Data>(Mock.Of<IMessageHandler>(), exceptionHandler);
+            var sut = new MessageProcessorCore<Data>(
+                Mock.Of<IMessageHandler>(),
+                DataSerializer.Instance,
+                exceptionHandler);
 
             Func<Task> action = () =>
-            sut.Process(source, Data.Deserialize, x => throw exception, CancellationToken.None);
+            sut.Process(source, x => throw exception, CancellationToken.None);
 
             action.ShouldThrow<Exception>().Where(x => x == exception);
             Mock.Get(exceptionHandler).Verify(
@@ -206,6 +225,11 @@
                         p.Exception == exception &&
                         p.Handled == false)),
                 Times.Once());
+        }
+
+        public interface IFunctionProvider
+        {
+            TResult Func<T, TResult>(T arg);
         }
 
         public class Data
@@ -222,9 +246,13 @@
             public static Task Checkpoint(Data source) => Task.FromResult(true);
         }
 
-        public interface IFunctionProvider
+        public class DataSerializer : IMessageDataSerializer<Data>
         {
-            TResult Func<T, TResult>(T arg);
+            public static readonly DataSerializer Instance = new DataSerializer();
+
+            public Task<Envelope> Deserialize(Data data) => Task.FromResult(data.Envelope);
+
+            public Task<Data> Serialize(Envelope envelope) => Task.FromResult(new Data(envelope));
         }
     }
 }

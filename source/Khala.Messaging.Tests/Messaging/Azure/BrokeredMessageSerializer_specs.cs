@@ -27,6 +27,12 @@
         }
 
         [TestMethod]
+        public void sut_implements_IMessageDataSerializer_of_BrokeredMessage()
+        {
+            typeof(BrokeredMessageSerializer).Should().Implement<IMessageDataSerializer<BrokeredMessage>>();
+        }
+
+        [TestMethod]
         public void class_has_guard_clauses()
         {
             fixture.OmitAutoProperties = true;

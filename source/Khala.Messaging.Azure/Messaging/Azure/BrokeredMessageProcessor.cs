@@ -8,13 +8,13 @@
 
     public sealed class BrokeredMessageProcessor
     {
-        private readonly BrokeredMessageSerializer _serializer;
+        private readonly IMessageDataSerializer<BrokeredMessage> _serializer;
         private readonly IMessageHandler _messageHandler;
         private readonly IMessageProcessingExceptionHandler<BrokeredMessage> _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         public BrokeredMessageProcessor(
-            BrokeredMessageSerializer serializer,
+            IMessageDataSerializer<BrokeredMessage> serializer,
             IMessageHandler messageHandler,
             IMessageProcessingExceptionHandler<BrokeredMessage> exceptionHandler,
             CancellationToken cancellationToken)

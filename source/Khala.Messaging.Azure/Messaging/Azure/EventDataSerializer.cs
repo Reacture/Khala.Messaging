@@ -9,7 +9,7 @@
     /// <summary>
     /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="EventData"/>.
     /// </summary>
-    public sealed class EventDataSerializer
+    public sealed class EventDataSerializer : IMessageDataSerializer<EventData>
     {
         private readonly IMessageSerializer _messageSerializer;
 
@@ -65,42 +65,42 @@
         /// <summary>
         /// Deserializes <see cref="Envelope"/> from <see cref="EventData"/>.
         /// </summary>
-        /// <param name="eventData"><see cref="EventData"/> that contains serialized data.</param>
+        /// <param name="data"><see cref="EventData"/> that contains serialized data.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="Envelope"/> instance deserialized.</returns>
-        public Task<Envelope> Deserialize(EventData eventData)
+        public Task<Envelope> Deserialize(EventData data)
         {
-            if (eventData == null)
+            if (data == null)
             {
-                throw new ArgumentNullException(nameof(eventData));
+                throw new ArgumentNullException(nameof(data));
             }
 
-            return DeserialzeEnvelope(eventData);
+            async Task<Envelope> Run()
+            {
+                data.Properties.TryGetValue(
+                    "Khala.Messaging.Envelope.MessageId", out object messageId);
+
+                data.Properties.TryGetValue(
+                    "Khala.Messaging.Envelope.CorrelationId", out object correlationId);
+
+                using (Stream stream = data.GetBodyStream())
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                {
+                    string value = await reader.ReadToEndAsync().ConfigureAwait(false);
+                    object message = _messageSerializer.Deserialize(value);
+
+                    return new Envelope(
+                        ParseGuid(messageId) ?? Guid.NewGuid(),
+                        ParseGuid(correlationId),
+                        message);
+                }
+            }
+
+            return Run();
         }
 
         private static Guid? ParseGuid(object property)
         {
             return Guid.TryParse(property?.ToString(), out Guid value) ? value : default(Guid?);
-        }
-
-        private async Task<Envelope> DeserialzeEnvelope(EventData eventData)
-        {
-            eventData.Properties.TryGetValue(
-                "Khala.Messaging.Envelope.MessageId", out object messageId);
-
-            eventData.Properties.TryGetValue(
-                "Khala.Messaging.Envelope.CorrelationId", out object correlationId);
-
-            using (Stream stream = eventData.GetBodyStream())
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                string value = await reader.ReadToEndAsync().ConfigureAwait(false);
-                object message = _messageSerializer.Deserialize(value);
-
-                return new Envelope(
-                    ParseGuid(messageId) ?? Guid.NewGuid(),
-                    ParseGuid(correlationId),
-                    message);
-            }
         }
     }
 }
