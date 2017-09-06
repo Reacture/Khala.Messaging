@@ -18,18 +18,8 @@
             EventHubClient eventHubClient,
             EventDataSerializer serializer)
         {
-            if (serializer == null)
-            {
-                throw new ArgumentNullException(nameof(serializer));
-            }
-
-            if (eventHubClient == null)
-            {
-                throw new ArgumentNullException(nameof(eventHubClient));
-            }
-
-            _eventHubClient = eventHubClient;
-            _serializer = serializer;
+            _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public EventHubMessageBus(
