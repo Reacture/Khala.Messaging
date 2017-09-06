@@ -11,11 +11,11 @@
         private readonly MessageProcessorCore<EventData> _processorCore;
         private readonly CancellationToken _cancellationToken;
 
-        internal EventMessageProcessor(
+        public EventMessageProcessor(
             MessageProcessorCore<EventData> processorCore,
             CancellationToken cancellationToken)
         {
-            _processorCore = processorCore;
+            _processorCore = processorCore ?? throw new ArgumentNullException(nameof(processorCore));
             _cancellationToken = cancellationToken;
         }
 
