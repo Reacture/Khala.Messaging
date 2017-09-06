@@ -154,6 +154,7 @@
   <ItemGroup>
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
     <Compile Include="Messaging\Azure\BrokeredMessageSerializer_specs.cs" />
+    <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />

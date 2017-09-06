@@ -13,12 +13,7 @@
         public DelegatingMessageProcessingExceptionHandler(
             Func<MessageProcessingExceptionContext<TSource>, Task> handler)
         {
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-
-            _handler = handler;
+            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public Task Handle(MessageProcessingExceptionContext<TSource> context)
