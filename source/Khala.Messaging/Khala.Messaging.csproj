@@ -54,6 +54,7 @@
     <Compile Include="Messaging\IPartitioned.cs" />
     <Compile Include="Messaging\JsonMessageSerializer.cs" />
     <Compile Include="Messaging\MessagingExtensions.cs" />
+    <Compile Include="Messaging\TransientFaultHandlingMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
