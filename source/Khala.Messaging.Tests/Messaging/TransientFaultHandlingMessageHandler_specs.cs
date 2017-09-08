@@ -28,25 +28,43 @@
         }
 
         [TestMethod]
-        public async Task Handle_relays_with_retry_policy()
+        public void constructor_sets_properties_correctly()
         {
-            // Arrange
-            var spy = new TransientFaultHandlingSpy();
-            RetryPolicy retryPolicy = spy.Policy;
-            var envelope = new Envelope(new object());
-            var messageHandler = Mock.Of<IMessageHandler>();
-            Mock.Get(messageHandler)
-                .Setup(x => x.Handle(envelope, CancellationToken.None))
-                .Callback<Envelope, CancellationToken>((envelopeParam, cancellationToken) => spy.OperationCancellable.Invoke(cancellationToken))
-                .Returns(Task.FromResult(true));
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var retryPolicy = fixture.Create<RetryPolicy>();
+            var messageHandler = fixture.Create<IMessageHandler>();
+
             var sut = new TransientFaultHandlingMessageHandler(retryPolicy, messageHandler);
 
+            sut.RetryPolicy.Should().BeSameAs(retryPolicy);
+            sut.MessageHandler.Should().BeSameAs(messageHandler);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task Handle_relays_with_retry_policy(bool canceled)
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken(canceled);
+            var functionProvider = Mock.Of<IFunctionProvider>();
+            var spy = new TransientFaultHandlingActionSpy<Envelope>(functionProvider.Action);
+            var sut = new TransientFaultHandlingMessageHandler(
+                spy.Policy,
+                new DelegatingMessageHandler(spy.Operation));
+            var envelope = new Envelope(new object());
+
             // Act
-            await sut.Handle(envelope);
+            await sut.Handle(envelope, cancellationToken);
 
             // Assert
             spy.Verify();
-            Mock.Get(messageHandler).Verify(x => x.Handle(envelope, CancellationToken.None));
+            Mock.Get(functionProvider).Verify(x => x.Action(envelope, cancellationToken));
+        }
+
+        public interface IFunctionProvider
+        {
+            void Action<T1, T2>(T1 arg1, T2 arg2);
         }
     }
 }

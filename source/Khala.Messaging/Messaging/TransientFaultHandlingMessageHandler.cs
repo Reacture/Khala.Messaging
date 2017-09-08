@@ -7,14 +7,15 @@
 
     public class TransientFaultHandlingMessageHandler : IMessageHandler
     {
-        private RetryPolicy _retryPolicy;
-        private IMessageHandler _messageHandler;
-
         public TransientFaultHandlingMessageHandler(RetryPolicy retryPolicy, IMessageHandler messageHandler)
         {
-            _retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
-            _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+            RetryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
+            MessageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
         }
+
+        public RetryPolicy RetryPolicy { get; }
+
+        public IMessageHandler MessageHandler { get; }
 
         public Task Handle(Envelope envelope, CancellationToken cancellationToken)
         {
@@ -23,7 +24,7 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return _retryPolicy.Run(() => _messageHandler.Handle(envelope, cancellationToken));
+            return RetryPolicy.Run(() => MessageHandler.Handle(envelope, cancellationToken));
         }
     }
 }
