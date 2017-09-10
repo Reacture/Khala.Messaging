@@ -1,27 +1,25 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Khala.Messaging.Abstraction</id>
+    <id>Khala.Messaging.Contracts</id>
     <version>0.12.0</version>
-    <title>Khala.Messaging.Abstraction</title>
+    <title>Khala.Messaging.Contracts</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
     <licenseUrl>https://github.com/Reacture/Khala.Messaging/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Reacture/Khala.Messaging</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Abstraction layer for asynchronous messaging</description>
+    <description>Provides contract types for messaging</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright Gyuwon 2017</copyright>
     <tags>Khala Reactive Messaging</tags>
     <dependencies>
       <group targetFramework="netstandard1.1">
-        <dependency id="Khala.Messaging.Contracts" version="0.12.0" />
         <dependency id="NETStandard.Library" version="1.6.0" />
-        <dependency id="Newtonsoft.Json" version="9.0.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.Messaging\bin\Release\Khala.Messaging.Abstraction.dll" target="lib\netstandard1.1\Khala.Messaging.Abstraction.dll" />
+    <file src="..\source\Khala.Messaging.Contracts\bin\Release\Khala.Messaging.Contracts.dll" target="lib\netstandard1.1\Khala.Messaging.Contracts.dll" />
   </files>
 </package>
