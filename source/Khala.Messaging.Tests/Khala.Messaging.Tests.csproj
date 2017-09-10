@@ -199,6 +199,10 @@
       <Project>{56a2971b-ae27-4068-b14a-bd783375bca5}</Project>
       <Name>Khala.Messaging.Azure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj">
+      <Project>{008045d5-baf2-43ce-acd6-f5583845d2a5}</Project>
+      <Name>Khala.Messaging.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Khala.Messaging\Khala.Messaging.csproj">
       <Project>{989d5de1-b30b-4bc5-9cb1-bf23ec560b84}</Project>
       <Name>Khala.Messaging</Name>

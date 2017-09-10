@@ -44,14 +44,12 @@
   <ItemGroup>
     <Compile Include="Messaging\CompositeMessageHandler.cs" />
     <Compile Include="Messaging\DelegatingMessageHandler.cs" />
-    <Compile Include="Messaging\Envelope.cs" />
     <Compile Include="Messaging\Envelope{TMessage}.cs" />
     <Compile Include="Messaging\InterfaceAwareHandler.cs" />
     <Compile Include="Messaging\IHandles.cs" />
     <Compile Include="Messaging\IMessageBus.cs" />
     <Compile Include="Messaging\IMessageHandler.cs" />
     <Compile Include="Messaging\IMessageSerializer.cs" />
-    <Compile Include="Messaging\IPartitioned.cs" />
     <Compile Include="Messaging\JsonMessageSerializer.cs" />
     <Compile Include="Messaging\MessagingExtensions.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler.cs" />
@@ -61,6 +59,12 @@
     <CodeAnalysisDictionary Include="..\Rules\Khala.Messaging.Dictionary.xml">
       <Link>Khala.Messaging.Dictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj">
+      <Project>{008045d5-baf2-43ce-acd6-f5583845d2a5}</Project>
+      <Name>Khala.Messaging.Contracts</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
