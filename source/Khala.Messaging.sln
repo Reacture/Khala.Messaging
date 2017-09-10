@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging", "Khala.Messaging\Khala.Messaging.csproj", "{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}"
 EndProject
@@ -17,6 +17,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure.Owin", "Khala.Messaging.Azure.Owin\Khala.Messaging.Azure.Owin.csproj", "{86F451DA-8011-4DF3-A762-F8517BF0FC54}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Tests", "Khala.Messaging.Tests\Khala.Messaging.Tests.csproj", "{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Contracts", "Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj", "{008045D5-BAF2-43CE-ACD6-F5583845D2A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,8 +42,15 @@ Global
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{008045D5-BAF2-43CE-ACD6-F5583845D2A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{008045D5-BAF2-43CE-ACD6-F5583845D2A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{008045D5-BAF2-43CE-ACD6-F5583845D2A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{008045D5-BAF2-43CE-ACD6-F5583845D2A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B81D1A7-B481-489D-A25D-58F2D7DFB53A}
 	EndGlobalSection
 EndGlobal
