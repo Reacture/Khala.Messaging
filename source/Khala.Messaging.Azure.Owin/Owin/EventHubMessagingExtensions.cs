@@ -52,7 +52,7 @@
         public static void UseEventMessageProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
-            EventDataSerializer serializer,
+            IMessageDataSerializer<EventData> serializer,
             IMessageHandler messageHandler)
         {
             app.UseEventMessageProcessor(

@@ -14,7 +14,7 @@
             this IAppBuilder app,
             string connectionString,
             string queueName,
-            BrokeredMessageSerializer serializer,
+            IMessageDataSerializer<BrokeredMessage> serializer,
             IMessageHandler messageHandler,
             IMessageProcessingExceptionHandler<BrokeredMessage> exceptionHandler)
         {
@@ -60,7 +60,7 @@
             this IAppBuilder app,
             string connectionString,
             string queueName,
-            BrokeredMessageSerializer serializer,
+            IMessageDataSerializer<BrokeredMessage> serializer,
             IMessageHandler messageHandler)
         {
             app.UseServiceBusQueueMessageProcessor(
