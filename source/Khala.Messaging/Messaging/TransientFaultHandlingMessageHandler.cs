@@ -24,7 +24,7 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return RetryPolicy.Run(() => MessageHandler.Handle(envelope, cancellationToken));
+            return RetryPolicy.Run(MessageHandler.Handle, envelope, cancellationToken);
         }
     }
 }

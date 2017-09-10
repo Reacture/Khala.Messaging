@@ -1,10 +1,10 @@
 ﻿namespace Khala.Messaging
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using FluentAssertions;
     using Khala.TransientFaultHandling;
-    using Khala.TransientFaultHandling.Testing;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Ploeh.AutoFixture;
@@ -43,28 +43,36 @@
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task Handle_relays_with_retry_policy(bool canceled)
+        public async Task Handle_relays_to_retry_policy(bool canceled)
         {
             // Arrange
             var cancellationToken = new CancellationToken(canceled);
-            var functionProvider = Mock.Of<IFunctionProvider>();
-            var spy = new TransientFaultHandlingActionSpy<Envelope>(functionProvider.Action);
+            var maximumRetryCount = 1;
+            var moq = new Mock<RetryPolicy>(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var messageHandler = Mock.Of<IMessageHandler>();
             var sut = new TransientFaultHandlingMessageHandler(
-                spy.Policy,
-                new DelegatingMessageHandler(spy.Operation));
+                moq.Object,
+                messageHandler);
             var envelope = new Envelope(new object());
 
             // Act
             await sut.Handle(envelope, cancellationToken);
 
             // Assert
-            spy.Verify();
-            Mock.Get(functionProvider).Verify(x => x.Action(envelope, cancellationToken));
-        }
-
-        public interface IFunctionProvider
-        {
-            void Action<T1, T2>(T1 arg1, T2 arg2);
+            Func<Envelope, CancellationToken, Task> del = messageHandler.Handle;
+            moq.Verify(
+                x =>
+                x.Run<Envelope>(
+                    It.Is<Func<Envelope, CancellationToken, Task>>(
+                        p =>
+                        p.Target == del.Target &&
+                        p.Method == del.Method),
+                    envelope,
+                    cancellationToken),
+                Times.Once());
         }
     }
 }

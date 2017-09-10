@@ -120,7 +120,7 @@ References
                 await messageBus.Send(envelope, CancellationToken.None);
                 await RetryPolicy<Envelope>
                     .LinearTransientDefault(5, TimeSpan.FromMilliseconds(100))
-                    .Run(() => Task.FromResult(handled));
+                    .Run(ct => Task.FromResult(handled), cancellationToken);
 
                 // Assert
                 Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken));
