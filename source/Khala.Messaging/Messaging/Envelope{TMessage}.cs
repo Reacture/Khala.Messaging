@@ -30,10 +30,12 @@
                     nameof(correlationId));
             }
 
+#pragma warning disable IDE0016 // Ignore "Use 'throw' expression" because TMessage does not have a reference type constraint.
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
+#pragma warning restore IDE0016 // Ignore "Use 'throw' expression" because TMessage does not have a reference type constraint.
 
             MessageId = messageId;
             CorrelationId = correlationId;
