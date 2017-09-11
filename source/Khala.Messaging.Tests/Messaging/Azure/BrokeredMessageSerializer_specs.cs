@@ -101,6 +101,15 @@
         }
 
         [TestMethod]
+        public async Task Serialize_sets_PartitionKey_to_null_if_message_is_not_IPartitioned()
+        {
+            var message = new { Value = 1024 };
+            var envelope = new Envelope(message);
+            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
+            brokeredMessage.PartitionKey.Should().BeNull();
+        }
+
+        [TestMethod]
         public async Task Deserialize_deserializes_envelope_correctly()
         {
             var correlationId = Guid.NewGuid();

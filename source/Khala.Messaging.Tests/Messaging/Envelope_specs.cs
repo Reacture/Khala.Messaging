@@ -18,7 +18,7 @@
         }
 
         [TestMethod]
-        public void greedy_constructor_has_guard_clause_for_empty_correlationId()
+        public void constructor_has_guard_clause_for_empty_correlationId()
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), Guid.Empty, new object());
@@ -27,7 +27,7 @@
         }
 
         [TestMethod]
-        public void greedy_constructor_allows_null_correlationId()
+        public void constructor_allows_null_correlationId()
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), null, new object());

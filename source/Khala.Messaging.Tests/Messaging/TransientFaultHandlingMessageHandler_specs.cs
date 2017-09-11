@@ -65,7 +65,7 @@
             Func<Envelope, CancellationToken, Task> del = messageHandler.Handle;
             moq.Verify(
                 x =>
-                x.Run<Envelope>(
+                x.Run(
                     It.Is<Func<Envelope, CancellationToken, Task>>(
                         p =>
                         p.Target == del.Target &&
