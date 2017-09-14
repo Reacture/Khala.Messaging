@@ -52,6 +52,7 @@
     <Compile Include="Messaging\IMessageSerializer.cs" />
     <Compile Include="Messaging\JsonMessageSerializer.cs" />
     <Compile Include="Messaging\MessagingExtensions.cs" />
+    <Compile Include="Messaging\TransientFaultHandlingMessageBus.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
