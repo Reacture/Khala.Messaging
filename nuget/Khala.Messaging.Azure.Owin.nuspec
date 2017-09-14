@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.Messaging.Azure.Owin</id>
-    <version>0.13.0</version>
+    <version>0.13.1</version>
     <title>Khala.Messaging.Azure.Owin</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -16,8 +16,8 @@
     <dependencies>
       <group targetFramework="net45">
         <dependency id="Khala.Messaging.Contracts" version="0.13.0" />
-        <dependency id="Khala.Messaging.Abstraction" version="0.13.0" />
-        <dependency id="Khala.Messaging.Azure" version="0.13.0" />
+        <dependency id="Khala.Messaging.Abstraction" version="0.13.1" />
+        <dependency id="Khala.Messaging.Azure" version="0.13.1" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="Microsoft.Owin" version="3.0.1" />
         <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="2.2.10" />

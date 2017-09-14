@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.Messaging.Azure</id>
-    <version>0.13.0</version>
+    <version>0.13.1</version>
     <title>Khala.Messaging.Azure</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -16,7 +16,7 @@
     <dependencies>
       <group targetFramework="net45">
         <dependency id="Khala.Messaging.Contracts" version="0.13.0" />
-        <dependency id="Khala.Messaging.Abstraction" version="0.13.0" />
+        <dependency id="Khala.Messaging.Abstraction" version="0.13.1" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="WindowsAzure.ServiceBus" version="3.4.5" />
       </group>

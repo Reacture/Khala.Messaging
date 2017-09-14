@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.Messaging.Abstraction</id>
-    <version>0.13.0</version>
+    <version>0.13.1</version>
     <title>Khala.Messaging.Abstraction</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -16,6 +16,7 @@
     <dependencies>
       <group targetFramework="netstandard1.1">
         <dependency id="Khala.Messaging.Contracts" version="0.13.0" />
+        <dependency id="Khala.TransientFaultHandling" version="0.7.0" />
         <dependency id="NETStandard.Library" version="1.6.0" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
       </group>
