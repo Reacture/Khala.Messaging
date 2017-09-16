@@ -6,21 +6,21 @@
 
     public class DelegatingMessageHandler : IMessageHandler
     {
-        private Func<Envelope, CancellationToken, Task> _func;
+        private Func<Envelope, CancellationToken, Task> _handler;
 
-        public DelegatingMessageHandler(Func<Envelope, CancellationToken, Task> func)
+        public DelegatingMessageHandler(Func<Envelope, CancellationToken, Task> handler)
         {
-            _func = func ?? throw new ArgumentNullException(nameof(func));
+            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public DelegatingMessageHandler(Func<Envelope, Task> func)
+        public DelegatingMessageHandler(Func<Envelope, Task> handler)
         {
-            if (func == null)
+            if (handler == null)
             {
-                throw new ArgumentNullException(nameof(func));
+                throw new ArgumentNullException(nameof(handler));
             }
 
-            _func = (envelope, cancellationToken) => func.Invoke(envelope);
+            _handler = (envelope, cancellationToken) => handler.Invoke(envelope);
         }
 
         public Task Handle(Envelope envelope, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return _func.Invoke(envelope, cancellationToken);
+            return _handler.Invoke(envelope, cancellationToken);
         }
     }
 }
