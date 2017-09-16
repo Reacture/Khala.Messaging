@@ -5,11 +5,11 @@
 
     public class DelegatingMessageBusExceptionHandler : IMessageBusExceptionHandler
     {
-        private Func<MessageBusExceptionContext, Task> _func;
+        private Func<MessageBusExceptionContext, Task> _handler;
 
-        public DelegatingMessageBusExceptionHandler(Func<MessageBusExceptionContext, Task> func)
+        public DelegatingMessageBusExceptionHandler(Func<MessageBusExceptionContext, Task> handler)
         {
-            _func = func ?? throw new ArgumentNullException(nameof(func));
+            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public Task Handle(MessageBusExceptionContext context)
@@ -19,7 +19,7 @@
                 throw new ArgumentNullException(nameof(context));
             }
 
-            return _func.Invoke(context);
+            return _handler.Invoke(context);
         }
     }
 }

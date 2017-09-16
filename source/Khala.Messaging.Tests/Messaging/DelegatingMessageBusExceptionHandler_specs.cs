@@ -23,7 +23,7 @@
         }
 
         [TestMethod]
-        public async Task Handle_relays_to_function()
+        public async Task Handle_relays_to_asynchronous_handler_action()
         {
             var functionProvider = Mock.Of<IFunctionProvider>();
             var sut = new DelegatingMessageBusExceptionHandler(functionProvider.Func<MessageBusExceptionContext, Task>);
