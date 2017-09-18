@@ -167,15 +167,11 @@
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusQueueMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
-    <Compile Include="Messaging\DelegatingMessageBusExceptionHandler_specs.cs" />
     <Compile Include="Messaging\DelegatingMessageHandler_specs.cs" />
     <Compile Include="Messaging\EnvelopeT_specs.cs" />
     <Compile Include="Messaging\Envelope_specs.cs" />
-    <Compile Include="Messaging\ExceptionHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\InterfaceAwareHandler_specs.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_specs.cs" />
-    <Compile Include="Messaging\IMessageBusExceptionHandler_specs.cs" />
-    <Compile Include="Messaging\MessageBusExceptionContext_specs.cs" />
     <Compile Include="Messaging\MessagingExtensions_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler_specs.cs" />
