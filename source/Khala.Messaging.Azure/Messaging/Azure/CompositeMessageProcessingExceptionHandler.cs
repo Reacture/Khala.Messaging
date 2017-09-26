@@ -50,7 +50,7 @@
             {
                 try
                 {
-                    await handler.Handle(context);
+                    await handler.Handle(context).ConfigureAwait(false);
                 }
                 catch (Exception handlerError)
                 {
