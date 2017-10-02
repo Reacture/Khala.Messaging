@@ -4,6 +4,7 @@
     <TargetFramework>netstandard1.1</TargetFramework>
     <RootNamespace>Khala</RootNamespace>
     <Authors>Gyuwon</Authors>
+    <Version>0.15.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Khala.TransientFaultHandling" Version="0.10.0" />
+    <PackageReference Include="Khala.TransientFaultHandling" Version="0.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
   </ItemGroup>
