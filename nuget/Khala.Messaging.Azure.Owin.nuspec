@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package >
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.Messaging.Azure.Owin</id>
-    <version>0.13.1</version>
+    <version>0.14.0</version>
     <title>Khala.Messaging.Azure.Owin</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -15,12 +15,9 @@
     <tags>Khala Reactive Messaging Azure ServiceBus Queue EventHub Event Owin</tags>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="Khala.Messaging.Contracts" version="0.13.0" />
-        <dependency id="Khala.Messaging.Abstraction" version="0.13.1" />
-        <dependency id="Khala.Messaging.Azure" version="0.13.1" />
-        <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="Microsoft.Owin" version="3.0.1" />
-        <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="2.2.10" />
+        <dependency id="Khala.Messaging.Azure" version="0.14.0" exclude="build,analyzers" />
+        <dependency id="Microsoft.Owin" version="3.0.1" exclude="build,analyzers" />
+        <dependency id="Microsoft.Azure.ServiceBus.EventProcessorHost" version="2.2.10" exclude="build,analyzers" />
       </group>
     </dependencies>
   </metadata>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.Messaging.Abstraction</id>
-    <version>0.13.4</version>
+    <version>0.14.0</version>
     <title>Khala.Messaging.Abstraction</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -15,19 +15,19 @@
     <tags>Khala Reactive Messaging</tags>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="Khala.Messaging.Contracts" version="0.13.1" exclude="build,analyzers" />
-        <dependency id="Khala.TransientFaultHandling" version="0.7.4" exclude="build,analyzers" />
+        <dependency id="Khala.Messaging.Contracts" version="0.14.0" exclude="build,analyzers" />
+        <dependency id="Khala.TransientFaultHandling" version="0.10.0" exclude="build,analyzers" />
         <dependency id="Newtonsoft.Json" version="9.0.1" exclude="build,analyzers" />
       </group>
       <group targetFramework="netstandard1.1">
-        <dependency id="Khala.Messaging.Contracts" version="0.13.1" exclude="build,analyzers" />
-        <dependency id="Khala.TransientFaultHandling" version="0.7.4" exclude="build,analyzers" />
+        <dependency id="Khala.Messaging.Contracts" version="0.14.0" exclude="build,analyzers" />
+        <dependency id="Khala.TransientFaultHandling" version="0.10.0" exclude="build,analyzers" />
         <dependency id="Newtonsoft.Json" version="9.0.1" exclude="build,analyzers" />
-        <dependency id="NETStandard.Library" version="1.6.0" exclude="build,analyzers" />
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="build,analyzers" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.Messaging\bin\Release\Khala.Messaging.Abstraction.dll" target="lib\netstandard1.1\Khala.Messaging.Abstraction.dll" />
+    <file src="..\source\Khala.Messaging.Abstraction\bin\Release\netstandard1.1\Khala.Messaging.Abstraction.dll" target="lib\netstandard1.1\Khala.Messaging.Abstraction.dll" />
   </files>
 </package>

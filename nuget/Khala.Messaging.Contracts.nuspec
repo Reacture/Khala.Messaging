@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.Messaging.Contracts</id>
-    <version>0.13.1</version>
+    <version>0.14.0</version>
     <title>Khala.Messaging.Contracts</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -16,11 +16,11 @@
     <dependencies>
       <group targetFramework="net45" />
       <group targetFramework="netstandard1.1">
-        <dependency id="NETStandard.Library" version="1.6.0" exclude="build,analyzers" />
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="build,analyzers" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.Messaging.Contracts\bin\Release\Khala.Messaging.Contracts.dll" target="lib\netstandard1.1\Khala.Messaging.Contracts.dll" />
+    <file src="..\source\Khala.Messaging.Contracts\bin\Release\netstandard1.1\Khala.Messaging.Contracts.dll" target="lib\netstandard1.1\Khala.Messaging.Contracts.dll" />
   </files>
 </package>
