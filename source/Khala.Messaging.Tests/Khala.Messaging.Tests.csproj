@@ -52,8 +52,8 @@
       <HintPath>..\packages\FluentAssertions.4.18.0\lib\net45\FluentAssertions.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Khala.TransientFaultHandling, Version=0.7.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Khala.TransientFaultHandling.0.7.4\lib\netstandard1.1\Khala.TransientFaultHandling.dll</HintPath>
+    <Reference Include="Khala.TransientFaultHandling, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Khala.TransientFaultHandling.0.10.0\lib\netstandard1.1\Khala.TransientFaultHandling.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -184,6 +184,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj">
+      <Project>{627a5ba8-eb5d-484e-a1ad-22df556521d5}</Project>
+      <Name>Khala.Messaging.Abstraction</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Khala.Messaging.Azure.Owin\Khala.Messaging.Azure.Owin.csproj">
       <Project>{86f451da-8011-4df3-a762-f8517bf0fc54}</Project>
       <Name>Khala.Messaging.Azure.Owin</Name>
@@ -195,10 +199,6 @@
     <ProjectReference Include="..\Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj">
       <Project>{008045d5-baf2-43ce-acd6-f5583845d2a5}</Project>
       <Name>Khala.Messaging.Contracts</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Khala.Messaging\Khala.Messaging.csproj">
-      <Project>{989d5de1-b30b-4bc5-9cb1-bf23ec560b84}</Project>
-      <Name>Khala.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

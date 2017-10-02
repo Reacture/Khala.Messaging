@@ -72,13 +72,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj">
+      <Project>{627a5ba8-eb5d-484e-a1ad-22df556521d5}</Project>
+      <Name>Khala.Messaging.Abstraction</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj">
       <Project>{008045d5-baf2-43ce-acd6-f5583845d2a5}</Project>
       <Name>Khala.Messaging.Contracts</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Khala.Messaging\Khala.Messaging.csproj">
-      <Project>{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}</Project>
-      <Name>Khala.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

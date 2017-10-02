@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging", "Khala.Messaging\Khala.Messaging.csproj", "{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{233BCB29-1F2E-432C-B825-7F54FF4BD64E}"
 	ProjectSection(SolutionItems) = preProject
 		Rules\Khala.Messaging.Dictionary.xml = Rules\Khala.Messaging.Dictionary.xml
@@ -20,16 +18,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Tests", "Kh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Contracts", "Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj", "{D4BE37C8-D223-4FFA-B148-AD43119FAB36}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Abstraction", "Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj", "{627A5BA8-EB5D-484E-A1AD-22DF556521D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{989D5DE1-B30B-4BC5-9CB1-BF23EC560B84}.Release|Any CPU.Build.0 = Release|Any CPU
 		{56A2971B-AE27-4068-B14A-BD783375BCA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56A2971B-AE27-4068-B14A-BD783375BCA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56A2971B-AE27-4068-B14A-BD783375BCA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,6 +42,10 @@ Global
 		{D4BE37C8-D223-4FFA-B148-AD43119FAB36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4BE37C8-D223-4FFA-B148-AD43119FAB36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4BE37C8-D223-4FFA-B148-AD43119FAB36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{627A5BA8-EB5D-484E-A1AD-22DF556521D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{627A5BA8-EB5D-484E-A1AD-22DF556521D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{627A5BA8-EB5D-484E-A1AD-22DF556521D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{627A5BA8-EB5D-484E-A1AD-22DF556521D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
