@@ -2,7 +2,8 @@
 {
     using System;
     using System.Threading;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
+    using Microsoft.Azure.EventHubs.Processor;
 
     public sealed class EventMessageProcessorFactory : IEventProcessorFactory
     {

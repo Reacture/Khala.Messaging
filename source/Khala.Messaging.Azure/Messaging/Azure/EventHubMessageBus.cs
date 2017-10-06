@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
 
     /// <summary>
     /// Provides the implementation of <see cref="IMessageBus"/> for Azure Event hubs.
@@ -49,7 +49,8 @@
         private async Task SendMessage(Envelope envelope)
         {
             EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
-            await _eventHubClient.SendAsync(eventData).ConfigureAwait(false);
+            string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
+            await _eventHubClient.SendAsync(eventData, partitionKey).ConfigureAwait(false);
         }
 
         public Task SendBatch(
@@ -75,6 +76,8 @@
                 envelopeList.Add(envelope);
             }
 
+            // TODO: Ensure envelopes is not empty.
+            // TODO: Ensure same partition keys.
             return SendMessages(envelopeList);
         }
 
@@ -88,7 +91,7 @@
                 eventDataList.Add(eventData);
             }
 
-            await _eventHubClient.SendBatchAsync(eventDataList).ConfigureAwait(false);
+            await _eventHubClient.SendAsync(eventDataList).ConfigureAwait(false);
         }
     }
 }

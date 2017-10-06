@@ -1,7 +1,6 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -37,41 +36,43 @@
                 throw new ArgumentNullException(nameof(checkpoint));
             }
 
-            async Task Run()
+            return RunProcess(source, checkpoint, cancellationToken);
+        }
+
+        private async Task RunProcess(
+            T source,
+            Func<T, Task> checkpoint,
+            CancellationToken cancellationToken)
+        {
+            Envelope envelope = null;
+            try
             {
-                Envelope envelope = null;
+                envelope = await _serializer.Deserialize(source).ConfigureAwait(false);
+                await _messageHandler.Handle(envelope, cancellationToken).ConfigureAwait(false);
+                await checkpoint.Invoke(source).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
                 try
                 {
-                    envelope = await _serializer.Deserialize(source).ConfigureAwait(false);
-                    await _messageHandler.Handle(envelope, cancellationToken).ConfigureAwait(false);
-                    await checkpoint.Invoke(source).ConfigureAwait(false);
+                    var exceptionContext
+                        = envelope == null
+                        ? new MessageProcessingExceptionContext<T>(source, exception)
+                        : new MessageProcessingExceptionContext<T>(source, envelope, exception);
+
+                    await _exceptionHandler.Handle(exceptionContext).ConfigureAwait(false);
+
+                    if (exceptionContext.Handled)
+                    {
+                        return;
+                    }
                 }
-                catch (Exception exception)
+                catch
                 {
-                    try
-                    {
-                        var exceptionContext
-                            = envelope == null
-                            ? new MessageProcessingExceptionContext<T>(source, exception)
-                            : new MessageProcessingExceptionContext<T>(source, envelope, exception);
-
-                        await _exceptionHandler.Handle(exceptionContext).ConfigureAwait(false);
-
-                        if (exceptionContext.Handled)
-                        {
-                            return;
-                        }
-                    }
-                    catch (Exception unhandleable)
-                    {
-                        Trace.TraceError(unhandleable.ToString());
-                    }
-
-                    throw;
                 }
-            }
 
-            return Run();
+                throw;
+            }
         }
     }
 }

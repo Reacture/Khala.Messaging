@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading.Tasks;
 
     public sealed class CompositeMessageProcessingExceptionHandler<TSource> :
@@ -52,9 +51,8 @@
                 {
                     await handler.Handle(context).ConfigureAwait(false);
                 }
-                catch (Exception handlerError)
+                catch
                 {
-                    Trace.TraceError(handlerError.ToString());
                 }
             }
         }

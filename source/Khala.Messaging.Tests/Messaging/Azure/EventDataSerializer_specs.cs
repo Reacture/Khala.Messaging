@@ -1,12 +1,11 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using FakeBlogEngine;
     using FluentAssertions;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
@@ -48,14 +47,11 @@
 
             EventData eventData = await sut.Serialize(envelope);
 
-            using (Stream stream = eventData.GetBodyStream())
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                string value = reader.ReadToEnd();
-                object actual = messageSerializer.Deserialize(value);
-                actual.Should().BeOfType<BlogPostCreated>();
-                actual.ShouldBeEquivalentTo(message);
-            }
+            ArraySegment<byte> body = eventData.Body;
+            string value = Encoding.UTF8.GetString(body.Array, body.Offset, body.Count);
+            object actual = messageSerializer.Deserialize(value);
+            actual.Should().BeOfType<BlogPostCreated>();
+            actual.ShouldBeEquivalentTo(message);
         }
 
         [TestMethod]
@@ -90,15 +86,6 @@
         }
 
         [TestMethod]
-        public async Task Serialize_sets_PartitionKey_correctly_if_message_is_IPartitioned()
-        {
-            IPartitioned message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(message);
-            EventData eventData = await sut.Serialize(envelope);
-            eventData.PartitionKey.Should().Be(message.PartitionKey);
-        }
-
-        [TestMethod]
         public async Task Deserialize_deserializes_envelope_correctly()
         {
             var correlationId = Guid.NewGuid();
@@ -108,8 +95,7 @@
 
             Envelope actual = await sut.Deserialize(eventData);
 
-            actual.ShouldBeEquivalentTo(
-                envelope, opts => opts.RespectingRuntimeTypes());
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
 
         [TestMethod]
@@ -120,7 +106,7 @@
             EventData eventData = await sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Messaging.Envelope.MessageId");
 
-            Envelope actual = await sut.Deserialize(eventData.Clone());
+            Envelope actual = await sut.Deserialize(eventData);
 
             actual.MessageId.Should().NotBeEmpty();
             (await sut.Deserialize(eventData)).MessageId.Should().NotBe(actual.MessageId);
@@ -139,8 +125,7 @@
             actual = await sut.Deserialize(eventData);
 
             action.ShouldNotThrow();
-            actual.ShouldBeEquivalentTo(
-                envelope, opts => opts.RespectingRuntimeTypes());
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
     }
 }

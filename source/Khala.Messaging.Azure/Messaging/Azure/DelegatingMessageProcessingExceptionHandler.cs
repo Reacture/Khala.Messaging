@@ -1,7 +1,6 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.Diagnostics;
     using System.Threading.Tasks;
 
     public sealed class DelegatingMessageProcessingExceptionHandler<TSource> :
@@ -32,9 +31,8 @@
             {
                 await _handler.Invoke(context);
             }
-            catch (Exception handlerError)
+            catch
             {
-                Trace.TraceError(handlerError.ToString());
             }
         }
     }

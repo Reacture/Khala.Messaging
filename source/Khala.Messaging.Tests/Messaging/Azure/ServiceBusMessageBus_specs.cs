@@ -1,20 +1,19 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using FakeBlogEngine;
     using FluentAssertions;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.ServiceBus;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
     using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
-    public class ServiceBusQueueMessageBus_specs
+    public class ServiceBusMessageBus_specs
     {
         public const string ConnectionStringPropertyName = "servicebusqueuemessagebus-connectionstring";
         public const string QueueNamePropertyName = "servicebusqueuemessagebus-path";
@@ -37,46 +36,51 @@ References
         private static string connectionString;
         private static string queueName;
         private static QueueClient queueClient;
+        private static ConcurrentQueue<Message> receivedQueue;
         private IFixture fixture;
-        private BrokeredMessageSerializer serializer;
-        private ServiceBusQueueMessageBus sut;
+        private ServiceBusMessageSerializer serializer;
+        private ServiceBusMessageBus sut;
 
         public TestContext TestContext { get; set; }
 
         [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
+        public static async Task ClassInitialize(TestContext context)
         {
             connectionString = (string)context.Properties[ConnectionStringPropertyName];
             queueName = (string)context.Properties[QueueNamePropertyName];
             if (string.IsNullOrWhiteSpace(connectionString) == false &&
                 string.IsNullOrWhiteSpace(queueName) == false)
             {
-                queueClient = QueueClient.CreateFromConnectionString(connectionString, queueName);
-                ClearQueue(queueClient);
+                queueClient = new QueueClient(
+                    connectionString,
+                    queueName,
+                    receiveMode: ReceiveMode.ReceiveAndDelete);
+
+                receivedQueue = new ConcurrentQueue<Message>();
+
+                queueClient.RegisterMessageHandler(
+                    (message, cancellationToken) =>
+                    {
+                        receivedQueue.Enqueue(message);
+                        return Task.CompletedTask;
+                    },
+                    exceptionReceivedEventArgs => Task.CompletedTask);
+
+                await ClearQueue(queueClient);
             }
+        }
+
+        private static async Task ClearQueue(QueueClient queueClient)
+        {
+            do
+            {
+                await Task.Delay(1000);
+            }
+            while (receivedQueue.TryDequeue(out Message received));
         }
 
         [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            queueClient?.Close();
-        }
-
-        private static void ClearQueue(QueueClient queueClient)
-        {
-            while (queueClient.Peek() != null)
-            {
-                CompleteAll(queueClient.ReceiveBatch(100));
-            }
-        }
-
-        private static void CompleteAll(IEnumerable<BrokeredMessage> messages)
-        {
-            Task[] tasks = messages
-                .Select(m => Task.Factory.StartNew(() => m.Complete()))
-                .ToArray();
-            Task.WaitAll(tasks);
-        }
+        public static async Task ClassCleanup() => await queueClient?.CloseAsync();
 
         [TestInitialize]
         public void TestInitialize()
@@ -87,19 +91,19 @@ References
             }
 
             fixture = new Fixture().Customize(new AutoMoqCustomization());
-            serializer = new BrokeredMessageSerializer();
+            serializer = new ServiceBusMessageSerializer();
 
             fixture.Inject(queueClient);
             fixture.Inject(serializer);
 
-            sut = new ServiceBusQueueMessageBus(queueClient, serializer);
+            sut = new ServiceBusMessageBus(queueClient, serializer);
         }
 
         [TestMethod]
         public void class_has_guard_clauses()
         {
             var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(ServiceBusQueueMessageBus));
+            assertion.Verify(typeof(ServiceBusMessageBus));
         }
 
         [TestMethod]
@@ -114,26 +118,19 @@ References
         public async Task Send_sends_message_correctly()
         {
             // Arrange
-            BrokeredMessage received = null;
-            try
-            {
-                var message = fixture.Create<BlogPostCreated>();
-                var envelope = new Envelope(message);
+            var message = fixture.Create<BlogPostCreated>();
+            var envelope = new Envelope(message);
 
-                // Act
-                await sut.Send(envelope, CancellationToken.None);
+            // Act
+            await sut.Send(envelope, CancellationToken.None);
 
-                // Assert
-                received = await queueClient.ReceiveAsync(TimeSpan.FromSeconds(3));
-                received.Should().NotBeNull();
-                Envelope actual = await serializer.Deserialize(received);
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
-            }
-            finally
-            {
-                // Cleanup
-                received?.Complete();
-            }
+            // Assert
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            receivedQueue.Should().ContainSingle();
+            receivedQueue.TryDequeue(out Message received);
+            received.Should().NotBeNull();
+            Envelope actual = await serializer.Deserialize(received);
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
     }
 }

@@ -1,35 +1,34 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
-    using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using FakeBlogEngine;
     using FluentAssertions;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.ServiceBus;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
     using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
-    public class BrokeredMessageSerializer_specs
+    public class ServiceBusMessageSerializer_specs
     {
         private readonly IFixture fixture;
         private readonly JsonMessageSerializer messageSerializer;
-        private readonly BrokeredMessageSerializer sut;
+        private readonly ServiceBusMessageSerializer sut;
 
-        public BrokeredMessageSerializer_specs()
+        public ServiceBusMessageSerializer_specs()
         {
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             messageSerializer = new JsonMessageSerializer();
-            sut = new BrokeredMessageSerializer(messageSerializer);
+            sut = new ServiceBusMessageSerializer(messageSerializer);
         }
 
         [TestMethod]
         public void sut_implements_IMessageDataSerializer_of_BrokeredMessage()
         {
-            typeof(BrokeredMessageSerializer).Should().Implement<IMessageDataSerializer<BrokeredMessage>>();
+            typeof(ServiceBusMessageSerializer).Should().Implement<IMessageDataSerializer<Message>>();
         }
 
         [TestMethod]
@@ -37,7 +36,7 @@
         {
             fixture.OmitAutoProperties = true;
             var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(BrokeredMessageSerializer));
+            assertion.Verify(typeof(ServiceBusMessageSerializer));
         }
 
         [TestMethod]
@@ -46,16 +45,12 @@
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
+            Message serviceBusMessage = await sut.Serialize(envelope);
 
-            using (var stream = brokeredMessage.GetBody<Stream>())
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                string value = reader.ReadToEnd();
-                object actual = messageSerializer.Deserialize(value);
-                actual.Should().BeOfType<BlogPostCreated>();
-                actual.ShouldBeEquivalentTo(message);
-            }
+            string value = Encoding.UTF8.GetString(serviceBusMessage.Body);
+            object actual = messageSerializer.Deserialize(value);
+            actual.Should().BeOfType<BlogPostCreated>();
+            actual.ShouldBeEquivalentTo(message);
         }
 
         [TestMethod]
@@ -64,12 +59,12 @@
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
+            Message serviceBusMessage = await sut.Serialize(envelope);
 
-            brokeredMessage.MessageId.Should().Be(envelope.MessageId.ToString("n"));
+            serviceBusMessage.MessageId.Should().Be(envelope.MessageId.ToString("n"));
             string propertyName = "Khala.Messaging.Envelope.MessageId";
-            brokeredMessage.Properties.Keys.Should().Contain(propertyName);
-            object actual = brokeredMessage.Properties[propertyName];
+            serviceBusMessage.UserProperties.Keys.Should().Contain(propertyName);
+            object actual = serviceBusMessage.UserProperties[propertyName];
             actual.Should().BeOfType<string>();
             Guid.Parse((string)actual).Should().Be(envelope.MessageId);
         }
@@ -81,12 +76,12 @@
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(correlationId, message);
 
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
+            Message serviceBusMessage = await sut.Serialize(envelope);
 
-            brokeredMessage.CorrelationId.Should().Be(envelope.CorrelationId?.ToString("n"));
+            serviceBusMessage.CorrelationId.Should().Be(envelope.CorrelationId?.ToString("n"));
             string propertyName = "Khala.Messaging.Envelope.CorrelationId";
-            brokeredMessage.Properties.Keys.Should().Contain(propertyName);
-            object actual = brokeredMessage.Properties[propertyName];
+            serviceBusMessage.UserProperties.Keys.Should().Contain(propertyName);
+            object actual = serviceBusMessage.UserProperties[propertyName];
             actual.Should().BeOfType<string>();
             Guid.Parse((string)actual).Should().Be(correlationId);
         }
@@ -96,8 +91,8 @@
         {
             IPartitioned message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
-            brokeredMessage.PartitionKey.Should().Be(message.PartitionKey);
+            Message serviceBusMessage = await sut.Serialize(envelope);
+            serviceBusMessage.PartitionKey.Should().Be(message.PartitionKey);
         }
 
         [TestMethod]
@@ -105,8 +100,10 @@
         {
             var message = new { Value = 1024 };
             var envelope = new Envelope(message);
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
-            brokeredMessage.PartitionKey.Should().BeNull();
+
+            Message serviceBusMessage = await sut.Serialize(envelope);
+
+            serviceBusMessage.PartitionKey.Should().BeNull();
         }
 
         [TestMethod]
@@ -115,12 +112,11 @@
             var correlationId = Guid.NewGuid();
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(correlationId, message);
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
+            Message serviceBusMessage = await sut.Serialize(envelope);
 
-            Envelope actual = await sut.Deserialize(brokeredMessage);
+            Envelope actual = await sut.Deserialize(serviceBusMessage);
 
-            actual.ShouldBeEquivalentTo(
-                envelope, opts => opts.RespectingRuntimeTypes());
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
 
         [TestMethod]
@@ -128,13 +124,13 @@
         {
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
-            brokeredMessage.Properties.Remove("Khala.Messaging.Envelope.MessageId");
+            Message serviceBusMessage = await sut.Serialize(envelope);
+            serviceBusMessage.UserProperties.Remove("Khala.Messaging.Envelope.MessageId");
 
-            Envelope actual = await sut.Deserialize(brokeredMessage.Clone());
+            Envelope actual = await sut.Deserialize(serviceBusMessage.Clone());
 
             actual.MessageId.Should().NotBeEmpty();
-            (await sut.Deserialize(brokeredMessage)).MessageId.Should().NotBe(actual.MessageId);
+            (await sut.Deserialize(serviceBusMessage)).MessageId.Should().NotBe(actual.MessageId);
         }
 
         [TestMethod]
@@ -142,16 +138,15 @@
         {
             var message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
-            BrokeredMessage brokeredMessage = await sut.Serialize(envelope);
-            brokeredMessage.Properties.Remove("Khala.Envelope.CorrelationId");
+            Message serviceBusMessage = await sut.Serialize(envelope);
+            serviceBusMessage.UserProperties.Remove("Khala.Envelope.CorrelationId");
 
             Envelope actual = null;
             Func<Task> action = async () =>
-            actual = await sut.Deserialize(brokeredMessage);
+            actual = await sut.Deserialize(serviceBusMessage);
 
             action.ShouldNotThrow();
-            actual.ShouldBeEquivalentTo(
-                envelope, opts => opts.RespectingRuntimeTypes());
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
     }
 }

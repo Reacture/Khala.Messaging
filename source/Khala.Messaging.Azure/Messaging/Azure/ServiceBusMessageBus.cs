@@ -4,30 +4,31 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
 
-    public sealed class ServiceBusQueueMessageBus : IMessageBus
+    public sealed class ServiceBusMessageBus : IMessageBus
     {
-        private readonly QueueClient _queueClient;
-        private readonly BrokeredMessageSerializer _serializer;
+        private readonly ISenderClient _senderClient;
+        private readonly ServiceBusMessageSerializer _serializer;
 
-        public ServiceBusQueueMessageBus(
-            QueueClient queueClient,
-            BrokeredMessageSerializer serializer)
+        public ServiceBusMessageBus(
+            ISenderClient senderClient,
+            ServiceBusMessageSerializer serializer)
         {
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            _queueClient = queueClient ?? throw new ArgumentNullException(nameof(queueClient));
+            _senderClient = senderClient ?? throw new ArgumentNullException(nameof(senderClient));
         }
 
-        public ServiceBusQueueMessageBus(
-            QueueClient queueClient,
+        public ServiceBusMessageBus(
+            ISenderClient senderClient,
             IMessageSerializer messageSerializer)
-            : this(queueClient, new BrokeredMessageSerializer(messageSerializer))
+            : this(senderClient, new ServiceBusMessageSerializer(messageSerializer))
         {
         }
 
-        public ServiceBusQueueMessageBus(QueueClient queueClient)
-            : this(queueClient, new BrokeredMessageSerializer())
+        public ServiceBusMessageBus(ISenderClient senderClient)
+            : this(senderClient, new ServiceBusMessageSerializer())
         {
         }
 
@@ -45,8 +46,8 @@
 
         private async Task SendMessage(Envelope envelope)
         {
-            BrokeredMessage brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
-            await _queueClient.SendAsync(brokeredMessage).ConfigureAwait(false);
+            Message message = await _serializer.Serialize(envelope).ConfigureAwait(false);
+            await _senderClient.SendAsync(message).ConfigureAwait(false);
         }
 
         public Task SendBatch(
@@ -72,20 +73,20 @@
                 envelopeList.Add(envelope);
             }
 
-            return SendMessages(envelopeList);
+            return RunSendBatch(envelopeList);
         }
 
-        private async Task SendMessages(IEnumerable<Envelope> envelopes)
+        private async Task RunSendBatch(IEnumerable<Envelope> envelopes)
         {
-            var brokeredMessages = new List<BrokeredMessage>();
+            var messages = new List<Message>();
 
             foreach (Envelope envelope in envelopes)
             {
-                BrokeredMessage brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
-                brokeredMessages.Add(brokeredMessage);
+                Message brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
+                messages.Add(brokeredMessage);
             }
 
-            await _queueClient.SendBatchAsync(brokeredMessages).ConfigureAwait(false);
+            await _senderClient.SendAsync(messages).ConfigureAwait(false);
         }
     }
 }

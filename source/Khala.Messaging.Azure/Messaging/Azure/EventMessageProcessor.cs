@@ -4,7 +4,8 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
+    using Microsoft.Azure.EventHubs.Processor;
 
     public sealed class EventMessageProcessor : IEventProcessor
     {
@@ -19,15 +20,11 @@
             _cancellationToken = cancellationToken;
         }
 
-        Task IEventProcessor.CloseAsync(PartitionContext context, CloseReason reason)
-        {
-            return Task.FromResult(true);
-        }
+        Task IEventProcessor.CloseAsync(PartitionContext context, CloseReason reason) => Task.CompletedTask;
 
-        Task IEventProcessor.OpenAsync(PartitionContext context)
-        {
-            return Task.FromResult(true);
-        }
+        Task IEventProcessor.OpenAsync(PartitionContext context) => Task.CompletedTask;
+
+        Task IEventProcessor.ProcessErrorAsync(PartitionContext context, Exception error) => Task.CompletedTask;
 
         public Task ProcessEventsAsync(
             PartitionContext context, IEnumerable<EventData> messages)

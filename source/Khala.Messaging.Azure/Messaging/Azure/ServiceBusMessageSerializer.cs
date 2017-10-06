@@ -3,12 +3,12 @@
     using System;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.EventHubs;
+    using Microsoft.Azure.ServiceBus;
 
     /// <summary>
-    /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="EventData"/>.
+    /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="Message"/>.
     /// </summary>
-    public sealed class EventDataSerializer : IMessageDataSerializer<EventData>
+    public sealed class ServiceBusMessageSerializer : IMessageDataSerializer<Message>
     {
         private const string MessageIdName = "Khala.Messaging.Envelope.MessageId";
         private const string CorrelationIdName = "Khala.Messaging.Envelope.CorrelationId";
@@ -16,18 +16,18 @@
         private readonly IMessageSerializer _messageSerializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class with an <see cref="IMessageSerializer"/>.
+        /// Initializes a new instance of the <see cref="ServiceBusMessageSerializer"/> class with an <see cref="IMessageSerializer"/>.
         /// </summary>
         /// <param name="messageSerializer"><see cref="IMessageSerializer"/> to serialize enveloped messages.</param>
-        public EventDataSerializer(IMessageSerializer messageSerializer)
+        public ServiceBusMessageSerializer(IMessageSerializer messageSerializer)
         {
             _messageSerializer = messageSerializer ?? throw new ArgumentNullException(nameof(messageSerializer));
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class.
+        /// Initializes a new instance of the <see cref="ServiceBusMessageSerializer"/> class.
         /// </summary>
-        public EventDataSerializer()
+        public ServiceBusMessageSerializer()
             : this(new JsonMessageSerializer())
         {
         }
@@ -38,29 +38,32 @@
             : default(Guid?);
 
         /// <summary>
-        /// Serializes <see cref="Envelope"/> instance into <see cref="EventData"/>.
+        /// Serializes <see cref="Envelope"/> instance into <see cref="Message"/>.
         /// </summary>
         /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
-        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="EventData"/> that contains serialized data.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Serialize() method returns EventData asynchronously.")]
-        public Task<EventData> Serialize(Envelope envelope)
+        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="Message"/> that contains serialized data.</returns>
+        public Task<Message> Serialize(Envelope envelope)
         {
             if (envelope == null)
             {
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            byte[] body = SerializeMessage(envelope.Message);
+            object message = envelope.Message;
+            byte[] body = SerializeMessage(message);
             var messageId = envelope.MessageId.ToString("n");
             var correlationId = envelope.CorrelationId?.ToString("n");
 
-            return Task.FromResult(new EventData(body)
+            return Task.FromResult(new Message(body)
             {
-                Properties =
+                MessageId = messageId,
+                CorrelationId = correlationId,
+                UserProperties =
                 {
                     [MessageIdName] = messageId,
                     [CorrelationIdName] = correlationId
-                }
+                },
+                PartitionKey = (message as IPartitioned)?.PartitionKey
             });
         }
 
@@ -71,19 +74,19 @@
         }
 
         /// <summary>
-        /// Deserializes <see cref="Envelope"/> from <see cref="EventData"/>.
+        /// Deserializes <see cref="Envelope"/> from <see cref="Message"/>.
         /// </summary>
-        /// <param name="data"><see cref="EventData"/> that contains serialized data.</param>
+        /// <param name="data"><see cref="Message"/> that contains serialized data.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="Envelope"/> instance deserialized.</returns>
-        public Task<Envelope> Deserialize(EventData data)
+        public Task<Envelope> Deserialize(Message data)
         {
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            data.Properties.TryGetValue(MessageIdName, out object messageId);
-            data.Properties.TryGetValue(CorrelationIdName, out object correlationId);
+            data.UserProperties.TryGetValue(MessageIdName, out object messageId);
+            data.UserProperties.TryGetValue(CorrelationIdName, out object correlationId);
             object message = DeserializeMessage(data.Body);
 
             return Task.FromResult(new Envelope(
@@ -92,9 +95,9 @@
                 message));
         }
 
-        private object DeserializeMessage(ArraySegment<byte> body)
+        private object DeserializeMessage(byte[] body)
         {
-            string value = Encoding.UTF8.GetString(body.Array, body.Offset, body.Count);
+            string value = Encoding.UTF8.GetString(body);
             return _messageSerializer.Deserialize(value);
         }
     }

@@ -1,12 +1,12 @@
 ﻿namespace Owin
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Khala.Messaging;
     using Khala.Messaging.Azure;
+    using Microsoft.Azure.EventHubs;
+    using Microsoft.Azure.EventHubs.Processor;
     using Microsoft.Owin.BuilderProperties;
-    using Microsoft.ServiceBus.Messaging;
 
     public static class EventHubMessagingExtensions
     {
@@ -42,11 +42,18 @@
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
-            var processorCore = new MessageProcessorCore<EventData>(messageHandler, serializer, exceptionHandler);
-            var processorFactory = new EventMessageProcessorFactory(processorCore, cancellationToken);
+            var appProperties = new AppProperties(app.Properties);
+
+            var processorFactory = new EventMessageProcessorFactory(
+                new MessageProcessorCore<EventData>(
+                    messageHandler,
+                    serializer,
+                    exceptionHandler),
+                appProperties.OnAppDisposing);
+
             Start(eventProcessorHost, processorFactory);
-            cancellationToken.Register(() => Stop(eventProcessorHost));
+
+            appProperties.OnAppDisposing.Register(() => Stop(eventProcessorHost));
         }
 
         public static void UseEventMessageProcessor(
@@ -67,15 +74,15 @@
             EventMessageProcessorFactory processorFactory) =>
             eventProcessorHost.RegisterEventProcessorFactoryAsync(processorFactory).Wait();
 
-        private static void Stop(EventProcessorHost eventProcessorHost) =>
+        private static void Stop(
+            EventProcessorHost eventProcessorHost) =>
             eventProcessorHost.UnregisterEventProcessorAsync().Wait();
 
         private class DefaultExceptionHandler : IMessageProcessingExceptionHandler<EventData>
         {
             public static readonly DefaultExceptionHandler Instance = new DefaultExceptionHandler();
 
-            public Task Handle(MessageProcessingExceptionContext<EventData> context)
-                => Task.FromResult(true);
+            public Task Handle(MessageProcessingExceptionContext<EventData> context) => Task.CompletedTask;
         }
     }
 }

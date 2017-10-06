@@ -7,18 +7,16 @@
     using System.Threading.Tasks;
     using FakeBlogEngine;
     using FluentAssertions;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
     using Ploeh.AutoFixture.Idioms;
-    using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
 
     [TestClass]
     public class EventHubMessageBus_specs
     {
         public const string EventHubConnectionStringPropertyName = "eventhubmessagebus-eventhub-connectionstring";
-        public const string EventHubPathPropertyName = "eventhubmessagebus-eventhub-path";
         public const string ConsumerGroupPropertyName = "eventhubmessagebus-eventhub-consumergroup";
 
         private static string ConnectionParametersRequired => $@"
@@ -28,7 +26,6 @@ Event Hub connection information is not set. To run tests on the EventHubMessage
 <RunSettings>
   <TestRunParameters>
     <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
-    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
     <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
   </TestRunParameters>  
 </RunSettings>
@@ -49,12 +46,10 @@ References
         public static void ClassInitialize(TestContext context)
         {
             var connectionString = (string)context.Properties[EventHubConnectionStringPropertyName];
-            var path = (string)context.Properties[EventHubPathPropertyName];
-            if (string.IsNullOrWhiteSpace(connectionString) == false &&
-                string.IsNullOrWhiteSpace(path) == false)
+            if (string.IsNullOrWhiteSpace(connectionString) == false)
             {
-                eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, path);
-                consumerGroupName = (string)context.Properties[ConsumerGroupPropertyName] ?? DefaultGroupName;
+                eventHubClient = EventHubClient.CreateFromConnectionString(connectionString);
+                consumerGroupName = (string)context.Properties[ConsumerGroupPropertyName] ?? PartitionReceiver.DefaultConsumerGroupName;
             }
         }
 
@@ -103,7 +98,7 @@ References
             var correlationId = Guid.NewGuid();
             var envelope = new Envelope(correlationId, message);
 
-            List<EventHubReceiver> receivers = await GetReceivers();
+            List<PartitionReceiver> receivers = await GetReceivers();
 
             try
             {
@@ -111,10 +106,10 @@ References
                 await sut.Send(envelope, CancellationToken.None);
 
                 // Assert
-                var waitTime = TimeSpan.FromSeconds(1);
-                Task<EventData>[] tasks = receivers.Select(r => r.ReceiveAsync(waitTime)).ToArray();
+                var waitTime = TimeSpan.FromSeconds(3);
+                Task<IEnumerable<EventData>>[] tasks = receivers.Select(r => r.ReceiveAsync(1, waitTime)).ToArray();
                 await Task.WhenAll(tasks);
-                EventData eventData = tasks.Select(t => t.Result).FirstOrDefault(r => r != null);
+                EventData eventData = tasks.SelectMany(t => t?.Result ?? Enumerable.Empty<EventData>()).FirstOrDefault(r => r != null);
 
                 eventData.Should().NotBeNull();
                 Envelope actual = await serializer.Deserialize(eventData);
@@ -127,14 +122,13 @@ References
             }
         }
 
-        private async Task<List<EventHubReceiver>> GetReceivers()
+        private async Task<List<PartitionReceiver>> GetReceivers()
         {
-            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
             EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            var receivers = new List<EventHubReceiver>();
+            var receivers = new List<PartitionReceiver>();
             foreach (string partition in runtimeInfo.PartitionIds)
             {
-                receivers.Add(await consumerGroup.CreateReceiverAsync(partition, EndOfStream));
+                receivers.Add(eventHubClient.CreateReceiver(consumerGroupName, partition, DateTime.UtcNow));
             }
             return receivers;
         }
