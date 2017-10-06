@@ -3,37 +3,27 @@
     using System;
     using System.Threading.Tasks;
 
-    public sealed class DelegatingMessageProcessingExceptionHandler<TSource> :
-        IMessageProcessingExceptionHandler<TSource>
-        where TSource : class
+    public sealed class DelegatingMessageProcessingExceptionHandler<TData> :
+        IMessageProcessingExceptionHandler<TData>
+        where TData : class
     {
-        private readonly Func<MessageProcessingExceptionContext<TSource>, Task> _handler;
+        private readonly Func<MessageProcessingExceptionContext<TData>, Task> _handler;
 
         public DelegatingMessageProcessingExceptionHandler(
-            Func<MessageProcessingExceptionContext<TSource>, Task> handler)
+            Func<MessageProcessingExceptionContext<TData>, Task> handler)
         {
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public Task Handle(MessageProcessingExceptionContext<TSource> context)
+        public Task Handle(
+            MessageProcessingExceptionContext<TData> exceptionContext)
         {
-            if (context == null)
+            if (exceptionContext == null)
             {
-                throw new ArgumentNullException(nameof(context));
+                throw new ArgumentNullException(nameof(exceptionContext));
             }
 
-            return RunHandle(context);
-        }
-
-        private async Task RunHandle(MessageProcessingExceptionContext<TSource> context)
-        {
-            try
-            {
-                await _handler.Invoke(context).ConfigureAwait(false);
-            }
-            catch
-            {
-            }
+            return _handler.Invoke(exceptionContext);
         }
     }
 }

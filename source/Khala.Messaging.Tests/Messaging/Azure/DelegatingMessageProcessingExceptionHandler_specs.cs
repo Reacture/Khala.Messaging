@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Ploeh.AutoFixture;
@@ -14,45 +13,31 @@
         [TestMethod]
         public void sut_has_guard_clauses()
         {
-            var fixture = new Fixture();
-            var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(DelegatingMessageProcessingExceptionHandler<>));
+            var builder = new Fixture();
+            new GuardClauseAssertion(builder).Verify(typeof(DelegatingMessageProcessingExceptionHandler<>));
         }
 
         [TestMethod]
         public void Handle_relays_to_handler_function_correctly()
         {
             // Arrange
-            var functionProvider = Mock.Of<IFunctionProvider>();
             var fixture = new Fixture();
-            var source = fixture.Create<string>();
+            var functionProvider = Mock.Of<IFunctionProvider>();
+            var sut = new DelegatingMessageProcessingExceptionHandler<string>(functionProvider.Func);
+            var data = fixture.Create<string>();
             var exception = fixture.Create<Exception>();
-            var sut = new DelegatingMessageProcessingExceptionHandler<string>(
-                functionProvider.Func<MessageProcessingExceptionContext<string>, Task>);
-            var context = new MessageProcessingExceptionContext<string>(source, exception);
+            var context = new MessageProcessingExceptionContext<string>(data, exception);
 
             // Act
             sut.Handle(context);
 
             // Assert
-            Mock.Get(functionProvider).Verify(x => x.Func<MessageProcessingExceptionContext<string>, Task>(context), Times.Once());
-        }
-
-        [TestMethod]
-        public void Handle_consumes_handler_function_error()
-        {
-            var sut = new DelegatingMessageProcessingExceptionHandler<string>(
-                x => throw new InvalidOperationException());
-
-            Func<Task> action = () =>
-            sut.Handle(new MessageProcessingExceptionContext<string>("foo", new Exception()));
-
-            action.ShouldNotThrow();
+            Mock.Get(functionProvider).Verify(x => x.Func(context), Times.Once());
         }
 
         public interface IFunctionProvider
         {
-            TResult Func<T, TResult>(T arg);
+            Task Func<T>(T arg);
         }
     }
 }

@@ -2,27 +2,25 @@
 {
     using System;
 
-    public sealed class MessageProcessingExceptionContext<TSource>
-        where TSource : class
+    public sealed class MessageProcessingExceptionContext<TData>
+        where TData : class
     {
-        public MessageProcessingExceptionContext(
-            TSource source,
-            Exception exception)
+        public MessageProcessingExceptionContext(TData data, Exception exception)
         {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
+            Data = data ?? throw new ArgumentNullException(nameof(data));
             Exception = exception ?? throw new ArgumentNullException(nameof(exception));
         }
 
         public MessageProcessingExceptionContext(
-            TSource source,
+            TData data,
             Envelope envelope,
             Exception exception)
-            : this(source, exception)
+            : this(data, exception)
         {
             Envelope = envelope ?? throw new ArgumentNullException(nameof(envelope));
         }
 
-        public TSource Source { get; }
+        public TData Data { get; }
 
         public Envelope Envelope { get; }
 

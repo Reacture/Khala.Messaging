@@ -166,12 +166,12 @@
   </Choose>
   <ItemGroup>
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
-    <Compile Include="Messaging\Azure\CompositeMessageProcessingExceptionHandler_specs.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_specs.cs" />
+    <Compile Include="Messaging\Azure\MessageContext_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />
-    <Compile Include="Messaging\Azure\MessageProcessorCoreT_specs.cs" />
+    <Compile Include="Messaging\Azure\MessageProcessor_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusMessageSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\ServiceBusMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />

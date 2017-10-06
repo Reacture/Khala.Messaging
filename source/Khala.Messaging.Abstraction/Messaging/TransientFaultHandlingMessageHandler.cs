@@ -7,13 +7,13 @@
 
     public class TransientFaultHandlingMessageHandler : IMessageHandler
     {
-        public TransientFaultHandlingMessageHandler(RetryPolicy retryPolicy, IMessageHandler messageHandler)
+        public TransientFaultHandlingMessageHandler(IRetryPolicy retryPolicy, IMessageHandler messageHandler)
         {
             RetryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
             MessageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
         }
 
-        public RetryPolicy RetryPolicy { get; }
+        public IRetryPolicy RetryPolicy { get; }
 
         public IMessageHandler MessageHandler { get; }
 

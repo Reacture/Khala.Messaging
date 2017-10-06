@@ -2,9 +2,9 @@
 {
     using System.Threading.Tasks;
 
-    public interface IMessageProcessingExceptionHandler<TSource>
-        where TSource : class
+    public interface IMessageProcessingExceptionHandler<TData>
+        where TData : class
     {
-        Task Handle(MessageProcessingExceptionContext<TSource> context);
+        Task Handle(MessageProcessingExceptionContext<TData> exceptionContext);
     }
 }
