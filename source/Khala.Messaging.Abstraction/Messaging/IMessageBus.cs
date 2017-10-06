@@ -26,7 +26,7 @@
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         /// <remarks>The implementor must send messages sequentially and, if possible, atomically.</remarks>
-        Task SendBatch(
+        Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken);
     }

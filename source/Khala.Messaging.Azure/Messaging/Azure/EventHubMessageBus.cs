@@ -53,7 +53,7 @@
             await _eventHubClient.SendAsync(eventData, partitionKey).ConfigureAwait(false);
         }
 
-        public Task SendBatch(
+        public Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
         {

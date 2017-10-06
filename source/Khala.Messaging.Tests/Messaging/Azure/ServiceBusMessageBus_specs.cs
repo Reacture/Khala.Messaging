@@ -110,7 +110,7 @@ References
         public void SendBatch_has_guard_clause_for_null_message()
         {
             var envelopes = new Envelope[] { null };
-            Action action = () => sut.SendBatch(envelopes, CancellationToken.None);
+            Action action = () => sut.Send(envelopes, CancellationToken.None);
             action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
         }
 

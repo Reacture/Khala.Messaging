@@ -50,7 +50,7 @@
             await _senderClient.SendAsync(message).ConfigureAwait(false);
         }
 
-        public Task SendBatch(
+        public Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
         {

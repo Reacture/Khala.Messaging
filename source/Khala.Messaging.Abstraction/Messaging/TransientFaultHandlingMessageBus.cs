@@ -8,13 +8,13 @@
 
     public class TransientFaultHandlingMessageBus : IMessageBus
     {
-        public TransientFaultHandlingMessageBus(RetryPolicy retryPolicy, IMessageBus messageBus)
+        public TransientFaultHandlingMessageBus(IRetryPolicy retryPolicy, IMessageBus messageBus)
         {
             RetryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
             MessageBus = messageBus ?? throw new ArgumentNullException(nameof(messageBus));
         }
 
-        public RetryPolicy RetryPolicy { get; }
+        public IRetryPolicy RetryPolicy { get; }
 
         public IMessageBus MessageBus { get; }
 
@@ -28,14 +28,14 @@
             return RetryPolicy.Run(MessageBus.Send, envelope, cancellationToken);
         }
 
-        public Task SendBatch(IEnumerable<Envelope> envelopes, CancellationToken cancellationToken)
+        public Task Send(IEnumerable<Envelope> envelopes, CancellationToken cancellationToken)
         {
             if (envelopes == null)
             {
                 throw new ArgumentNullException(nameof(envelopes));
             }
 
-            return RetryPolicy.Run(MessageBus.SendBatch, envelopes, cancellationToken);
+            return RetryPolicy.Run(MessageBus.Send, envelopes, cancellationToken);
         }
     }
 }

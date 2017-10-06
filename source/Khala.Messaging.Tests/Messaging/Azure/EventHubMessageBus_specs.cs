@@ -84,7 +84,7 @@ References
                 .Concat(new[] { default(Envelope) })
                 .OrderBy(_ => random.Next());
 
-            Func<Task> action = () => sut.SendBatch(envelopes);
+            Func<Task> action = () => sut.Send(envelopes);
 
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "envelopes");

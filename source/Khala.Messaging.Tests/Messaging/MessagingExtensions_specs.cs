@@ -30,23 +30,21 @@
 
             Task result = messageBus.Send(envelope);
 
-            Mock.Get(messageBus).Verify(
-                x => x.Send(envelope, CancellationToken.None), Times.Once());
+            Mock.Get(messageBus).Verify(x => x.Send(envelope, CancellationToken.None), Times.Once());
             result.Should().BeSameAs(task);
         }
 
         [TestMethod]
-        public void SendBatch_relays_with_none_cancellation_token()
+        public void Send_with_envelopes_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);
             var envelopes = new Envelope[] { };
             var messageBus = Mock.Of<IMessageBus>(
-                x => x.SendBatch(envelopes, CancellationToken.None) == task);
+                x => x.Send(envelopes, CancellationToken.None) == task);
 
-            Task result = messageBus.SendBatch(envelopes);
+            Task result = messageBus.Send(envelopes);
 
-            Mock.Get(messageBus).Verify(
-                x => x.SendBatch(envelopes, CancellationToken.None), Times.Once());
+            Mock.Get(messageBus).Verify(x => x.Send(envelopes, CancellationToken.None), Times.Once());
             result.Should().BeSameAs(task);
         }
 
@@ -60,8 +58,7 @@
 
             Task result = messageHandler.Handle(envelope);
 
-            Mock.Get(messageHandler).Verify(
-                x => x.Handle(envelope, CancellationToken.None), Times.Once());
+            Mock.Get(messageHandler).Verify(x => x.Handle(envelope, CancellationToken.None), Times.Once());
             result.Should().BeSameAs(task);
         }
 
