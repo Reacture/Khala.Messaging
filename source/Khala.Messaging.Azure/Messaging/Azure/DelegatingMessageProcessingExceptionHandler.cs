@@ -22,14 +22,14 @@
                 throw new ArgumentNullException(nameof(context));
             }
 
-            return InvokeHandler(context);
+            return RunHandle(context);
         }
 
-        private async Task InvokeHandler(MessageProcessingExceptionContext<TSource> context)
+        private async Task RunHandle(MessageProcessingExceptionContext<TSource> context)
         {
             try
             {
-                await _handler.Invoke(context);
+                await _handler.Invoke(context).ConfigureAwait(false);
             }
             catch
             {

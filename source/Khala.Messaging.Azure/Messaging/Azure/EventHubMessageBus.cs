@@ -43,10 +43,10 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return SendMessage(envelope);
+            return RunSend(envelope);
         }
 
-        private async Task SendMessage(Envelope envelope)
+        private async Task RunSend(Envelope envelope)
         {
             EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
             string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
@@ -78,10 +78,10 @@
 
             // TODO: Ensure envelopes is not empty.
             // TODO: Ensure same partition keys.
-            return SendMessages(envelopeList);
+            return RunSend(envelopeList);
         }
 
-        private async Task SendMessages(IEnumerable<Envelope> envelopes)
+        private async Task RunSend(IEnumerable<Envelope> envelopes)
         {
             var eventDataList = new List<EventData>();
 

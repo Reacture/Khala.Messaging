@@ -40,10 +40,10 @@
                 throw new ArgumentNullException(nameof(context));
             }
 
-            return HandleException(context);
+            return RunHandle(context);
         }
 
-        private async Task HandleException(MessageProcessingExceptionContext<TSource> context)
+        private async Task RunHandle(MessageProcessingExceptionContext<TSource> context)
         {
             foreach (IMessageProcessingExceptionHandler<TSource> handler in _handlers)
             {

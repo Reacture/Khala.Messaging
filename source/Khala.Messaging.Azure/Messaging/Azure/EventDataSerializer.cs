@@ -50,16 +50,12 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            byte[] body = SerializeMessage(envelope.Message);
-            var messageId = envelope.MessageId.ToString("n");
-            var correlationId = envelope.CorrelationId?.ToString("n");
-
-            return Task.FromResult(new EventData(body)
+            return Task.FromResult(new EventData(SerializeMessage(envelope.Message))
             {
                 Properties =
                 {
-                    [MessageIdName] = messageId,
-                    [CorrelationIdName] = correlationId
+                    [MessageIdName] = envelope.MessageId.ToString("n"),
+                    [CorrelationIdName] = envelope.CorrelationId?.ToString("n")
                 }
             });
         }

@@ -41,10 +41,10 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return SendMessage(envelope);
+            return RunSend(envelope);
         }
 
-        private async Task SendMessage(Envelope envelope)
+        private async Task RunSend(Envelope envelope)
         {
             Message message = await _serializer.Serialize(envelope).ConfigureAwait(false);
             await _senderClient.SendAsync(message).ConfigureAwait(false);
@@ -73,10 +73,10 @@
                 envelopeList.Add(envelope);
             }
 
-            return RunSendBatch(envelopeList);
+            return RunSend(envelopeList);
         }
 
-        private async Task RunSendBatch(IEnumerable<Envelope> envelopes)
+        private async Task RunSend(IEnumerable<Envelope> envelopes)
         {
             var messages = new List<Message>();
 
