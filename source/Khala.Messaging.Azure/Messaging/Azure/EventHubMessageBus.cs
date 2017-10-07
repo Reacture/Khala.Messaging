@@ -11,12 +11,12 @@
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {
-        private readonly EventHubMessageSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
+        private readonly IMessageDataSerializer<EventData> _serializer;
 
         public EventHubMessageBus(
             EventHubClient eventHubClient,
-            EventHubMessageSerializer serializer)
+            IMessageDataSerializer<EventData> serializer)
         {
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));

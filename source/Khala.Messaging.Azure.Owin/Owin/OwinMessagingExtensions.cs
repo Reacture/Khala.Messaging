@@ -2,12 +2,13 @@
 {
     using System;
     using System.Threading;
+    using Khala.Messaging;
     using Khala.Messaging.Azure;
     using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.EventHubs.Processor;
     using Microsoft.Owin.BuilderProperties;
 
-    public static class EventHubMessagingExtensions
+    public static class OwinMessagingExtensions
     {
         public static void UseEventProcessor(
             this IAppBuilder app,

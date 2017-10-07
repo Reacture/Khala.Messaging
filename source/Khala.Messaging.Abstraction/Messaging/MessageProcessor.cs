@@ -1,4 +1,4 @@
-﻿namespace Khala.Messaging.Azure
+﻿namespace Khala.Messaging
 {
     using System;
     using System.Threading;
@@ -21,7 +21,7 @@
             _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
         }
 
-        public Task Process(MessageContext<TData> context, CancellationToken cancellationToken)
+        public Task Process(IMessageContext<TData> context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
@@ -31,7 +31,7 @@
             return RunProcess(context, cancellationToken);
         }
 
-        private async Task RunProcess(MessageContext<TData> context, CancellationToken cancellationToken)
+        private async Task RunProcess(IMessageContext<TData> context, CancellationToken cancellationToken)
         {
             TData data = context.Data;
             Envelope envelope = null;

@@ -1,9 +1,9 @@
-﻿namespace Khala.Messaging.Azure
+﻿namespace Khala.Messaging
 {
     using System;
     using System.Threading.Tasks;
 
-    public class MessageContext<TData>
+    public sealed class MessageContext<TData> : IMessageContext<TData>
         where TData : class
     {
         private readonly TData _data;

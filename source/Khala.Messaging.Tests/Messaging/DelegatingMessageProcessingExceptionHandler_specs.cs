@@ -1,4 +1,4 @@
-﻿namespace Khala.Messaging.Azure
+﻿namespace Khala.Messaging
 {
     using System;
     using System.Threading.Tasks;

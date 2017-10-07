@@ -1,4 +1,4 @@
-﻿namespace Khala.Messaging.Azure
+﻿namespace Khala.Messaging
 {
     using System.Threading.Tasks;
     using FluentAssertions;
@@ -10,6 +10,18 @@
     [TestClass]
     public class MessageContext_specs
     {
+        [TestMethod]
+        public void sut_implements_IMessageContext()
+        {
+            typeof(MessageContext<Data>).Should().Implement<IMessageContext<Data>>();
+        }
+
+        [TestMethod]
+        public void sut_is_sealed()
+        {
+            typeof(MessageContext<>).IsSealed.Should().BeTrue();
+        }
+
         [TestMethod]
         public void constructor_sets_data_correctly()
         {
