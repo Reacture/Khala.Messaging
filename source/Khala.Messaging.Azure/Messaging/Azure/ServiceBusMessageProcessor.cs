@@ -8,31 +8,55 @@
 
     public sealed class ServiceBusMessageProcessor
     {
-        private readonly IReceiverClient _receiverClient;
-        private readonly MessageProcessorCore<Message> _processorCore;
+        private readonly Func<Message, Task> _acknowledge;
+        private readonly MessageProcessor<Message> _processor;
         private readonly CancellationToken _cancellationToken;
 
         public ServiceBusMessageProcessor(
             IReceiverClient receiverClient,
-            MessageProcessorCore<Message> processorCore,
+            MessageProcessor<Message> processor,
             CancellationToken cancellationToken)
         {
-            _receiverClient = receiverClient;
-            _processorCore = processorCore;
+            if (receiverClient == null)
+            {
+                throw new ArgumentNullException(nameof(receiverClient));
+            }
+
+            _acknowledge = MakeAcknowledge(receiverClient);
+            _processor = processor ?? throw new ArgumentNullException(nameof(processor));
             _cancellationToken = cancellationToken;
         }
 
-        public Task ProcessMessage(Message message)
+        private static Func<Message, Task> MakeAcknowledge(IReceiverClient receiverClient)
+        {
+            switch (receiverClient.ReceiveMode)
+            {
+                case ReceiveMode.PeekLock:
+                    return message => receiverClient.CompleteAsync(message.SystemProperties.LockToken);
+
+                case ReceiveMode.ReceiveAndDelete:
+                default:
+                    return message => Task.CompletedTask;
+            }
+        }
+
+        public Task ProcessMessage(Message message, CancellationToken cancellationToken)
         {
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            return _processorCore.Process(message, Complete, _cancellationToken);
+            return RunProcessMessage(message, cancellationToken);
         }
 
-        private Task Complete(Message message)
-            => _receiverClient.CompleteAsync(message.SystemProperties.LockToken);
+        private async Task RunProcessMessage(Message message, CancellationToken cancellationToken)
+        {
+            var context = new MessageContext<Message>(message, _acknowledge);
+            using (var cancellation = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken, cancellationToken))
+            {
+                await _processor.Process(context, cancellation.Token);
+            }
+        }
     }
 }

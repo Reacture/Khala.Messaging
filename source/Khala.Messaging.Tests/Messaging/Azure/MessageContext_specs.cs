@@ -14,7 +14,7 @@
         public void constructor_sets_data_correctly()
         {
             var data = new Data();
-            var sut = new MessageContext<Data>(data, () => Task.CompletedTask);
+            var sut = new MessageContext<Data>(data, x => Task.CompletedTask);
             sut.Data.Should().BeSameAs(data);
         }
 
@@ -26,7 +26,7 @@
         }
 
         [TestMethod]
-        public void Acknowledge_invokes_ack_function_once()
+        public void Acknowledge_invokes_acknowledge_function_once()
         {
             var data = new Data();
             var functionProvider = Mock.Of<IFunctionProvider>();
@@ -34,12 +34,12 @@
 
             sut.Acknowledge();
 
-            Mock.Get(functionProvider).Verify(x => x.Func(), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func(data), Times.Once());
         }
 
         public interface IFunctionProvider
         {
-            Task Func();
+            Task Func<T>(T arg);
         }
 
         public class Data

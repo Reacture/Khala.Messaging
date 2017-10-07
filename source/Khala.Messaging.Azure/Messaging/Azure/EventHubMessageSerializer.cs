@@ -8,7 +8,7 @@
     /// <summary>
     /// Serializes and deserializes <see cref="Envelope"/> objects into and from <see cref="EventData"/>.
     /// </summary>
-    public sealed class EventDataSerializer : IMessageDataSerializer<EventData>
+    public sealed class EventHubMessageSerializer : IMessageDataSerializer<EventData>
     {
         private const string MessageIdName = "Khala.Messaging.Envelope.MessageId";
         private const string CorrelationIdName = "Khala.Messaging.Envelope.CorrelationId";
@@ -16,18 +16,18 @@
         private readonly IMessageSerializer _messageSerializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class with an <see cref="IMessageSerializer"/>.
+        /// Initializes a new instance of the <see cref="EventHubMessageSerializer"/> class with an <see cref="IMessageSerializer"/>.
         /// </summary>
         /// <param name="messageSerializer"><see cref="IMessageSerializer"/> to serialize enveloped messages.</param>
-        public EventDataSerializer(IMessageSerializer messageSerializer)
+        public EventHubMessageSerializer(IMessageSerializer messageSerializer)
         {
             _messageSerializer = messageSerializer ?? throw new ArgumentNullException(nameof(messageSerializer));
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSerializer"/> class.
+        /// Initializes a new instance of the <see cref="EventHubMessageSerializer"/> class.
         /// </summary>
-        public EventDataSerializer()
+        public EventHubMessageSerializer()
             : this(new JsonMessageSerializer())
         {
         }

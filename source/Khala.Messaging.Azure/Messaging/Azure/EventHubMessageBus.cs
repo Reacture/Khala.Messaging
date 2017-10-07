@@ -11,12 +11,12 @@
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {
-        private readonly EventDataSerializer _serializer;
+        private readonly EventHubMessageSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
 
         public EventHubMessageBus(
             EventHubClient eventHubClient,
-            EventDataSerializer serializer)
+            EventHubMessageSerializer serializer)
         {
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
@@ -25,15 +25,21 @@
         public EventHubMessageBus(
             EventHubClient eventHubClient,
             IMessageSerializer messageSerializer)
-            : this(eventHubClient, new EventDataSerializer(messageSerializer))
+            : this(eventHubClient, new EventHubMessageSerializer(messageSerializer))
         {
         }
 
         public EventHubMessageBus(EventHubClient eventHubClient)
-            : this(eventHubClient, new EventDataSerializer())
+            : this(eventHubClient, new EventHubMessageSerializer())
         {
         }
 
+        /// <summary>
+        /// Sends a single enveloped message to event hub.
+        /// </summary>
+        /// <param name="envelope">An enveloped message to be sent.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public Task Send(
             Envelope envelope,
             CancellationToken cancellationToken)
@@ -53,6 +59,12 @@
             await _eventHubClient.SendAsync(eventData, partitionKey).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Sends multiple enveloped messages to event hub sequentially and atomically.
+        /// </summary>
+        /// <param name="envelopes">A seqeunce contains enveloped messages.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
@@ -76,22 +88,37 @@
                 envelopeList.Add(envelope);
             }
 
-            // TODO: Ensure envelopes is not empty.
-            // TODO: Ensure same partition keys.
-            return RunSend(envelopeList);
+            if (envelopeList.Count == 0)
+            {
+                return Task.CompletedTask;
+            }
+
+            string partitionKey = (envelopeList[0].Message as IPartitioned)?.PartitionKey;
+
+            for (int i = 1; i < envelopeList.Count; i++)
+            {
+                Envelope envelope = envelopeList[i];
+                if ((envelope.Message as IPartitioned)?.PartitionKey != partitionKey)
+                {
+                    throw new ArgumentException(
+                        "All messages should have same parition key.",
+                        nameof(envelopes));
+                }
+            }
+
+            return RunSend(envelopeList, partitionKey);
         }
 
-        private async Task RunSend(IEnumerable<Envelope> envelopes)
+        private async Task RunSend(IEnumerable<Envelope> envelopes, string partitionKey)
         {
-            var eventDataList = new List<EventData>();
+            var messages = new List<EventData>();
 
             foreach (Envelope envelope in envelopes)
             {
-                EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
-                eventDataList.Add(eventData);
+                messages.Add(await _serializer.Serialize(envelope).ConfigureAwait(false));
             }
 
-            await _eventHubClient.SendAsync(eventDataList).ConfigureAwait(false);
+            await _eventHubClient.SendAsync(messages, partitionKey).ConfigureAwait(false);
         }
     }
 }

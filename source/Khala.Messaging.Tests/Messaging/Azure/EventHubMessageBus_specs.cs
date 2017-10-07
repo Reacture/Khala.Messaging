@@ -37,7 +37,7 @@ References
         private static EventHubClient eventHubClient;
         private static string consumerGroupName;
         private IFixture fixture;
-        private EventDataSerializer serializer;
+        private EventHubMessageSerializer serializer;
         private EventHubMessageBus sut;
 
         public TestContext TestContext { get; set; }
@@ -63,7 +63,7 @@ References
 
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             fixture.Inject(eventHubClient);
-            serializer = new EventDataSerializer();
+            serializer = new EventHubMessageSerializer();
             sut = new EventHubMessageBus(eventHubClient, serializer);
         }
 

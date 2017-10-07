@@ -168,7 +168,7 @@
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
     <Compile Include="Messaging\Azure\DelegatingMessageProcessingExceptionHandler_specs.cs" />
     <Compile Include="Messaging\Azure\MessageContext_specs.cs" />
-    <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
+    <Compile Include="Messaging\Azure\EventHubMessageSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
     <Compile Include="Messaging\Azure\MessageProcessingExceptionContext_specs.cs" />
     <Compile Include="Messaging\Azure\MessageProcessor_specs.cs" />
@@ -183,7 +183,6 @@
     <Compile Include="Messaging\MessagingExtensions_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler_specs.cs" />
-    <Compile Include="Owin\EventHubMessagingExtensions_features.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FakeBlogEngine\BlogPostCreated.cs" />
   </ItemGroup>

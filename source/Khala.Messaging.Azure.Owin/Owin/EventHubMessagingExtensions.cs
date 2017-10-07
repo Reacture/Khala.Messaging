@@ -1,8 +1,7 @@
 ﻿namespace Owin
 {
     using System;
-    using System.Threading.Tasks;
-    using Khala.Messaging;
+    using System.Threading;
     using Khala.Messaging.Azure;
     using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.EventHubs.Processor;
@@ -10,12 +9,10 @@
 
     public static class EventHubMessagingExtensions
     {
-        public static void UseEventMessageProcessor(
+        public static void UseEventProcessor(
             this IAppBuilder app,
             EventProcessorHost eventProcessorHost,
-            IMessageDataSerializer<EventData> serializer,
-            IMessageHandler messageHandler,
-            IMessageProcessingExceptionHandler<EventData> exceptionHandler)
+            MessageProcessor<EventData> messageProcessor)
         {
             if (app == null)
             {
@@ -27,62 +24,23 @@
                 throw new ArgumentNullException(nameof(eventProcessorHost));
             }
 
-            if (serializer == null)
+            if (messageProcessor == null)
             {
-                throw new ArgumentNullException(nameof(serializer));
+                throw new ArgumentNullException(nameof(messageProcessor));
             }
 
-            if (messageHandler == null)
-            {
-                throw new ArgumentNullException(nameof(messageHandler));
-            }
-
-            if (exceptionHandler == null)
-            {
-                throw new ArgumentNullException(nameof(exceptionHandler));
-            }
-
-            var appProperties = new AppProperties(app.Properties);
-
-            var processorFactory = new EventMessageProcessorFactory(
-                new MessageProcessorCore<EventData>(
-                    messageHandler,
-                    serializer,
-                    exceptionHandler),
-                appProperties.OnAppDisposing);
-
-            Start(eventProcessorHost, processorFactory);
-
-            appProperties.OnAppDisposing.Register(() => Stop(eventProcessorHost));
-        }
-
-        public static void UseEventMessageProcessor(
-            this IAppBuilder app,
-            EventProcessorHost eventProcessorHost,
-            IMessageDataSerializer<EventData> serializer,
-            IMessageHandler messageHandler)
-        {
-            app.UseEventMessageProcessor(
-                eventProcessorHost,
-                serializer,
-                messageHandler,
-                DefaultExceptionHandler.Instance);
+            CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
+            Start(eventProcessorHost, new EventProcessorFactory(messageProcessor, cancellationToken));
+            cancellationToken.Register(() => Stop(eventProcessorHost));
         }
 
         private static void Start(
             EventProcessorHost eventProcessorHost,
-            EventMessageProcessorFactory processorFactory) =>
-            eventProcessorHost.RegisterEventProcessorFactoryAsync(processorFactory).Wait();
+            EventProcessorFactory eventProcessorFactory) =>
+            eventProcessorHost.RegisterEventProcessorFactoryAsync(eventProcessorFactory).Wait();
 
         private static void Stop(
             EventProcessorHost eventProcessorHost) =>
             eventProcessorHost.UnregisterEventProcessorAsync().Wait();
-
-        private class DefaultExceptionHandler : IMessageProcessingExceptionHandler<EventData>
-        {
-            public static readonly DefaultExceptionHandler Instance = new DefaultExceptionHandler();
-
-            public Task Handle(MessageProcessingExceptionContext<EventData> context) => Task.CompletedTask;
-        }
     }
 }

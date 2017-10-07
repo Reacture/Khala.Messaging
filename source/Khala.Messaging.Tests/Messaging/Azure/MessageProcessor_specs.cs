@@ -29,7 +29,7 @@
                 serializer,
                 Mock.Of<IMessageHandler>(),
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
-            var context = new MessageContext<Data>(data, () => Task.CompletedTask);
+            var context = new MessageContext<Data>(data, d => Task.CompletedTask);
 
             await sut.Process(context, CancellationToken.None);
 
@@ -48,7 +48,7 @@
                 DataSerializer.Instance,
                 messageHandler,
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
-            var context = new MessageContext<Data>(new Data(envelope), () => Task.CompletedTask);
+            var context = new MessageContext<Data>(new Data(envelope), d => Task.CompletedTask);
 
             await sut.Process(context, cancellationToken);
 
@@ -62,14 +62,13 @@
                 DataSerializer.Instance,
                 Mock.Of<IMessageHandler>(),
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
+            var data = new Data(new Envelope(new object()));
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var context = new MessageContext<Data>(
-                new Data(new Envelope(new object())),
-                functionProvider.Func);
+            var context = new MessageContext<Data>(data, functionProvider.Func);
 
             await sut.Process(context, CancellationToken.None);
 
-            Mock.Get(functionProvider).Verify(x => x.Func(), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func(data), Times.Once());
         }
 
         [TestMethod]
@@ -91,7 +90,7 @@
                 messageHandler,
                 exceptionHandler);
 
-            var context = new MessageContext<Data>(data, () => Task.CompletedTask);
+            var context = new MessageContext<Data>(data, d => Task.CompletedTask);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
@@ -127,7 +126,7 @@
                 Mock.Of<IMessageHandler>(),
                 exceptionHandler);
 
-            var context = new MessageContext<Data>(data, () => Task.CompletedTask);
+            var context = new MessageContext<Data>(data, d => Task.CompletedTask);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
@@ -160,7 +159,7 @@
 
             var data = new Data(envelope);
             var exception = new Exception();
-            var context = new MessageContext<Data>(data, () => throw exception);
+            var context = new MessageContext<Data>(data, d => throw exception);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
@@ -195,17 +194,16 @@
                 messageHandler,
                 Mock.Of<IMessageProcessingExceptionHandler<Data>>());
 
+            var data = new Data(envelope);
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var context = new MessageContext<Data>(
-                new Data(envelope),
-                functionProvider.Func);
+            var context = new MessageContext<Data>(data, functionProvider.Func);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
 
             // Assert
             action.ShouldThrow<Exception>();
-            Mock.Get(functionProvider).Verify(x => x.Func(), Times.Never());
+            Mock.Get(functionProvider).Verify(x => x.Func(data), Times.Never());
         }
 
         [TestMethod]
@@ -228,7 +226,7 @@
                     return Task.CompletedTask;
                 }));
 
-            var context = new MessageContext<Data>(new Data(envelope), () => Task.CompletedTask);
+            var context = new MessageContext<Data>(new Data(envelope), d => Task.CompletedTask);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
@@ -255,7 +253,7 @@
                 new DelegatingMessageProcessingExceptionHandler<Data>(
                     x => throw new InvalidOperationException()));
 
-            var context = new MessageContext<Data>(new Data(envelope), () => Task.CompletedTask);
+            var context = new MessageContext<Data>(new Data(envelope), d => Task.CompletedTask);
 
             // Act
             Func<Task> action = () => sut.Process(context, CancellationToken.None);
@@ -267,7 +265,7 @@
 
         public interface IFunctionProvider
         {
-            Task Func();
+            Task Func<T>(T arg);
         }
 
         public class Data

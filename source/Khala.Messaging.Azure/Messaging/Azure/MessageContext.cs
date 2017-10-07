@@ -7,9 +7,9 @@
         where TData : class
     {
         private readonly TData _data;
-        private readonly Func<Task> _acknowledge;
+        private readonly Func<TData, Task> _acknowledge;
 
-        public MessageContext(TData data, Func<Task> acknowledge)
+        public MessageContext(TData data, Func<TData, Task> acknowledge)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             _acknowledge = acknowledge ?? throw new ArgumentNullException(nameof(acknowledge));
@@ -17,6 +17,6 @@
 
         public TData Data => _data;
 
-        public Task Acknowledge() => _acknowledge.Invoke();
+        public Task Acknowledge() => _acknowledge.Invoke(_data);
     }
 }

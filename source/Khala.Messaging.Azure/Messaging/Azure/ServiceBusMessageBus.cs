@@ -32,6 +32,12 @@
         {
         }
 
+        /// <summary>
+        /// Sends a single enveloped message to service bus.
+        /// </summary>
+        /// <param name="envelope">An enveloped message to be sent.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public Task Send(
             Envelope envelope,
             CancellationToken cancellationToken)
@@ -50,6 +56,12 @@
             await _senderClient.SendAsync(message).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Sends multiple enveloped messages to service bus sequentially and atomically.
+        /// </summary>
+        /// <param name="envelopes">A seqeunce contains enveloped messages.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
@@ -82,8 +94,7 @@
 
             foreach (Envelope envelope in envelopes)
             {
-                Message brokeredMessage = await _serializer.Serialize(envelope).ConfigureAwait(false);
-                messages.Add(brokeredMessage);
+                messages.Add(await _serializer.Serialize(envelope).ConfigureAwait(false));
             }
 
             await _senderClient.SendAsync(messages).ConfigureAwait(false);

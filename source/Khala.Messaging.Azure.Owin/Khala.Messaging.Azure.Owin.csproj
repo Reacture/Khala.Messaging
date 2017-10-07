@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Owin\EventHubMessagingExtensions.cs" />
-    <Compile Include="Owin\ServiceBusQueueMessagingExtensions.cs" />
+    <Compile Include="Owin\ServiceBusMessagingExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

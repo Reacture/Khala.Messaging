@@ -21,9 +21,7 @@
             _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
         }
 
-        public Task Process(
-            MessageContext<TData> context,
-            CancellationToken cancellationToken)
+        public Task Process(MessageContext<TData> context, CancellationToken cancellationToken)
         {
             if (context == null)
             {
@@ -33,9 +31,7 @@
             return RunProcess(context, cancellationToken);
         }
 
-        private async Task RunProcess(
-            MessageContext<TData> context,
-            CancellationToken cancellationToken)
+        private async Task RunProcess(MessageContext<TData> context, CancellationToken cancellationToken)
         {
             TData data = context.Data;
             Envelope envelope = null;
@@ -54,12 +50,10 @@
             }
         }
 
-        private async Task<bool> TryHandleException(
-            TData data,
-            Envelope envelope,
-            Exception exception)
+        private async Task<bool> TryHandleException(TData data, Envelope envelope, Exception exception)
         {
-            MessageProcessingExceptionContext<TData> exceptionContext = CreateExceptionContext(data, envelope, exception);
+            MessageProcessingExceptionContext<TData> exceptionContext;
+            exceptionContext = CreateExceptionContext(data, envelope, exception);
             await InvokeExceptionHandlerGenerously(exceptionContext).ConfigureAwait(false);
             return exceptionContext.Handled;
         }

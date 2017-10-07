@@ -12,31 +12,31 @@
     using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
-    public class EventDataSerializer_specs
+    public class EventHubMessageSerializer_specs
     {
         private IFixture fixture;
         private IMessageSerializer messageSerializer;
-        private EventDataSerializer sut;
+        private EventHubMessageSerializer sut;
 
         [TestInitialize]
         public void TestInitialize()
         {
             fixture = new Fixture().Customize(new AutoMoqCustomization());
             messageSerializer = new JsonMessageSerializer();
-            sut = new EventDataSerializer(messageSerializer);
+            sut = new EventHubMessageSerializer(messageSerializer);
         }
 
         [TestMethod]
         public void sut_implements_IMessageDataSerializer_of_EventData()
         {
-            typeof(EventDataSerializer).Should().Implement<IMessageDataSerializer<EventData>>();
+            typeof(EventHubMessageSerializer).Should().Implement<IMessageDataSerializer<EventData>>();
         }
 
         [TestMethod]
         public void class_has_guard_clauses()
         {
             var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(EventDataSerializer));
+            assertion.Verify(typeof(EventHubMessageSerializer));
         }
 
         [TestMethod]
