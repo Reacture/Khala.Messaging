@@ -22,7 +22,7 @@
             return messageBus.Send(envelope, CancellationToken.None);
         }
 
-        public static Task SendBatch(
+        public static Task Send(
             this IMessageBus messageBus,
             IEnumerable<Envelope> envelopes)
         {
@@ -36,7 +36,7 @@
                 throw new ArgumentNullException(nameof(envelopes));
             }
 
-            return messageBus.SendBatch(envelopes, CancellationToken.None);
+            return messageBus.Send(envelopes, CancellationToken.None);
         }
 
         public static Task Handle(

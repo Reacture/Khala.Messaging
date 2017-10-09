@@ -46,7 +46,7 @@
         [TestMethod]
         public void sut_has_RetryPolicy_property()
         {
-            typeof(TransientFaultHandlingMessageBus).Should().HaveProperty<RetryPolicy>("RetryPolicy");
+            typeof(TransientFaultHandlingMessageBus).Should().HaveProperty<IRetryPolicy>("RetryPolicy");
         }
 
         [TestMethod]
@@ -79,30 +79,17 @@
         [DataRow(false)]
         public async Task Send_relays_to_retry_policy(bool canceled)
         {
-            // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-
-            var maximumRetryCount = 1;
-            var retryPolicyMock = new Mock<RetryPolicy>(
-                maximumRetryCount,
-                new TransientFaultDetectionStrategy(),
-                fixture.Create<RetryIntervalStrategy>());
-
+            var retryPolicy = Mock.Of<IRetryPolicy>();
             var messageBus = Mock.Of<IMessageBus>();
-
-            var sut = new TransientFaultHandlingMessageBus(
-                retryPolicyMock.Object,
-                messageBus);
-
+            var sut = new TransientFaultHandlingMessageBus(retryPolicy, messageBus);
             var envelope = new Envelope(new object());
             var cancellationToken = new CancellationToken(canceled);
 
-            // Act
             await sut.Send(envelope, cancellationToken);
 
-            // Assert
             Func<Envelope, CancellationToken, Task> func = messageBus.Send;
-            retryPolicyMock.Verify(
+            Mock.Get(retryPolicy).Verify(
                 x =>
                 x.Run(
                     It.Is<Func<Envelope, CancellationToken, Task>>(
@@ -117,32 +104,19 @@
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task SendBatch_relays_to_retry_policy(bool canceled)
+        public async Task Send_with_envelopes_relays_to_retry_policy(bool canceled)
         {
-            // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
-
-            var maximumRetryCount = 1;
-            var retryPolicyMock = new Mock<RetryPolicy>(
-                maximumRetryCount,
-                new TransientFaultDetectionStrategy(),
-                fixture.Create<RetryIntervalStrategy>());
-
+            var retryPolicy = Mock.Of<IRetryPolicy>();
             var messageBus = Mock.Of<IMessageBus>();
-
-            var sut = new TransientFaultHandlingMessageBus(
-                retryPolicyMock.Object,
-                messageBus);
-
+            var sut = new TransientFaultHandlingMessageBus(retryPolicy, messageBus);
             var envelopes = new[] { new Envelope(new object()) };
             var cancellationToken = new CancellationToken(canceled);
 
-            // Act
-            await sut.SendBatch(envelopes, cancellationToken);
+            await sut.Send(envelopes, cancellationToken);
 
-            // Assert
-            Func<IEnumerable<Envelope>, CancellationToken, Task> func = messageBus.SendBatch;
-            retryPolicyMock.Verify(
+            Func<IEnumerable<Envelope>, CancellationToken, Task> func = messageBus.Send;
+            Mock.Get(retryPolicy).Verify(
                 x =>
                 x.Run(
                     It.Is<Func<IEnumerable<Envelope>, CancellationToken, Task>>(

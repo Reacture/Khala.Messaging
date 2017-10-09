@@ -10,7 +10,7 @@
     public class Envelope_specs
     {
         [TestMethod]
-        public void class_has_guard_clause()
+        public void class_has_guard_clauses()
         {
             var fixture = new Fixture();
             var assertion = new GuardClauseAssertion(fixture);

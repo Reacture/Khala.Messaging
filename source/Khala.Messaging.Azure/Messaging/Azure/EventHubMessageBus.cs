@@ -2,17 +2,18 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
 
     /// <summary>
     /// Provides the implementation of <see cref="IMessageBus"/> for Azure Event hubs.
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {
-        private readonly EventDataSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
+        private readonly EventDataSerializer _serializer;
 
         public EventHubMessageBus(
             EventHubClient eventHubClient,
@@ -34,6 +35,12 @@
         {
         }
 
+        /// <summary>
+        /// Sends a single enveloped message to event hub.
+        /// </summary>
+        /// <param name="envelope">An enveloped message to be sent.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public Task Send(
             Envelope envelope,
             CancellationToken cancellationToken)
@@ -43,16 +50,20 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return SendMessage(envelope);
+            EventData eventData = _serializer.Serialize(envelope);
+            string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
+            return partitionKey == null
+                ? _eventHubClient.SendAsync(eventData)
+                : _eventHubClient.SendAsync(eventData, partitionKey);
         }
 
-        private async Task SendMessage(Envelope envelope)
-        {
-            EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
-            await _eventHubClient.SendAsync(eventData).ConfigureAwait(false);
-        }
-
-        public Task SendBatch(
+        /// <summary>
+        /// Sends multiple enveloped messages to event hub sequentially and atomically.
+        /// </summary>
+        /// <param name="envelopes">A seqeunce contains enveloped messages.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken)
         {
@@ -75,20 +86,29 @@
                 envelopeList.Add(envelope);
             }
 
-            return SendMessages(envelopeList);
-        }
-
-        private async Task SendMessages(IEnumerable<Envelope> envelopes)
-        {
-            var eventDataList = new List<EventData>();
-
-            foreach (Envelope envelope in envelopes)
+            if (envelopeList.Count == 0)
             {
-                EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
-                eventDataList.Add(eventData);
+                return Task.CompletedTask;
             }
 
-            await _eventHubClient.SendBatchAsync(eventDataList).ConfigureAwait(false);
+            string partitionKey = (envelopeList[0].Message as IPartitioned)?.PartitionKey;
+
+            for (int i = 1; i < envelopeList.Count; i++)
+            {
+                Envelope envelope = envelopeList[i];
+                if ((envelope.Message as IPartitioned)?.PartitionKey != partitionKey)
+                {
+                    throw new ArgumentException(
+                        "All messages should have same parition key.",
+                        nameof(envelopes));
+                }
+            }
+
+            IEnumerable<EventData> messages =
+                from envelope in envelopeList
+                select _serializer.Serialize(envelope);
+
+            return _eventHubClient.SendAsync(messages, partitionKey);
         }
     }
 }

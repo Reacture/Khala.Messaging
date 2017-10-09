@@ -45,25 +45,16 @@
         [DataRow(false)]
         public async Task Handle_relays_to_retry_policy(bool canceled)
         {
-            // Arrange
             var cancellationToken = new CancellationToken(canceled);
-            var maximumRetryCount = 1;
-            var moq = new Mock<RetryPolicy>(
-                maximumRetryCount,
-                new TransientFaultDetectionStrategy(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var retryPolicy = Mock.Of<IRetryPolicy>();
             var messageHandler = Mock.Of<IMessageHandler>();
-            var sut = new TransientFaultHandlingMessageHandler(
-                moq.Object,
-                messageHandler);
+            var sut = new TransientFaultHandlingMessageHandler(retryPolicy, messageHandler);
             var envelope = new Envelope(new object());
 
-            // Act
             await sut.Handle(envelope, cancellationToken);
 
-            // Assert
             Func<Envelope, CancellationToken, Task> del = messageHandler.Handle;
-            moq.Verify(
+            Mock.Get(retryPolicy).Verify(
                 x =>
                 x.Run(
                     It.Is<Func<Envelope, CancellationToken, Task>>(

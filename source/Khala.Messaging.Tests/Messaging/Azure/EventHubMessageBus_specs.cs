@@ -3,140 +3,295 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using FakeBlogEngine;
     using FluentAssertions;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
     using Ploeh.AutoFixture.Idioms;
-    using static Microsoft.ServiceBus.Messaging.EventHubConsumerGroup;
 
     [TestClass]
     public class EventHubMessageBus_specs
     {
-        public const string EventHubConnectionStringPropertyName = "eventhubmessagebus-eventhub-connectionstring";
-        public const string EventHubPathPropertyName = "eventhubmessagebus-eventhub-path";
-        public const string ConsumerGroupPropertyName = "eventhubmessagebus-eventhub-consumergroup";
+        public const string ConnectionStringParam = "EventHubMessageBus/ConnectionString";
+        public const string ConsumerGroupNameParam = "EventHubMessageBus/ConsumerGroupName";
 
-        private static string ConnectionParametersRequired => $@"
-Event Hub connection information is not set. To run tests on the EventHubMessageBus class, you must set the connection information in the *.runsettings file as follows:
+        private static readonly string ConnectionParametersRequired = $@"Event Hub connection information is not set. To run tests on the EventHubMessageBus class, you must set the connection information in the *.runsettings file as follows:
 
 <?xml version=""1.0"" encoding=""utf-8"" ?>
 <RunSettings>
   <TestRunParameters>
-    <Parameter name=""{EventHubConnectionStringPropertyName}"" value=""your event hub connection string for testing"" />
-    <Parameter name=""{EventHubPathPropertyName}"" value=""your event hub path for testing"" />
-    <Parameter name=""{ConsumerGroupPropertyName}"" value=""[OPTIONAL] your event hub consumer group name for testing"" />
+    <Parameter name=""{ConnectionStringParam}"" value=""your connection string to the Event Hub"" />
+    <Parameter name=""{ConsumerGroupNameParam}"" value=""[OPTIONAL] The name of the consumer group within the Event Hub"" />
   </TestRunParameters>  
 </RunSettings>
 
 References
-- https://msdn.microsoft.com/en-us/library/jj635153.aspx
-".Trim();
+- https://msdn.microsoft.com/en-us/library/jj635153.aspx";
 
-        private static EventHubClient eventHubClient;
-        private static string consumerGroupName;
-        private IFixture fixture;
-        private EventDataSerializer serializer;
-        private EventHubMessageBus sut;
+        private static string _connectionString;
+        private static string _consumerGroupName;
 
         public TestContext TestContext { get; set; }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var connectionString = (string)context.Properties[EventHubConnectionStringPropertyName];
-            var path = (string)context.Properties[EventHubPathPropertyName];
-            if (string.IsNullOrWhiteSpace(connectionString) == false &&
-                string.IsNullOrWhiteSpace(path) == false)
-            {
-                eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, path);
-                consumerGroupName = (string)context.Properties[ConsumerGroupPropertyName] ?? DefaultGroupName;
-            }
-        }
+            _connectionString = (string)context.Properties[ConnectionStringParam];
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            if (eventHubClient == null)
+            if (string.IsNullOrWhiteSpace(_connectionString))
             {
                 Assert.Inconclusive(ConnectionParametersRequired);
             }
 
-            fixture = new Fixture().Customize(new AutoMoqCustomization());
-            fixture.Inject(eventHubClient);
-            serializer = new EventDataSerializer();
-            sut = new EventHubMessageBus(eventHubClient, serializer);
+            _consumerGroupName = (string)context.Properties[ConsumerGroupNameParam] ?? PartitionReceiver.DefaultConsumerGroupName;
+        }
+
+        private static async Task<IReadOnlyList<PartitionReceiver>> GetReceivers(EventHubClient eventHubClient, string consumerGroupName)
+        {
+            EventHubRuntimeInformation runtimeInformation = await eventHubClient.GetRuntimeInformationAsync();
+
+            var receivers = new List<PartitionReceiver>();
+
+            foreach (string partitionId in runtimeInformation.PartitionIds)
+            {
+                EventHubPartitionRuntimeInformation partitionRuntimeInformation =
+                    await eventHubClient.GetPartitionRuntimeInformationAsync(partitionId);
+
+                PartitionReceiver receiver = eventHubClient.CreateReceiver(
+                    consumerGroupName,
+                    partitionId,
+                    partitionRuntimeInformation.LastEnqueuedOffset,
+                    offsetInclusive: false);
+
+                receivers.Add(receiver);
+            }
+
+            return receivers;
+        }
+
+        private static async Task<IReadOnlyList<EventData>> ReceiveAll(IEnumerable<PartitionReceiver> receivers)
+        {
+            IReadOnlyList<EventData>[] unflattened = await Task.WhenAll(receivers.Select(ReceiveAll));
+            return unflattened.SelectMany(received => received).ToList();
+        }
+
+        private static async Task<IReadOnlyList<EventData>> ReceiveAll(PartitionReceiver receiver)
+        {
+            var messages = new List<EventData>();
+            var waitTime = TimeSpan.FromMilliseconds(1000);
+
+            while (true)
+            {
+                var received = await receiver.ReceiveAsync(10, waitTime);
+                if (received == null)
+                {
+                    break;
+                }
+
+                messages.AddRange(received);
+            }
+
+            return messages;
         }
 
         [TestMethod]
-        public void class_has_guard_clauses()
+        public void sut_has_guard_clauses()
         {
-            var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(EventHubMessageBus));
-        }
-
-        [TestMethod]
-        public void SendBatch_has_guard_clause_for_null_envelope()
-        {
-            var random = new Random();
-            var envelopes = Enumerable
-                .Range(0, 10)
-                .Select(_ => new Envelope(new object()))
-                .Concat(new[] { default(Envelope) })
-                .OrderBy(_ => random.Next());
-
-            Func<Task> action = () => sut.SendBatch(envelopes);
-
-            action.ShouldThrow<ArgumentException>()
-                .Where(x => x.ParamName == "envelopes");
+            var builder = new Fixture();
+            builder.Customize(new AutoMoqCustomization());
+            builder.Inject(EventHubClient.CreateFromConnectionString(_connectionString));
+            new GuardClauseAssertion(builder).Verify(typeof(EventHubMessageBus));
         }
 
         [TestMethod]
         public async Task Send_sends_message_correctly()
         {
-            // Arrange
-            var message = fixture.Create<BlogPostCreated>();
-            var correlationId = Guid.NewGuid();
-            var envelope = new Envelope(correlationId, message);
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var serializer = new EventDataSerializer();
+            var sut = new EventHubMessageBus(eventHubClient, serializer);
+            var envelope = new Envelope(new Fixture().Create<Message>());
+            IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
 
-            List<EventHubReceiver> receivers = await GetReceivers();
+            await sut.Send(envelope, CancellationToken.None);
 
-            try
-            {
-                // Act
-                await sut.Send(envelope, CancellationToken.None);
-
-                // Assert
-                var waitTime = TimeSpan.FromSeconds(1);
-                Task<EventData>[] tasks = receivers.Select(r => r.ReceiveAsync(waitTime)).ToArray();
-                await Task.WhenAll(tasks);
-                EventData eventData = tasks.Select(t => t.Result).FirstOrDefault(r => r != null);
-
-                eventData.Should().NotBeNull();
-                Envelope actual = await serializer.Deserialize(eventData);
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
-            }
-            finally
-            {
-                // Cleanup
-                receivers.ForEach(r => r.Close());
-            }
+            IEnumerable<EventData> received = await ReceiveAll(receivers);
+            await eventHubClient.CloseAsync();
+            received.Should().HaveCount(1);
+            Envelope actual = serializer.Deserialize(received.Single());
+            actual.ShouldBeEquivalentTo(envelope);
         }
 
-        private async Task<List<EventHubReceiver>> GetReceivers()
+        [TestMethod]
+        public async Task Send_sets_partition_key_correctly()
         {
-            EventHubConsumerGroup consumerGroup = eventHubClient.GetConsumerGroup(consumerGroupName);
-            EventHubRuntimeInformation runtimeInfo = await eventHubClient.GetRuntimeInformationAsync();
-            var receivers = new List<EventHubReceiver>();
-            foreach (string partition in runtimeInfo.PartitionIds)
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var sut = new EventHubMessageBus(eventHubClient);
+            var message = new Fixture().Create<PartitionedMessage>();
+            IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
+
+            await sut.Send(new Envelope(message), CancellationToken.None);
+
+            IEnumerable<EventData> received = await ReceiveAll(receivers);
+            await eventHubClient.CloseAsync();
+            EventData eventData = received.Single();
+            eventData.SystemProperties.PartitionKey.Should().Be(message.PartitionKey);
+        }
+
+        [TestMethod]
+        public async Task Send_with_envelopes_sends_multiple_messages_correctly()
+        {
+            // Arrange
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var serializer = new EventDataSerializer();
+            var sut = new EventHubMessageBus(eventHubClient, serializer);
+
+            List<Envelope> envelopes = new Fixture()
+                .CreateMany<Message>()
+                .Select(message => new Envelope(message))
+                .ToList();
+
+            IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
+
+            // Act
+            await sut.Send(envelopes, CancellationToken.None);
+
+            // Assert
+            IEnumerable<EventData> received = await ReceiveAll(receivers);
+            await eventHubClient.CloseAsync();
+
+            IEnumerable<Envelope> actual = from eventData in received
+                                           select serializer.Deserialize(eventData);
+
+            actual.ShouldAllBeEquivalentTo(
+                envelopes,
+                opts =>
+                opts.RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
+        public async Task Send_with_envelopes_sends_partitioned_messages_correctly()
+        {
+            // Arrange
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var serializer = new EventDataSerializer();
+            var sut = new EventHubMessageBus(eventHubClient, serializer);
+
+            string partitionKey = Guid.NewGuid().ToString();
+            List<Envelope> envelopes = new Fixture()
+                .Build<PartitionedMessage>()
+                .With(message => message.PartitionKey, partitionKey)
+                .CreateMany()
+                .Select(message => new Envelope(message))
+                .ToList();
+
+            IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
+
+            // Act
+            await sut.Send(envelopes, CancellationToken.None);
+
+            // Assert
+            IEnumerable<EventData> received = await ReceiveAll(receivers);
+            await eventHubClient.CloseAsync();
+
+            IEnumerable<Envelope> actual = from eventData in received
+                                           select serializer.Deserialize(eventData);
+
+            actual.ShouldAllBeEquivalentTo(
+                envelopes,
+                opts =>
+                opts.WithStrictOrdering()
+                    .RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
+        public async Task Send_with_envelopes_sets_partition_key_correctly()
+        {
+            // Arrange
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var serializer = new EventDataSerializer();
+            var sut = new EventHubMessageBus(eventHubClient, serializer);
+
+            string partitionKey = Guid.NewGuid().ToString();
+            List<Envelope> envelopes = new Fixture()
+                .Build<PartitionedMessage>()
+                .With(message => message.PartitionKey, partitionKey)
+                .CreateMany()
+                .Select(message => new Envelope(message))
+                .ToList();
+
+            IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
+
+            // Act
+            await sut.Send(envelopes, CancellationToken.None);
+
+            // Assert
+            IEnumerable<EventData> received = await ReceiveAll(receivers);
+            await eventHubClient.CloseAsync();
+
+            IEnumerable<string> partitionKeys =
+                from eventData in received
+                select eventData.SystemProperties.PartitionKey;
+
+            partitionKeys.Should().OnlyContain(x => x == partitionKey);
+        }
+
+        [TestMethod]
+        public void Send_with_envelopes_has_guard_clause_against_null_envelope()
+        {
+            Envelope[] envelopes = new[]
             {
-                receivers.Add(await consumerGroup.CreateReceiverAsync(partition, EndOfStream));
-            }
-            return receivers;
+                new Envelope(new object()),
+                new Envelope(new object()),
+                default
+            };
+            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            var random = new Random();
+
+            Func<Task> action = () =>
+            sut.Send(
+                from e in envelopes
+                orderby random.Next()
+                select e,
+                CancellationToken.None);
+
+            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
+        }
+
+        [TestMethod]
+        public void given_empty_envelopes_Send_returns_CompletedTask()
+        {
+            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            Task actual = sut.Send(Enumerable.Empty<Envelope>(), CancellationToken.None);
+            actual.Should().BeSameAs(Task.CompletedTask);
+        }
+
+        [TestMethod]
+        public void Send_has_guard_clause_against_partition_key_conflict()
+        {
+            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            var envelopes = new List<Envelope>(
+                from message in new Fixture().CreateMany<PartitionedMessage>()
+                select new Envelope(message));
+
+            Func<Task> action = () => sut.Send(envelopes, CancellationToken.None);
+
+            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
+        }
+
+        public class Message
+        {
+            public string Content { get; set; }
+        }
+
+        public class PartitionedMessage : IPartitioned
+        {
+            public string PartitionKey { get; set; }
+
+            public string Content { get; set; }
         }
     }
 }

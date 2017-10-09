@@ -2,10 +2,10 @@
 <RuleSet Name="Khala.Messaging.Tests Rules" ToolsVersion="15.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
-    <Rule Id="CS8019" Action="Warning" />
+    <Rule Id="CS8019" Action="Error" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
-    <Rule Id="IDE0005" Action="Warning" />
+    <Rule Id="IDE0005" Action="Error" />
     <Rule Id="IDE1006" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
@@ -56,7 +56,7 @@
     <Rule Id="SA1115" Action="Error" />
     <Rule Id="SA1116" Action="Error" />
     <Rule Id="SA1117" Action="Error" />
-    <Rule Id="SA1118" Action="Error" />
+    <Rule Id="SA1118" Action="None" />
     <Rule Id="SA1119" Action="Error" />
     <Rule Id="SA1120" Action="Error" />
     <Rule Id="SA1121" Action="Error" />
@@ -127,7 +127,7 @@
     <Rule Id="SA1510" Action="Error" />
     <Rule Id="SA1511" Action="Error" />
     <Rule Id="SA1512" Action="Error" />
-    <Rule Id="SA1513" Action="None" />
+    <Rule Id="SA1513" Action="Error" />
     <Rule Id="SA1514" Action="Error" />
     <Rule Id="SA1515" Action="None" />
     <Rule Id="SA1516" Action="Error" />

@@ -31,13 +31,13 @@
         public async Task Handle_relays_to_handler_function_correctly(bool canceled)
         {
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope, CancellationToken, Task>);
+            var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope, CancellationToken>);
             var envelope = new Envelope(new object());
             var cancellationToken = new CancellationToken(canceled);
 
             await sut.Handle(envelope, cancellationToken);
 
-            Mock.Get(functionProvider).Verify(x => x.Func<Envelope, CancellationToken, Task>(envelope, cancellationToken), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func(envelope, cancellationToken), Times.Once());
         }
 
         [TestMethod]
@@ -46,20 +46,20 @@
         public async Task Handle_replays_to_modest_handler_function_correctly(bool canceled)
         {
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope, Task>);
+            var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope>);
             var envelope = new Envelope(new object());
             var cancellationToken = new CancellationToken(canceled);
 
             await sut.Handle(envelope, cancellationToken);
 
-            Mock.Get(functionProvider).Verify(x => x.Func<Envelope, Task>(envelope), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func(envelope), Times.Once());
         }
 
         public interface IFunctionProvider
         {
-            TResult Func<T, TResult>(T args);
+            Task Func<T>(T args);
 
-            TResult Func<T1, T2, TResult>(T1 arg1, T2 arg2);
+            Task Func<T1, T2>(T1 arg1, T2 arg2);
         }
     }
 }

@@ -25,8 +25,8 @@
         /// <param name="envelopes">A seqeunce contains enveloped messages.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        /// <remarks>The implementor must send messages sequentially and, if possible, atomically.</remarks>
-        Task SendBatch(
+        /// <remarks>The implementor must send messages, if possible, sequentially and atomically.</remarks>
+        Task Send(
             IEnumerable<Envelope> envelopes,
             CancellationToken cancellationToken);
     }
