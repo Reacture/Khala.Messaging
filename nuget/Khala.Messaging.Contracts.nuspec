@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.Messaging.Contracts</id>
-    <version>0.15.0</version>
+    <version>0.16.0</version>
     <title>Khala.Messaging.Contracts</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -14,13 +14,13 @@
     <copyright>Copyright Gyuwon 2017</copyright>
     <tags>Khala Reactive Messaging</tags>
     <dependencies>
-      <group targetFramework="net45" />
-      <group targetFramework="netstandard1.1">
+      <group targetFramework="net461" />
+      <group targetFramework="netstandard1.3">
         <dependency id="NETStandard.Library" version="1.6.1" exclude="build,analyzers" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.Messaging.Contracts\bin\Release\netstandard1.1\Khala.Messaging.Contracts.dll" target="lib\netstandard1.1\Khala.Messaging.Contracts.dll" />
+    <file src="..\source\Khala.Messaging.Contracts\bin\Release\netstandard1.3\Khala.Messaging.Contracts.dll" target="lib\netstandard1.3\Khala.Messaging.Contracts.dll" />
   </files>
 </package>
