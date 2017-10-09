@@ -4,6 +4,14 @@
 
 ## 패키지
 
+### Contracts
+
+메시지 계약 형식을 제공합니다.
+
+```
+> Install-Package Khala.Messaging.Contracts
+```
+
 ### Abstraction
 
 메시징 추상화 계층을 제공합니다.
@@ -17,8 +25,6 @@
 Microsoft Azure 메시징 서비스 대상 구현체를 제공합니다. 지원하는 서비스는 다음과 같습니다.
 
 - Event Hubs
-- Service Bus Queues
-- Service Bus Topics
 
 ```
 > Install-Package Khala.Messaging.Azure
