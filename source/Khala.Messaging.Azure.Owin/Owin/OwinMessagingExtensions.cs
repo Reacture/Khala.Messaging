@@ -4,20 +4,20 @@
     using System.Threading;
     using Khala.Messaging;
     using Khala.Messaging.Azure;
-    using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.EventHubs.Processor;
     using Microsoft.Owin.BuilderProperties;
 
     public static class OwinMessagingExtensions
     {
         public static void UseEventProcessor(
-            this IAppBuilder app,
+            this IAppBuilder appBuilder,
             EventProcessorHost eventProcessorHost,
-            MessageProcessor<EventData> messageProcessor)
+            IMessageHandler messageHandler,
+            IEventProcessingExceptionHandler exceptionHandler)
         {
-            if (app == null)
+            if (appBuilder == null)
             {
-                throw new ArgumentNullException(nameof(app));
+                throw new ArgumentNullException(nameof(appBuilder));
             }
 
             if (eventProcessorHost == null)
@@ -25,23 +25,11 @@
                 throw new ArgumentNullException(nameof(eventProcessorHost));
             }
 
-            if (messageProcessor == null)
-            {
-                throw new ArgumentNullException(nameof(messageProcessor));
-            }
-
-            CancellationToken cancellationToken = new AppProperties(app.Properties).OnAppDisposing;
-            Start(eventProcessorHost, new EventProcessorFactory(messageProcessor, cancellationToken));
-            cancellationToken.Register(() => Stop(eventProcessorHost));
+            var appProperties = new AppProperties(appBuilder.Properties);
+            CancellationToken cancellationToken = appProperties.OnAppDisposing;
+            var processorFactory = new EventProcessorFactory(messageHandler, exceptionHandler, cancellationToken);
+            eventProcessorHost.RegisterEventProcessorFactoryAsync(processorFactory).Wait();
+            cancellationToken.Register(() => eventProcessorHost.UnregisterEventProcessorAsync().Wait());
         }
-
-        private static void Start(
-            EventProcessorHost eventProcessorHost,
-            EventProcessorFactory eventProcessorFactory) =>
-            eventProcessorHost.RegisterEventProcessorFactoryAsync(eventProcessorFactory).Wait();
-
-        private static void Stop(
-            EventProcessorHost eventProcessorHost) =>
-            eventProcessorHost.UnregisterEventProcessorAsync().Wait();
     }
 }

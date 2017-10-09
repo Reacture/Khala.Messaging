@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.EventHubs;
@@ -12,11 +13,11 @@
     public sealed class EventHubMessageBus : IMessageBus
     {
         private readonly EventHubClient _eventHubClient;
-        private readonly IMessageDataSerializer<EventData> _serializer;
+        private readonly EventDataSerializer _serializer;
 
         public EventHubMessageBus(
             EventHubClient eventHubClient,
-            IMessageDataSerializer<EventData> serializer)
+            EventDataSerializer serializer)
         {
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
@@ -25,12 +26,12 @@
         public EventHubMessageBus(
             EventHubClient eventHubClient,
             IMessageSerializer messageSerializer)
-            : this(eventHubClient, new EventHubMessageSerializer(messageSerializer))
+            : this(eventHubClient, new EventDataSerializer(messageSerializer))
         {
         }
 
         public EventHubMessageBus(EventHubClient eventHubClient)
-            : this(eventHubClient, new EventHubMessageSerializer())
+            : this(eventHubClient, new EventDataSerializer())
         {
         }
 
@@ -49,14 +50,11 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return RunSend(envelope);
-        }
-
-        private async Task RunSend(Envelope envelope)
-        {
-            EventData eventData = await _serializer.Serialize(envelope).ConfigureAwait(false);
+            EventData eventData = _serializer.Serialize(envelope);
             string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
-            await _eventHubClient.SendAsync(eventData, partitionKey).ConfigureAwait(false);
+            return partitionKey == null
+                ? _eventHubClient.SendAsync(eventData)
+                : _eventHubClient.SendAsync(eventData, partitionKey);
         }
 
         /// <summary>
@@ -106,19 +104,11 @@
                 }
             }
 
-            return RunSend(envelopeList, partitionKey);
-        }
+            IEnumerable<EventData> messages =
+                from envelope in envelopeList
+                select _serializer.Serialize(envelope);
 
-        private async Task RunSend(IEnumerable<Envelope> envelopes, string partitionKey)
-        {
-            var messages = new List<EventData>();
-
-            foreach (Envelope envelope in envelopes)
-            {
-                messages.Add(await _serializer.Serialize(envelope).ConfigureAwait(false));
-            }
-
-            await _eventHubClient.SendAsync(messages, partitionKey).ConfigureAwait(false);
+            return _eventHubClient.SendAsync(messages, partitionKey);
         }
     }
 }

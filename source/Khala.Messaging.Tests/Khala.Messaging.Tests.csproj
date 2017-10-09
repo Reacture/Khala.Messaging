@@ -30,6 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.Tests.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -39,6 +40,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.Tests.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -124,6 +126,15 @@
     <Reference Include="System.Net.Http, Version=4.1.1.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.3\lib\net46\System.Net.Http.dll</HintPath>
     </Reference>
+    <Reference Include="System.Reactive.Core, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Core.3.1.1\lib\net46\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Interfaces.3.1.1\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Linq.3.1.1\lib\net46\System.Reactive.Linq.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
     </Reference>
@@ -163,12 +174,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="FakeBlogEngine\CommentedOnBlogPost.cs" />
-    <Compile Include="Messaging\DelegatingMessageProcessingExceptionHandler_specs.cs" />
-    <Compile Include="Messaging\MessageContext_specs.cs" />
-    <Compile Include="Messaging\Azure\EventHubMessageSerializer_specs.cs" />
+    <Compile Include="Messaging\Azure\EventProcessingExceptionContext_specs.cs" />
+    <Compile Include="Messaging\Azure\EventProcessorFactory_specs.cs" />
+    <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
-    <Compile Include="Messaging\MessageProcessingExceptionContext_specs.cs" />
-    <Compile Include="Messaging\MessageProcessor_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
     <Compile Include="Messaging\DelegatingMessageHandler_specs.cs" />
     <Compile Include="Messaging\EnvelopeT_specs.cs" />
@@ -178,6 +187,7 @@
     <Compile Include="Messaging\MessagingExtensions_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler_specs.cs" />
+    <Compile Include="Owin\OwinMessagingExtensions_specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FakeBlogEngine\BlogPostCreated.cs" />
   </ItemGroup>
