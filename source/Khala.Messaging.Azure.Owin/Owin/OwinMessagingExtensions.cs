@@ -25,11 +25,11 @@
                 throw new ArgumentNullException(nameof(eventProcessorHost));
             }
 
-            var appProperties = new AppProperties(appBuilder.Properties);
-            CancellationToken cancellationToken = appProperties.OnAppDisposing;
-            var processorFactory = new EventProcessorFactory(messageHandler, exceptionHandler, cancellationToken);
+            var processorFactory = new EventProcessorFactory(messageHandler, exceptionHandler, CancellationToken.None);
             eventProcessorHost.RegisterEventProcessorFactoryAsync(processorFactory).Wait();
-            cancellationToken.Register(() => eventProcessorHost.UnregisterEventProcessorAsync().Wait());
+
+            CancellationToken appDisposing = new AppProperties(appBuilder.Properties).OnAppDisposing;
+            appDisposing.Register(() => eventProcessorHost.UnregisterEventProcessorAsync().Wait());
         }
     }
 }

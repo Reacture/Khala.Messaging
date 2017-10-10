@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,6 +19,7 @@
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
     using Moq;
+    using Newtonsoft.Json;
     using Ploeh.AutoFixture;
     using Ploeh.AutoFixture.AutoMoq;
     using Ploeh.AutoFixture.Idioms;
@@ -136,7 +138,7 @@ References
             public IEventProcessor CreateEventProcessor(PartitionContext context) => _function.Invoke();
         }
 
-        public static Task<ICloudBlob> GetPartitionLease(string partitionId)
+        public static Task<ICloudBlob> GetPartitionLeaseBlob(string partitionId)
         {
             var storageAccount = CloudStorageAccount.Parse(_storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -144,9 +146,40 @@ References
             return blobContainer.GetBlobReferenceFromServerAsync($"{_consumerGroupName}/{partitionId}");
         }
 
-        private static async Task<IReadOnlyCollection<ICloudBlob>> GetPartitionLeases(EventHubRuntimeInformation runtimeInformation)
+        private static async Task<IReadOnlyCollection<ICloudBlob>> GetPartitionLeaseBlobs(EventHubRuntimeInformation runtimeInformation)
         {
-            return new List<ICloudBlob>(await Task.WhenAll(runtimeInformation.PartitionIds.Select(GetPartitionLease)));
+            return new List<ICloudBlob>(await Task.WhenAll(runtimeInformation.PartitionIds.Select(GetPartitionLeaseBlob)));
+        }
+
+        public class PartitionLease
+        {
+            public string PartitionId { get; set; }
+
+            public string Offset { get; set; }
+
+            public int SequenceNumber { get; set; }
+
+            public string Owner { get; set; }
+
+            public string Token { get; set; }
+
+            public int Epoch { get; set; }
+        }
+
+        public static async Task<PartitionLease> GetPartitionLease(string partitionId)
+        {
+            ICloudBlob blob = await GetPartitionLeaseBlob(partitionId);
+            using (Stream stream = await blob.OpenReadAsync())
+            using (var reader = new StreamReader(stream))
+            {
+                string content = await reader.ReadToEndAsync();
+                return JsonConvert.DeserializeObject<PartitionLease>(content);
+            }
+        }
+
+        private static async Task<IReadOnlyCollection<PartitionLease>> GetPartitionLeases(EventHubRuntimeInformation runtimeInformation)
+        {
+            return new List<PartitionLease>(await Task.WhenAll(runtimeInformation.PartitionIds.Select(GetPartitionLease)));
         }
 
         [ClassInitialize]
@@ -188,24 +221,31 @@ References
             var cancellation = new CancellationTokenSource();
             appProperties.OnAppDisposing = cancellation.Token;
 
-            EventProcessorHost processorHost = GetEventProcessorHost();
-            var messageHandler = Mock.Of<IMessageHandler>();
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
-
             // Act
-            app.UseEventProcessor(processorHost, messageHandler, exceptionHandler);
+            app.UseEventProcessor(
+                GetEventProcessorHost(),
+                Mock.Of<IMessageHandler>(),
+                Mock.Of<IEventProcessingExceptionHandler>());
+
             await RetryPolicy<bool>
                 .LinearTransientDefault(5, TimeSpan.FromMilliseconds(500))
                 .Run(async () =>
                 {
-                    IReadOnlyCollection<ICloudBlob> partitionLeases = await GetPartitionLeases(runtimeInformation);
-                    return partitionLeases.All(lease => lease.Properties.LeaseState == LeaseState.Leased);
+                    IReadOnlyCollection<ICloudBlob> leasesBlobs = await GetPartitionLeaseBlobs(runtimeInformation);
+                    return leasesBlobs.All(blob => blob.Properties.LeaseState == LeaseState.Leased);
                 });
 
-            // Assert
-            IReadOnlyCollection<ICloudBlob> actual = await GetPartitionLeases(runtimeInformation);
-            actual.Should().OnlyContain(lease => lease.Properties.LeaseState == LeaseState.Leased);
-            cancellation.Cancel();
+            try
+            {
+                // Assert
+                IReadOnlyCollection<ICloudBlob> partitionLeasesBlobs = await GetPartitionLeaseBlobs(runtimeInformation);
+                partitionLeasesBlobs.Should().OnlyContain(blob => blob.Properties.LeaseState == LeaseState.Leased);
+            }
+            finally
+            {
+                // Cleanup
+                cancellation.Cancel();
+            }
         }
 
         [TestMethod]
@@ -221,24 +261,90 @@ References
             var cancellation = new CancellationTokenSource();
             appProperties.OnAppDisposing = cancellation.Token;
 
-            EventProcessorHost processorHost = GetEventProcessorHost();
-            var messageHandler = Mock.Of<IMessageHandler>();
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
-
             // Act
-            app.UseEventProcessor(processorHost, messageHandler, exceptionHandler);
+            app.UseEventProcessor(
+                GetEventProcessorHost(),
+                Mock.Of<IMessageHandler>(),
+                Mock.Of<IEventProcessingExceptionHandler>());
+
             await RetryPolicy<bool>
                 .LinearTransientDefault(5, TimeSpan.FromMilliseconds(500))
                 .Run(async () =>
                 {
-                    IReadOnlyCollection<ICloudBlob> partitionLeases = await GetPartitionLeases(runtimeInformation);
-                    return partitionLeases.All(lease => lease.Properties.LeaseState == LeaseState.Leased);
+                    IReadOnlyCollection<ICloudBlob> leasesBlobs = await GetPartitionLeaseBlobs(runtimeInformation);
+                    return leasesBlobs.All(blob => blob.Properties.LeaseState == LeaseState.Leased);
                 });
+
             cancellation.Cancel();
 
             // Assert
-            IReadOnlyCollection<ICloudBlob> actual = await GetPartitionLeases(runtimeInformation);
-            actual.Should().NotContain(lease => lease.Properties.LeaseState == LeaseState.Leased);
+            IReadOnlyCollection<ICloudBlob> partitionLeasesBlobs = await GetPartitionLeaseBlobs(runtimeInformation);
+            partitionLeasesBlobs.Should().NotContain(blob => blob.Properties.LeaseState == LeaseState.Leased);
+        }
+
+        [TestMethod]
+        public async Task UseEventProcessor_finishes_processors_gracefully_when_app_disposing()
+        {
+            // Arrange
+            EventHubRuntimeInformation runtimeInformation = await GetRuntimeInformation();
+            await CheckpointLatest(runtimeInformation);
+
+            IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
+
+            var app = new AppBuilder();
+
+            var appProperties = new AppProperties(app.Properties);
+            var cancellation = new CancellationTokenSource();
+            appProperties.OnAppDisposing = cancellation.Token;
+
+            var messageHandler = new MessageHandler();
+            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+
+            // Act
+            app.UseEventProcessor(GetEventProcessorHost(), messageHandler, exceptionHandler);
+
+            await RetryPolicy<bool>
+                .LinearTransientDefault(5, TimeSpan.FromMilliseconds(500))
+                .Run(async () =>
+                {
+                    IReadOnlyCollection<ICloudBlob> leasesBlobs = await GetPartitionLeaseBlobs(runtimeInformation);
+                    return leasesBlobs.All(blob => blob.Properties.LeaseState == LeaseState.Leased);
+                });
+
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_eventHubConnectionString);
+            var messageBus = new EventHubMessageBus(eventHubClient);
+            await messageBus.Send(new Envelope(new Fixture().Create<Message>()));
+            await messageHandler.ReceiveMessage;
+
+            cancellation.Cancel();
+
+            // Assert
+            Mock.Get(exceptionHandler).Verify(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()), Times.Never());
+            IEnumerable<int> diffs = from first in partitionLeases
+                                     join second in await GetPartitionLeases(runtimeInformation)
+                                     on first.PartitionId equals second.PartitionId
+                                     select second.SequenceNumber - first.SequenceNumber;
+            diffs.Sum().Should().Be(1);
+        }
+
+        public class MessageHandler : IMessageHandler
+        {
+            private readonly TaskCompletionSource<Envelope> _receiveMessageSource;
+
+            public MessageHandler() => _receiveMessageSource = new TaskCompletionSource<Envelope>();
+
+            public Task<Envelope> ReceiveMessage => _receiveMessageSource.Task;
+
+            public Task Handle(Envelope envelope, CancellationToken cancellationToken)
+            {
+                Task.Factory.StartNew(() => _receiveMessageSource.TrySetResult(envelope));
+                return Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+            }
+        }
+
+        public class Message
+        {
+            public string Content { get; set; }
         }
     }
 }
