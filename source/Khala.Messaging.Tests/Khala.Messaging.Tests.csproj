@@ -67,6 +67,9 @@
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Azure.ServiceBus, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7e34167dcc6d6d8c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.ServiceBus.1.0.0\lib\net451\Microsoft.Azure.ServiceBus.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm, Version=5.8.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Data.Edm.5.8.2\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -178,6 +181,8 @@
     <Compile Include="Messaging\Azure\EventProcessorFactory_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusMessageMediator_specs.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
     <Compile Include="Messaging\DelegatingMessageHandler_specs.cs" />
     <Compile Include="Messaging\EnvelopeT_specs.cs" />
@@ -185,6 +190,7 @@
     <Compile Include="Messaging\InterfaceAwareHandler_specs.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_specs.cs" />
     <Compile Include="Messaging\MessagingExtensions_specs.cs" />
+    <Compile Include="Messaging\ScheduledEnvelope_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler_specs.cs" />
     <Compile Include="Owin\OwinMessagingExtensions_specs.cs" />

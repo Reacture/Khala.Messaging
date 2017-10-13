@@ -41,13 +41,14 @@
                     envelope = _serializer.Deserialize(eventData);
                     await _messageHandler.Handle(envelope, _cancellationToken);
                 }
-                catch (TaskCanceledException)
-                {
-                    throw;
-                }
                 catch (Exception exception)
                 {
                     await HandleExceptionFaultTolerantly(eventData, envelope, exception);
+
+                    if (exception is TaskCanceledException)
+                    {
+                        throw;
+                    }
                 }
 
                 await context.CheckpointAsync(eventData);

@@ -169,6 +169,12 @@ References
             return new List<PartitionLease>(await Task.WhenAll(runtimeInformation.PartitionIds.Select(GetPartitionLease)));
         }
 
+        private static EventHubMessageBus GetMessageBus()
+        {
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_eventHubConnectionString);
+            return new EventHubMessageBus(eventHubClient);
+        }
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
@@ -208,13 +214,10 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             var envelope = new Envelope(new Fixture().Create<Message>());
 
             // Act
-            await messageBus.Send(envelope);
+            await GetMessageBus().Send(envelope);
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);
@@ -246,12 +249,10 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             int messageCount = 5;
 
             // Act
+            EventHubMessageBus messageBus = GetMessageBus();
             for (int i = 0; i < messageCount; i++)
             {
                 var message = new Fixture().Create<Message>();
@@ -297,12 +298,9 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             // Act
             var message = new Fixture().Create<Message>();
-            await messageBus.Send(new Envelope(message));
+            await GetMessageBus().Send(new Envelope(message));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);
@@ -387,12 +385,9 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             // Act
             var message = new Fixture().Create<Message>();
-            await messageBus.Send(new Envelope(message));
+            await GetMessageBus().Send(new Envelope(message));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);
@@ -491,13 +486,10 @@ References
                 exceptionHandler,
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             var envelope = new Envelope(new Fixture().Create<Message>());
 
             // Act
-            await messageBus.Send(envelope);
+            await GetMessageBus().Send(envelope);
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);
@@ -586,11 +578,8 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             // Act
-            await messageBus.Send(new Envelope(new Fixture().Create<Message>()));
+            await GetMessageBus().Send(new Envelope(new Fixture().Create<Message>()));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);
@@ -614,6 +603,59 @@ References
         }
 
         [TestMethod]
+        public async Task event_processor_invokes_exception_handler_if_TaskCanceledException_occurs()
+        {
+            // Arrange
+            EventHubRuntimeInformation runtimeInformation = await GetRuntimeInformation();
+            await CheckpointLatest(runtimeInformation);
+
+            IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
+
+            var messageHandler = Mock.Of<IMessageHandler>();
+            Exception exception = new TaskCanceledException();
+            Mock.Get(messageHandler)
+                .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
+                .ThrowsAsync(exception);
+
+            EventProcessingExceptionContext exceptionContext = null;
+            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            Mock.Get(exceptionHandler)
+                .Setup(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()))
+                .Callback<EventProcessingExceptionContext>(p => exceptionContext = p)
+                .Returns(Task.CompletedTask);
+
+            var sut = new EventProcessorFactory(
+                messageHandler,
+                exceptionHandler,
+                CancellationToken.None);
+
+            var envelope = new Envelope(new Fixture().Create<Message>());
+
+            // Act
+            await GetMessageBus().Send(envelope);
+
+            EventProcessorHost processorHost = GetEventProcessorHost();
+            await processorHost.RegisterEventProcessorFactoryAsync(sut);
+
+            await TransientFaultHandling.RetryPolicy
+                .Linear(5, TimeSpan.FromMilliseconds(500))
+                .Run(() =>
+                {
+                    Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None));
+                    return Task.CompletedTask;
+                });
+
+            await processorHost.UnregisterEventProcessorAsync();
+
+            // Assert
+            Mock.Get(exceptionHandler).Verify(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()), Times.Once());
+            exceptionContext.EventData.Should().NotBeNull();
+            exceptionContext.EventData.Body.ShouldBeEquivalentTo(new EventDataSerializer().Serialize(envelope).Body);
+            exceptionContext.Envelope.ShouldBeEquivalentTo(envelope);
+            exceptionContext.Exception.Should().BeSameAs(exception);
+        }
+
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task event_processor_invokes_message_handler_with_cancellation_token(bool canceled)
@@ -631,11 +673,8 @@ References
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 cancellationToken);
 
-            var messageBus = new EventHubMessageBus(
-                EventHubClient.CreateFromConnectionString(_eventHubConnectionString));
-
             // Act
-            await messageBus.Send(new Envelope(new Fixture().Create<Message>()));
+            await GetMessageBus().Send(new Envelope(new Fixture().Create<Message>()));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
             await processorHost.RegisterEventProcessorFactoryAsync(sut);

@@ -1,0 +1,183 @@
+﻿namespace Khala.Messaging.Azure
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using FluentAssertions;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Ploeh.AutoFixture;
+    using Ploeh.AutoFixture.AutoMoq;
+    using Ploeh.AutoFixture.Idioms;
+
+    [TestClass]
+    public class ServiceBusMessageMediator_specs
+    {
+        public const string ConnectionStringParam = "ServiceBusMessageMediator/ConnectionString";
+        public const string EntityPathParam = "ServiceBusMessageMediator/EntityPath";
+
+        private static readonly string ConnectionParametersRequired = $@"Service Bus connection information is not set. To run tests on the ServiceBusMessageMediator class, you must set the connection information in the *.runsettings file as follows:
+
+<?xml version=""1.0"" encoding=""utf-8"" ?>
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name=""{ConnectionStringParam}"" value=""your connection string to the Service Bus"" />
+    <Parameter name=""{EntityPathParam}"" value=""[OPTIONAL] The name of the queue"" />
+  </TestRunParameters>  
+</RunSettings>
+
+References
+- https://msdn.microsoft.com/en-us/library/jj635153.aspx";
+
+        private static ServiceBusConnectionStringBuilder _connectionStringBuilder;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            var connectionString = (string)context.Properties[ConnectionStringParam];
+            var entityPath = (string)context.Properties[EntityPathParam];
+
+            if (string.IsNullOrWhiteSpace(connectionString) ||
+                string.IsNullOrWhiteSpace(entityPath))
+            {
+                Assert.Inconclusive(ConnectionParametersRequired);
+            }
+
+            _connectionStringBuilder = new ServiceBusConnectionStringBuilder(connectionString)
+            {
+                EntityPath = entityPath
+            };
+        }
+
+        public TestContext TestContext { get; set; }
+
+        private static async Task ReceiveAndForgetAll()
+        {
+            var receiver = new MessageReceiver(_connectionStringBuilder, ReceiveMode.ReceiveAndDelete);
+
+            while (await receiver.ReceiveAsync(10, TimeSpan.FromMilliseconds(1000)) != null)
+            {
+            }
+
+            await receiver.CloseAsync();
+        }
+
+        private static async Task SendMessage(Envelope envelope, JsonMessageSerializer serializer)
+        {
+            var messageSender = new MessageSender(_connectionStringBuilder);
+            var message = new Message(Encoding.UTF8.GetBytes(serializer.Serialize(envelope.Message)))
+            {
+                MessageId = envelope.MessageId.ToString("n"),
+                CorrelationId = envelope.CorrelationId?.ToString("n")
+            };
+            await messageSender.SendAsync(message);
+            await messageSender.CloseAsync();
+        }
+
+        [TestMethod]
+        public void sut_has_guard_clauses()
+        {
+            var builder = new Fixture();
+            builder.Customize(new AutoMoqCustomization());
+            builder.Inject(_connectionStringBuilder);
+            new GuardClauseAssertion(builder).Verify(typeof(ServiceBusMessageMediator));
+        }
+
+        [TestMethod]
+        public async Task message_handler_sends_message_correctly()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            var messageBus = new MessageBus();
+            var serializer = new JsonMessageSerializer();
+
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
+                message: new Fixture().Create<SomeMessage>());
+
+            // Act
+            ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            await SendMessage(envelope, serializer);
+
+            // Assert
+            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+            messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+            Envelope actual = await messageBus.SentMessage;
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
+        public async Task message_handler_sends_message_not_having_correlationId_correctly()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            var messageBus = new MessageBus();
+            var serializer = new JsonMessageSerializer();
+
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                correlationId: default,
+                message: new Fixture().Create<SomeMessage>());
+
+            // Act
+            ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            await SendMessage(envelope, serializer);
+
+            // Assert
+            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+            messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+            Envelope actual = await messageBus.SentMessage;
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
+        public async Task Start_returns_close_function()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            var messageBus = new MessageBus();
+            var serializer = new JsonMessageSerializer();
+
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                correlationId: default,
+                message: new Fixture().Create<SomeMessage>());
+
+            // Act
+            Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            await closeFunction.Invoke();
+            await SendMessage(envelope, serializer);
+
+            // Assert
+            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+            messageBus.SentMessage.Status.Should().NotBe(TaskStatus.RanToCompletion);
+        }
+
+        public class SomeMessage
+        {
+            public string Content { get; set; }
+        }
+
+        public class MessageBus : IMessageBus
+        {
+            private readonly TaskCompletionSource<Envelope> _completion = new TaskCompletionSource<Envelope>();
+
+            public Task<Envelope> SentMessage => _completion.Task;
+
+            public Task Send(Envelope envelope, CancellationToken cancellationToken)
+            {
+                _completion.SetResult(envelope);
+                return Task.CompletedTask;
+            }
+
+            public Task Send(IEnumerable<Envelope> envelopes, CancellationToken cancellationToken) => throw new NotSupportedException();
+        }
+    }
+}
