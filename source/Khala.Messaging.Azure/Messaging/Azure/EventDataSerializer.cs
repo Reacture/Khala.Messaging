@@ -1,6 +1,7 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using Microsoft.Azure.EventHubs;
 
@@ -30,11 +31,6 @@
             : this(new JsonMessageSerializer())
         {
         }
-
-        private static Guid? ParseGuid(object property)
-            => Guid.TryParse(property?.ToString(), out Guid value)
-            ? value
-            : default(Guid?);
 
         /// <summary>
         /// Serializes <see cref="Envelope"/> instance into <see cref="EventData"/>.
@@ -77,20 +73,30 @@
                 throw new ArgumentNullException(nameof(data));
             }
 
-            data.Properties.TryGetValue(MessageIdName, out object messageId);
-            data.Properties.TryGetValue(CorrelationIdName, out object correlationId);
-            object message = DeserializeMessage(data.Body);
-
             return new Envelope(
-                ParseGuid(messageId) ?? Guid.NewGuid(),
-                ParseGuid(correlationId),
-                message);
+                GetMessageId(data.Properties),
+                GetCorrelationId(data.Properties),
+                DeserializeMessage(data.Body));
         }
 
         private object DeserializeMessage(ArraySegment<byte> body)
         {
             string value = Encoding.UTF8.GetString(body.Array, body.Offset, body.Count);
             return _messageSerializer.Deserialize(value);
+        }
+
+        private Guid GetMessageId(IDictionary<string, object> properties)
+        {
+            properties.TryGetValue(MessageIdName, out object value);
+            return Guid.TryParse(value?.ToString(), out Guid messageId) ? messageId : Guid.NewGuid();
+        }
+
+        private Guid? GetCorrelationId(IDictionary<string, object> properties)
+        {
+#pragma warning disable IDE0034 // Disable IDE0034(Simplify 'default' expression) warning because it changes the type to Guid from Guid?.
+            properties.TryGetValue(CorrelationIdName, out object value);
+            return Guid.TryParse(value?.ToString(), out Guid correlationId) ? correlationId : default(Guid?);
+#pragma warning restore IDE0034 // Disable IDE0034(Simplify 'default' expression) warning because it changes the type to Guid from Guid?.
         }
     }
 }

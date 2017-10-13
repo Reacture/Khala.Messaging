@@ -181,6 +181,8 @@
     <Compile Include="Messaging\Azure\EventProcessorFactory_specs.cs" />
     <Compile Include="Messaging\Azure\EventDataSerializer_specs.cs" />
     <Compile Include="Messaging\Azure\EventHubMessageBus_specs.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusMessageMediator_specs.cs" />
+    <Compile Include="Messaging\Azure\ServiceBusMessageBus_specs.cs" />
     <Compile Include="Messaging\CompositeMessageHandler_specs.cs" />
     <Compile Include="Messaging\DelegatingMessageHandler_specs.cs" />
     <Compile Include="Messaging\EnvelopeT_specs.cs" />
@@ -188,6 +190,7 @@
     <Compile Include="Messaging\InterfaceAwareHandler_specs.cs" />
     <Compile Include="Messaging\JsonMessageSerializer_specs.cs" />
     <Compile Include="Messaging\MessagingExtensions_specs.cs" />
+    <Compile Include="Messaging\ScheduledEnvelope_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageBus_specs.cs" />
     <Compile Include="Messaging\TransientFaultHandlingMessageHandler_specs.cs" />
     <Compile Include="Owin\OwinMessagingExtensions_specs.cs" />
