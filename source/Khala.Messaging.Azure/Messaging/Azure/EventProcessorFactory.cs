@@ -4,12 +4,21 @@
     using System.Threading;
     using Microsoft.Azure.EventHubs.Processor;
 
+    /// <summary>
+    /// Generates <see cref="IEventProcessor"/> implementors that routes messages to a message handler.
+    /// </summary>
     public sealed class EventProcessorFactory : IEventProcessorFactory
     {
         private readonly IMessageHandler _messageHandler;
         private readonly IEventProcessingExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventProcessorFactory"/> class.
+        /// </summary>
+        /// <param name="messageHandler">A message handler object.</param>
+        /// <param name="exceptionHandler">An exception handler object.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while event processors working.</param>
         public EventProcessorFactory(
             IMessageHandler messageHandler,
             IEventProcessingExceptionHandler exceptionHandler,
@@ -20,6 +29,11 @@
             _cancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="IEventProcessor"/> that routes messages to the <see cref="IMessageHandler"/>.
+        /// </summary>
+        /// <param name="context">A <see cref="PartitionContext"/>.</param>
+        /// <returns>An instance of <see cref="IEventProcessor"/>.</returns>
         public IEventProcessor CreateEventProcessor(PartitionContext context)
         {
             if (context == null)

@@ -7,8 +7,18 @@
     using Microsoft.Azure.EventHubs.Processor;
     using Microsoft.Owin.BuilderProperties;
 
+    /// <summary>
+    /// Provides extension methods to support OWIN applications.
+    /// </summary>
     public static class OwinMessagingExtensions
     {
+        /// <summary>
+        /// Starts an event processor that routes messages to an <see cref="IMessageHandler"/>.
+        /// </summary>
+        /// <param name="appBuilder">An <see cref="IAppBuilder"/> to initialize an OWIN applcation.</param>
+        /// <param name="eventProcessorHost">An <see cref="EventProcessorHost"/> for processing event data.</param>
+        /// <param name="messageHandler">A message handler object.</param>
+        /// <param name="exceptionHandler">An exception handler object.</param>
         public static void UseEventProcessor(
             this IAppBuilder appBuilder,
             EventProcessorHost eventProcessorHost,

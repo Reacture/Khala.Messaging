@@ -22,5 +22,6 @@
   </metadata>
   <files>
     <file src="..\source\Khala.Messaging.Azure.Owin\bin\Release\Khala.Messaging.Azure.Owin.dll" target="lib\net45\Khala.Messaging.Azure.Owin.dll" />
+    <file src="..\source\Khala.Messaging.Azure.Owin\bin\Release\Khala.Messaging.Azure.Owin.xml" target="lib\net45\Khala.Messaging.Azure.Owin.xml" />
   </files>
 </package>

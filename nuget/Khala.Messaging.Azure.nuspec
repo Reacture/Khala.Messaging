@@ -29,5 +29,6 @@
   </metadata>
   <files>
     <file src="..\source\Khala.Messaging.Azure\bin\Release\netstandard1.3\Khala.Messaging.Azure.dll" target="lib\netstandard1.3\Khala.Messaging.Azure.dll" />
+    <file src="..\source\Khala.Messaging.Azure\bin\Release\netstandard1.3\Khala.Messaging.Azure.xml" target="lib\netstandard1.3\Khala.Messaging.Azure.xml" />
   </files>
 </package>

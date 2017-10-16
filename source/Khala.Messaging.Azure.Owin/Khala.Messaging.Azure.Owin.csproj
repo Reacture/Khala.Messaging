@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>bin\Debug\Khala.Messaging.Azure.Owin.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>bin\Release\Khala.Messaging.Azure.Owin.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Azure.Amqp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">

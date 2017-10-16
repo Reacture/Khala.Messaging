@@ -29,5 +29,6 @@
   </metadata>
   <files>
     <file src="..\source\Khala.Messaging.Abstraction\bin\Release\netstandard1.3\Khala.Messaging.Abstraction.dll" target="lib\netstandard1.3\Khala.Messaging.Abstraction.dll" />
+    <file src="..\source\Khala.Messaging.Abstraction\bin\Release\netstandard1.3\Khala.Messaging.Abstraction.xml" target="lib\netstandard1.3\Khala.Messaging.Abstraction.xml" />
   </files>
 </package>

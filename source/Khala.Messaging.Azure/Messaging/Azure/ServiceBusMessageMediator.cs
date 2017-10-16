@@ -6,8 +6,18 @@
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
 
-    public class ServiceBusMessageMediator
+    /// <summary>
+    /// Provides function to brokers messages from an Azure Service Bus queue to a message bus.
+    /// </summary>
+    public static class ServiceBusMessageMediator
     {
+        /// <summary>
+        /// Start to broker messages from an Azure Service bus queue to a message bus.
+        /// </summary>
+        /// <param name="connectionStringBuilder">A <see cref="ServiceBusConnectionStringBuilder"/>to build an Azure Service Bus connection string.</param>
+        /// <param name="messageBus">A message bus client.</param>
+        /// <param name="serializer">A serializer to serialize messages.</param>
+        /// <returns>The asynchronous function to release resources that used to access the Azure Service Bus queue.</returns>
         public static Func<Task> Start(
             ServiceBusConnectionStringBuilder connectionStringBuilder,
             IMessageBus messageBus,

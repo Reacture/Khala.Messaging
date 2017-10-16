@@ -10,11 +10,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\netstandard1.3\Khala.Messaging.Abstraction.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleSet>..\Rules\Khala.Messaging.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\netstandard1.3\Khala.Messaging.Abstraction.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

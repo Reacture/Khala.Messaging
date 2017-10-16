@@ -6,10 +6,17 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Provides a composite of message handlers.
+    /// </summary>
     public sealed class CompositeMessageHandler : IMessageHandler
     {
         private readonly IEnumerable<IMessageHandler> _handlers;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositeMessageHandler"/> class.
+        /// </summary>
+        /// <param name="handlers">Message handlers</param>
         public CompositeMessageHandler(params IMessageHandler[] handlers)
         {
             if (handlers == null)
@@ -31,6 +38,13 @@
             _handlers = new ReadOnlyCollection<IMessageHandler>(handlerList);
         }
 
+        /// <summary>
+        /// Handles a message.
+        /// </summary>
+        /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for a task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <remarks>Even if some message handler fails, <paramref name="envelope"/> is sent to all message handlers.</remarks>
         public Task Handle(
             Envelope envelope, CancellationToken cancellationToken)
         {

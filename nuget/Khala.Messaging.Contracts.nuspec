@@ -22,5 +22,6 @@
   </metadata>
   <files>
     <file src="..\source\Khala.Messaging.Contracts\bin\Release\netstandard1.3\Khala.Messaging.Contracts.dll" target="lib\netstandard1.3\Khala.Messaging.Contracts.dll" />
+    <file src="..\source\Khala.Messaging.Contracts\bin\Release\netstandard1.3\Khala.Messaging.Contracts.xml" target="lib\netstandard1.3\Khala.Messaging.Contracts.xml" />
   </files>
 </package>
