@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class ScheduledEnvelope
+    public sealed class ScheduledEnvelope
     {
         public ScheduledEnvelope(Envelope envelope, DateTimeOffset scheduledTime)
         {

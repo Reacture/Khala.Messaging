@@ -10,6 +10,12 @@
     public class ScheduledEnvelope_specs
     {
         [TestMethod]
+        public void sut_is_sealed()
+        {
+            typeof(ScheduledEnvelope).IsSealed.Should().BeTrue();
+        }
+
+        [TestMethod]
         public void sut_has_Envelope_property()
         {
             typeof(ScheduledEnvelope)
