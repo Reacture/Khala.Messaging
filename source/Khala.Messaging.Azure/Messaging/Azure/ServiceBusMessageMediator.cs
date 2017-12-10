@@ -48,6 +48,7 @@
 #pragma warning disable IDE0034 // Disable warning because it changes the type to Guid from Guid?.
                     Guid.TryParse(message.CorrelationId, out Guid correlationId) ? correlationId : default(Guid?),
 #pragma warning restore IDE0034 // Disable warning because it changes the type to Guid from Guid?.
+                    message.UserProperties.TryGetValue("Khala.Messaging.Envelope.Contributor", out object value) ? value?.ToString() : default,
                     serializer.Deserialize(Encoding.UTF8.GetString(message.Body)));
 
                 await messageBus.Send(envelope);

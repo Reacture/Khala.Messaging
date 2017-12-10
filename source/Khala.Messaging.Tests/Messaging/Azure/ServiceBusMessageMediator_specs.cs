@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using FluentAssertions;
@@ -67,14 +66,9 @@ References
 
         private static async Task SendMessage(Envelope envelope, JsonMessageSerializer serializer)
         {
-            var messageSender = new MessageSender(_connectionStringBuilder);
-            var message = new Message(Encoding.UTF8.GetBytes(serializer.Serialize(envelope.Message)))
-            {
-                MessageId = envelope.MessageId.ToString("n"),
-                CorrelationId = envelope.CorrelationId?.ToString("n")
-            };
-            await messageSender.SendAsync(message);
-            await messageSender.CloseAsync();
+            var messageBus = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
+            await messageBus.Send(new ScheduledEnvelope(envelope, DateTimeOffset.Now.AddMinutes(-1.0)), default);
+            await messageBus.Close();
         }
 
         [TestMethod]
@@ -98,17 +92,25 @@ References
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 correlationId: Guid.NewGuid(),
+                contributor: Guid.NewGuid().ToString(),
                 message: new Fixture().Create<SomeMessage>());
 
             // Act
-            ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
-            await SendMessage(envelope, serializer);
+            Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            try
+            {
+                await SendMessage(envelope, serializer);
 
-            // Assert
-            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
-            messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
-            Envelope actual = await messageBus.SentMessage;
-            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                // Assert
+                await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+                messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+                Envelope actual = await messageBus.SentMessage;
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            }
+            finally
+            {
+                await closeFunction.Invoke();
+            }
         }
 
         [TestMethod]
@@ -126,14 +128,21 @@ References
                 message: new Fixture().Create<SomeMessage>());
 
             // Act
-            ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
-            await SendMessage(envelope, serializer);
+            Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            try
+            {
+                await SendMessage(envelope, serializer);
 
-            // Assert
-            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
-            messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
-            Envelope actual = await messageBus.SentMessage;
-            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                // Assert
+                await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+                messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+                Envelope actual = await messageBus.SentMessage;
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            }
+            finally
+            {
+                await closeFunction.Invoke();
+            }
         }
 
         [TestMethod]
@@ -152,12 +161,19 @@ References
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
-            await closeFunction.Invoke();
-            await SendMessage(envelope, serializer);
+            try
+            {
+                await closeFunction.Invoke();
+                await SendMessage(envelope, serializer);
 
-            // Assert
-            await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
-            messageBus.SentMessage.Status.Should().NotBe(TaskStatus.RanToCompletion);
+                // Assert
+                await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+                messageBus.SentMessage.Status.Should().NotBe(TaskStatus.RanToCompletion);
+            }
+            finally
+            {
+                await closeFunction.Invoke();
+            }
         }
 
         public class SomeMessage
