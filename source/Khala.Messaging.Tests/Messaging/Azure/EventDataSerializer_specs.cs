@@ -79,11 +79,28 @@
         }
 
         [TestMethod]
+        public void Serialize_sets_Contributor_property_correctly()
+        {
+            string contributor = Guid.NewGuid().ToString();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
+            var envelope = new Envelope(contributor, message);
+
+            EventData eventData = sut.Serialize(envelope);
+
+            string propertyName = "Khala.Messaging.Envelope.Contributor";
+            eventData.Properties.Keys.Should().Contain(propertyName);
+            object actual = eventData.Properties[propertyName];
+            actual.Should().BeOfType<string>().Which.Should().Be(contributor);
+        }
+
+        [TestMethod]
         public void Deserialize_deserializes_envelope_correctly()
         {
+            var messageId = Guid.NewGuid();
             var correlationId = Guid.NewGuid();
+            string contributor = Guid.NewGuid().ToString();
             var message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(correlationId, message);
+            var envelope = new Envelope(messageId, correlationId, contributor, message);
             EventData eventData = sut.Serialize(envelope);
 
             Envelope actual = sut.Deserialize(eventData);
@@ -112,6 +129,21 @@
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Messaging.Envelope.CorrelationId");
+
+            Envelope actual = null;
+            Action action = () => actual = sut.Deserialize(eventData);
+
+            action.ShouldNotThrow();
+            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
+        public void Deserialize_not_fails_even_if_Contributor_property_not_set()
+        {
+            var message = fixture.Create<BlogPostCreated>();
+            var envelope = new Envelope(message);
+            EventData eventData = sut.Serialize(envelope);
+            eventData.Properties.Remove("Khala.Messaging.Envelope.Contributor");
 
             Envelope actual = null;
             Action action = () => actual = sut.Deserialize(eventData);
