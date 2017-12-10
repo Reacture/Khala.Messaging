@@ -3,25 +3,24 @@
     using System;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class Envelope_specs
     {
         [TestMethod]
-        public void class_has_guard_clauses()
+        public void constructor_has_guard_clause_against_empty_messageId()
         {
-            var fixture = new Fixture();
-            var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(Envelope));
+            Action action = () =>
+            new Envelope(Guid.Empty, default, default, new object());
+            action.ShouldThrow<ArgumentException>()
+                .Where(x => x.ParamName == "messageId");
         }
 
         [TestMethod]
-        public void constructor_has_guard_clause_for_empty_correlationId()
+        public void constructor_has_guard_clause_against_empty_correlationId()
         {
             Action action = () =>
-            new Envelope(Guid.NewGuid(), Guid.Empty, new object());
+            new Envelope(Guid.NewGuid(), Guid.Empty, default, new object());
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "correlationId");
         }
@@ -29,8 +28,9 @@
         [TestMethod]
         public void constructor_allows_null_correlationId()
         {
+            Guid? correlationId = null;
             Action action = () =>
-            new Envelope(Guid.NewGuid(), null, new object());
+            new Envelope(Guid.NewGuid(), correlationId, default, new object());
             action.ShouldNotThrow();
         }
     }

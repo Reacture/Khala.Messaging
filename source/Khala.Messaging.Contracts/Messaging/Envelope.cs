@@ -12,7 +12,17 @@
         /// </summary>
         /// <param name="message">The message object.</param>
         public Envelope(object message)
-            : this(Guid.NewGuid(), null, message)
+            : this(Guid.NewGuid(), default, default, message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Envelope"/> class with information of the contributor to the message and the message object.
+        /// </summary>
+        /// <param name="contributor">Information of the contributor to the message.</param>
+        /// <param name="message">The message object.</param>
+        public Envelope(string contributor, object message)
+            : this(Guid.NewGuid(), default, contributor, message)
         {
         }
 
@@ -22,7 +32,7 @@
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="message">The message object.</param>
         public Envelope(Guid correlationId, object message)
-            : this(Guid.NewGuid(), correlationId, message)
+            : this(Guid.NewGuid(), correlationId, default, message)
         {
         }
 
@@ -33,6 +43,18 @@
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="message">The message object.</param>
         public Envelope(Guid messageId, Guid? correlationId, object message)
+            : this(messageId, correlationId, default, message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the correlation, information of the contributor to the message and the message object.
+        /// </summary>
+        /// <param name="messageId">The identifier of the message.</param>
+        /// <param name="correlationId">The identifier of the correlation.</param>
+        /// <param name="contributor">Information of the contributor to the message.</param>
+        /// <param name="message">The message object.</param>
+        public Envelope(Guid messageId, Guid? correlationId, string contributor, object message)
         {
             if (messageId == Guid.Empty)
             {
@@ -50,6 +72,7 @@
 
             MessageId = messageId;
             CorrelationId = correlationId;
+            Contributor = contributor;
             Message = message ?? throw new ArgumentNullException(nameof(message));
         }
 
@@ -68,6 +91,14 @@
         /// The identifier of the correlation.
         /// </value>
         public Guid? CorrelationId { get; }
+
+        /// <summary>
+        /// Gets information of the contributor to the message.
+        /// </summary>
+        /// <value>
+        /// Information of the contributor to the message.
+        /// </value>
+        public string Contributor { get; }
 
         /// <summary>
         /// Gets the message object.
