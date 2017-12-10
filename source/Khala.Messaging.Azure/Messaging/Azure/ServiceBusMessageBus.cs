@@ -51,7 +51,11 @@
                 Body = Encoding.UTF8.GetBytes(_serializer.Serialize(envelope.Envelope.Message)),
                 ScheduledEnqueueTimeUtc = envelope.ScheduledTime.UtcDateTime,
                 MessageId = envelope.Envelope.MessageId.ToString("n"),
-                CorrelationId = envelope.Envelope.CorrelationId?.ToString("n")
+                CorrelationId = envelope.Envelope.CorrelationId?.ToString("n"),
+                UserProperties =
+                {
+                    ["Khala.Messaging.Envelope.Contributor"] = envelope.Envelope.Contributor
+                }
             });
         }
 

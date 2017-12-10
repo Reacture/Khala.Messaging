@@ -188,13 +188,35 @@ References
 
             // Assert
             (Message received, DateTime receivedAt) = await ReceiveSingle();
-            var precision = TimeSpan.FromMilliseconds(1000);
-            receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTime.UtcDateTime.AddTicks(-precision.Ticks));
-
             received.CorrelationId.Should().Be(correlationId.ToString("n"));
+        }
 
-            object message = serializer.Deserialize(Encoding.UTF8.GetString(received.Body));
-            message.ShouldBeEquivalentTo(scheduled.Envelope.Message);
+        [TestMethod]
+        public async Task Send_sets_Contributor_user_property_correctly()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            IMessageSerializer serializer = new JsonMessageSerializer();
+            var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
+
+            var messageId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
+            var contributor = Guid.NewGuid().ToString();
+            var scheduled = new ScheduledEnvelope(
+                new Envelope(
+                    messageId,
+                    correlationId,
+                    contributor,
+                    new Fixture().Create<SomeMessage>()),
+                DateTimeOffset.Now);
+
+            // Act
+            await sut.Send(scheduled, CancellationToken.None);
+
+            // Assert
+            (Message received, DateTime receivedAt) = await ReceiveSingle();
+            received.UserProperties.Should().Contain("Khala.Messaging.Envelope.Contributor", contributor);
         }
 
         [TestMethod]
