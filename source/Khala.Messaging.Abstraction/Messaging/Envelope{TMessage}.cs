@@ -13,8 +13,9 @@
         /// </summary>
         /// <param name="messageId">The identifier of the message.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
+        /// <param name="contributor">Information of the contributor to the message.</param>
         /// <param name="message">The strongly-typed message object.</param>
-        public Envelope(Guid messageId, Guid? correlationId, TMessage message)
+        public Envelope(Guid messageId, Guid? correlationId, string contributor, TMessage message)
         {
             if (messageId == Guid.Empty)
             {
@@ -39,6 +40,7 @@
 
             MessageId = messageId;
             CorrelationId = correlationId;
+            Contributor = contributor;
             Message = message;
         }
 
@@ -57,6 +59,14 @@
         /// The identifier of the correlation.
         /// </value>
         public Guid? CorrelationId { get; }
+
+        /// <summary>
+        /// Gets information of the contributor to the message.
+        /// </summary>
+        /// <value>
+        /// Information of the contributor to the message.
+        /// </value>
+        public string Contributor { get; }
 
         /// <summary>
         /// Gets the message object.

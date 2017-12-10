@@ -23,7 +23,7 @@
         [TestMethod]
         public void sut_implements_IMessageHandler()
         {
-            var sut = Mock.Of<Messaging.InterfaceAwareHandler>();
+            var sut = Mock.Of<InterfaceAwareHandler>();
             sut.Should().BeAssignableTo<IMessageHandler>();
         }
 
@@ -54,9 +54,11 @@
         {
             var mock = new Mock<BlogEventHandler> { CallBase = true };
             BlogEventHandler sut = mock.Object;
-            object message = new BlogPostCreated();
+            Guid messageId = Guid.NewGuid();
             Guid correlationId = Guid.NewGuid();
-            var envelope = new Envelope(correlationId, message);
+            string contributor = Guid.NewGuid().ToString();
+            object message = new BlogPostCreated();
+            var envelope = new Envelope(messageId, correlationId, contributor, message);
 
             await sut.Handle(envelope, CancellationToken.None);
 
@@ -65,8 +67,9 @@
                 x.Handle(
                     It.Is<Envelope<BlogPostCreated>>(
                         p =>
-                        p.MessageId == envelope.MessageId &&
+                        p.MessageId == messageId &&
                         p.CorrelationId == correlationId &&
+                        p.Contributor == contributor &&
                         p.Message == message),
                     CancellationToken.None),
                 Times.Once());

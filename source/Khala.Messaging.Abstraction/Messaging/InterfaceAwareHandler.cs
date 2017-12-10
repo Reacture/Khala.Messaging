@@ -85,6 +85,7 @@
                     new Envelope<TMessage>(
                         envelope.MessageId,
                         envelope.CorrelationId,
+                        envelope.Contributor,
                         (TMessage)envelope.Message),
                     cancellationToken);
             };
