@@ -166,6 +166,33 @@ References
         }
 
         [TestMethod]
+        public async Task Send_sets_OperationId_correctly_if_exists()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            IMessageSerializer serializer = new JsonMessageSerializer();
+            var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
+
+            var operationId = Guid.NewGuid();
+            var scheduled = new ScheduledEnvelope(
+                new Envelope(
+                    messageId: Guid.NewGuid(),
+                    operationId,
+                    correlationId: default,
+                    contributor: default,
+                    new Fixture().Create<SomeMessage>()),
+                DateTimeOffset.Now);
+
+            // Act
+            await sut.Send(scheduled, CancellationToken.None);
+
+            // Assert
+            (Message received, DateTime receivedAt) = await ReceiveSingle();
+            received.UserProperties.Should().Contain("Khala.Messaging.Envelope.OperationId", operationId);
+        }
+
+        [TestMethod]
         public async Task Send_sets_CorrelationId_correctly_if_exists()
         {
             // Arrange
@@ -174,12 +201,13 @@ References
             IMessageSerializer serializer = new JsonMessageSerializer();
             var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
 
-            var messageId = Guid.NewGuid();
             var correlationId = Guid.NewGuid();
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
-                    messageId,
+                    messageId: Guid.NewGuid(),
+                    operationId: default,
                     correlationId,
+                    contributor: default,
                     new Fixture().Create<SomeMessage>()),
                 DateTimeOffset.Now);
 
@@ -201,12 +229,12 @@ References
             var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
 
             var messageId = Guid.NewGuid();
-            var correlationId = Guid.NewGuid();
             var contributor = Guid.NewGuid().ToString();
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId,
-                    correlationId,
+                    operationId: default,
+                    correlationId: default,
                     contributor,
                     new Fixture().Create<SomeMessage>()),
                 DateTimeOffset.Now);

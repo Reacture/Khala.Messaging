@@ -12,55 +12,32 @@
         /// </summary>
         /// <param name="message">The message object.</param>
         public Envelope(object message)
-            : this(Guid.NewGuid(), default, default, message)
+            : this(messageId: Guid.NewGuid(), operationId: default, correlationId: default, contributor: default, message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with information of the contributor to the message and the message object.
-        /// </summary>
-        /// <param name="contributor">Information of the contributor to the message.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(string contributor, object message)
-            : this(Guid.NewGuid(), default, contributor, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the correlation and the message object.
-        /// </summary>
-        /// <param name="correlationId">The identifier of the correlation.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(Guid correlationId, object message)
-            : this(Guid.NewGuid(), correlationId, default, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the correlation and the message object.
+        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the operation, the identifier of the correlation, information of the contributor to the message and the message object.
         /// </summary>
         /// <param name="messageId">The identifier of the message.</param>
-        /// <param name="correlationId">The identifier of the correlation.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(Guid messageId, Guid? correlationId, object message)
-            : this(messageId, correlationId, default, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the correlation, information of the contributor to the message and the message object.
-        /// </summary>
-        /// <param name="messageId">The identifier of the message.</param>
+        /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
         /// <param name="message">The message object.</param>
-        public Envelope(Guid messageId, Guid? correlationId, string contributor, object message)
+        public Envelope(Guid messageId, Guid? operationId, Guid? correlationId, string contributor, object message)
         {
             if (messageId == Guid.Empty)
             {
                 throw new ArgumentException(
                     $"{nameof(messageId)} cannot be empty.",
                     nameof(messageId));
+            }
+
+            if (operationId == Guid.Empty)
+            {
+                throw new ArgumentException(
+                    $"{nameof(correlationId)} cannot be empty.",
+                    nameof(operationId));
             }
 
             if (correlationId == Guid.Empty)
@@ -71,6 +48,7 @@
             }
 
             MessageId = messageId;
+            OperationId = operationId;
             CorrelationId = correlationId;
             Contributor = contributor;
             Message = message ?? throw new ArgumentNullException(nameof(message));
@@ -83,6 +61,14 @@
         /// The identifier of the message.
         /// </value>
         public Guid MessageId { get; }
+
+        /// <summary>
+        /// Gets the identifier of the message.
+        /// </summary>
+        /// <value>
+        /// The identifier of the message.
+        /// </value>
+        public Guid? OperationId { get; }
 
         /// <summary>
         /// Gets the identifier of the correlation.

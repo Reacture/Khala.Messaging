@@ -55,10 +55,11 @@
             var mock = new Mock<BlogEventHandler> { CallBase = true };
             BlogEventHandler sut = mock.Object;
             Guid messageId = Guid.NewGuid();
+            Guid operationId = Guid.NewGuid();
             Guid correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             object message = new BlogPostCreated();
-            var envelope = new Envelope(messageId, correlationId, contributor, message);
+            var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);
 
             await sut.Handle(envelope, CancellationToken.None);
 
@@ -68,6 +69,7 @@
                     It.Is<Envelope<BlogPostCreated>>(
                         p =>
                         p.MessageId == messageId &&
+                        p.OperationId == operationId &&
                         p.CorrelationId == correlationId &&
                         p.Contributor == contributor &&
                         p.Message == message),

@@ -12,16 +12,24 @@
         /// Initializes a new instance of the <see cref="Envelope{TMessage}"/> class.
         /// </summary>
         /// <param name="messageId">The identifier of the message.</param>
+        /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
         /// <param name="message">The strongly-typed message object.</param>
-        public Envelope(Guid messageId, Guid? correlationId, string contributor, TMessage message)
+        public Envelope(Guid messageId, Guid? operationId, Guid? correlationId, string contributor, TMessage message)
         {
             if (messageId == Guid.Empty)
             {
                 throw new ArgumentException(
                     $"{nameof(messageId)} cannot be empty.",
                     nameof(messageId));
+            }
+
+            if (operationId == Guid.Empty)
+            {
+                throw new ArgumentException(
+                    $"{nameof(operationId)} cannot be empty.",
+                    nameof(operationId));
             }
 
             if (correlationId == Guid.Empty)
@@ -39,6 +47,7 @@
 #pragma warning restore IDE0016 // Ignore "Use 'throw' expression" because TMessage does not have a reference type constraint.
 
             MessageId = messageId;
+            OperationId = operationId;
             CorrelationId = correlationId;
             Contributor = contributor;
             Message = message;
@@ -51,6 +60,14 @@
         /// The identifier of the message.
         /// </value>
         public Guid MessageId { get; }
+
+        /// <summary>
+        /// Gets the identifier of the message.
+        /// </summary>
+        /// <value>
+        /// The identifier of the message.
+        /// </value>
+        public Guid? OperationId { get; }
 
         /// <summary>
         /// Gets the identifier of the correlation.

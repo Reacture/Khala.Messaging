@@ -66,7 +66,7 @@
         public void HandleTMessage_releys_with_non_cancellation_token()
         {
             var task = Task.FromResult(true);
-            var envelope = new Envelope<object>(Guid.NewGuid(), default, default, new object());
+            var envelope = new Envelope<object>(Guid.NewGuid(), default, default, default, new object());
             var handles = Mock.Of<IHandles<object>>(
                 x => x.Handle(envelope, CancellationToken.None) == task);
 

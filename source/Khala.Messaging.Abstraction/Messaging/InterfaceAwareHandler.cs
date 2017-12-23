@@ -84,6 +84,7 @@
                 return handler.Handle(
                     new Envelope<TMessage>(
                         envelope.MessageId,
+                        envelope.OperationId,
                         envelope.CorrelationId,
                         envelope.Contributor,
                         (TMessage)envelope.Message),

@@ -54,6 +54,7 @@
                 CorrelationId = envelope.Envelope.CorrelationId?.ToString("n"),
                 UserProperties =
                 {
+                    ["Khala.Messaging.Envelope.OperationId"] = envelope.Envelope.OperationId,
                     ["Khala.Messaging.Envelope.Contributor"] = envelope.Envelope.Contributor
                 }
             });

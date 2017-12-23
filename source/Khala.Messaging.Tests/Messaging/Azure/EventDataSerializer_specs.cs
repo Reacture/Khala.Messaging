@@ -63,11 +63,37 @@
         }
 
         [TestMethod]
+        public void Serialize_sets_OperationId_property_as_string_correctly()
+        {
+            var operationId = Guid.NewGuid();
+            var message = fixture.Create<BlogPostCreated>();
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                operationId,
+                correlationId: default,
+                contributor: default,
+                message);
+
+            EventData eventData = sut.Serialize(envelope);
+
+            string propertyName = "Khala.Messaging.Envelope.OperationId";
+            eventData.Properties.Keys.Should().Contain(propertyName);
+            object actual = eventData.Properties[propertyName];
+            actual.Should().BeOfType<string>();
+            Guid.Parse((string)actual).Should().Be(operationId);
+        }
+
+        [TestMethod]
         public void Serialize_sets_CorrelationId_property_as_string_correctly()
         {
             var correlationId = Guid.NewGuid();
             var message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(correlationId, message);
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                operationId: default,
+                correlationId,
+                contributor: default,
+                message);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -83,7 +109,12 @@
         {
             string contributor = Guid.NewGuid().ToString();
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(contributor, message);
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                operationId: default,
+                correlationId: default,
+                contributor,
+                message);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -97,10 +128,11 @@
         public void Deserialize_deserializes_envelope_correctly()
         {
             var messageId = Guid.NewGuid();
+            var operationId = Guid.NewGuid();
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             var message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(messageId, correlationId, contributor, message);
+            var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);
             EventData eventData = sut.Serialize(envelope);
 
             Envelope actual = sut.Deserialize(eventData);

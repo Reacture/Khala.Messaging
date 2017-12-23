@@ -11,6 +11,7 @@
     public sealed class EventDataSerializer
     {
         private const string MessageIdName = "Khala.Messaging.Envelope.MessageId";
+        private const string OperationIdName = "Khala.Messaging.Envelope.OperationId";
         private const string CorrelationIdName = "Khala.Messaging.Envelope.CorrelationId";
         private const string ContributorName = "Khala.Messaging.Envelope.Contributor";
 
@@ -51,6 +52,7 @@
                 Properties =
                 {
                     [MessageIdName] = envelope.MessageId.ToString("n"),
+                    [OperationIdName] = envelope.OperationId?.ToString("n"),
                     [CorrelationIdName] = envelope.CorrelationId?.ToString("n"),
                     [ContributorName] = envelope.Contributor
                 }
@@ -77,6 +79,7 @@
 
             return new Envelope(
                 GetMessageId(data.Properties),
+                GetOperationId(data.Properties),
                 GetCorrelationId(data.Properties),
                 GetContributor(data.Properties),
                 DeserializeMessage(data.Body));
@@ -94,12 +97,16 @@
             return Guid.TryParse(value?.ToString(), out Guid messageId) ? messageId : Guid.NewGuid();
         }
 
+        private Guid? GetOperationId(IDictionary<string, object> properties)
+        {
+            properties.TryGetValue(OperationIdName, out object value);
+            return Guid.TryParse(value?.ToString(), out Guid operationId) ? operationId : default(Guid?);
+        }
+
         private Guid? GetCorrelationId(IDictionary<string, object> properties)
         {
-#pragma warning disable IDE0034 // Disable IDE0034(Simplify 'default' expression) warning because it changes the type to Guid from Guid?.
             properties.TryGetValue(CorrelationIdName, out object value);
             return Guid.TryParse(value?.ToString(), out Guid correlationId) ? correlationId : default(Guid?);
-#pragma warning restore IDE0034 // Disable IDE0034(Simplify 'default' expression) warning because it changes the type to Guid from Guid?.
         }
 
         private string GetContributor(IDictionary<string, object> properties)

@@ -89,11 +89,50 @@ References
             var messageBus = new MessageBus();
             var serializer = new JsonMessageSerializer();
 
+            var fixture = new Fixture();
+
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                operationId: Guid.NewGuid(),
                 correlationId: Guid.NewGuid(),
-                contributor: Guid.NewGuid().ToString(),
-                message: new Fixture().Create<SomeMessage>());
+                contributor: fixture.Create<string>(),
+                message: fixture.Create<SomeMessage>());
+
+            // Act
+            Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            try
+            {
+                await SendMessage(envelope, serializer);
+
+                // Assert
+                await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+                messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+                Envelope actual = await messageBus.SentMessage;
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            }
+            finally
+            {
+                await closeFunction.Invoke();
+            }
+        }
+
+        [TestMethod]
+        public async Task message_handler_sends_message_not_having_operationId_correctly()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            var messageBus = new MessageBus();
+            var serializer = new JsonMessageSerializer();
+
+            var fixture = new Fixture();
+
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                operationId: default,
+                correlationId: Guid.NewGuid(),
+                contributor: fixture.Create<string>(),
+                message: fixture.Create<SomeMessage>());
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
@@ -122,9 +161,47 @@ References
             var messageBus = new MessageBus();
             var serializer = new JsonMessageSerializer();
 
+            var fixture = new Fixture();
+
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                operationId: Guid.NewGuid(),
                 correlationId: default,
+                contributor: fixture.Create<string>(),
+                message: fixture.Create<SomeMessage>());
+
+            // Act
+            Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
+            try
+            {
+                await SendMessage(envelope, serializer);
+
+                // Assert
+                await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
+                messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
+                Envelope actual = await messageBus.SentMessage;
+                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            }
+            finally
+            {
+                await closeFunction.Invoke();
+            }
+        }
+
+        [TestMethod]
+        public async Task message_handler_sends_message_not_having_contributor_correctly()
+        {
+            // Arrange
+            await ReceiveAndForgetAll();
+
+            var messageBus = new MessageBus();
+            var serializer = new JsonMessageSerializer();
+
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                operationId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
+                contributor: default,
                 message: new Fixture().Create<SomeMessage>());
 
             // Act
@@ -156,7 +233,9 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                operationId: default,
                 correlationId: default,
+                contributor: default,
                 message: new Fixture().Create<SomeMessage>());
 
             // Act
