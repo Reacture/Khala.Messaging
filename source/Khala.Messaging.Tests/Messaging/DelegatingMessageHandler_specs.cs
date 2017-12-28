@@ -30,7 +30,7 @@
         [DataRow(false)]
         public async Task Handle_relays_to_handler_function_correctly(bool canceled)
         {
-            var functionProvider = Mock.Of<IFunctionProvider>();
+            IFunctionProvider functionProvider = Mock.Of<IFunctionProvider>();
             var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope, CancellationToken>);
             var envelope = new Envelope(new object());
             var cancellationToken = new CancellationToken(canceled);
@@ -45,7 +45,7 @@
         [DataRow(false)]
         public async Task Handle_replays_to_modest_handler_function_correctly(bool canceled)
         {
-            var functionProvider = Mock.Of<IFunctionProvider>();
+            IFunctionProvider functionProvider = Mock.Of<IFunctionProvider>();
             var sut = new DelegatingMessageHandler(functionProvider.Func<Envelope>);
             var envelope = new Envelope(new object());
             var cancellationToken = new CancellationToken(canceled);

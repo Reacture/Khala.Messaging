@@ -298,7 +298,7 @@ References
             appProperties.OnAppDisposing = cancellation.Token;
 
             var messageHandler = new MessageHandler();
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            IEventProcessingExceptionHandler exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
 
             // Act
             app.UseEventProcessor(GetEventProcessorHost(), messageHandler, exceptionHandler);

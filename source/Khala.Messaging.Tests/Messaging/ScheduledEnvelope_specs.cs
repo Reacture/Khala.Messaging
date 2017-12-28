@@ -44,8 +44,8 @@
         public void constructor_sets_properties_correctly()
         {
             var fixture = new Fixture();
-            var envelope = fixture.Create<Envelope>();
-            var scheduledTime = fixture.Create<DateTimeOffset>();
+            Envelope envelope = fixture.Create<Envelope>();
+            DateTimeOffset scheduledTime = fixture.Create<DateTimeOffset>();
 
             var sut = new ScheduledEnvelope(envelope, scheduledTime);
 

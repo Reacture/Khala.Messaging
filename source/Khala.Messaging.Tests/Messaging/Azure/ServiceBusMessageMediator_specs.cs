@@ -36,8 +36,8 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var connectionString = (string)context.Properties[ConnectionStringParam];
-            var entityPath = (string)context.Properties[EntityPathParam];
+            string connectionString = (string)context.Properties[ConnectionStringParam];
+            string entityPath = (string)context.Properties[EntityPathParam];
 
             if (string.IsNullOrWhiteSpace(connectionString) ||
                 string.IsNullOrWhiteSpace(entityPath))

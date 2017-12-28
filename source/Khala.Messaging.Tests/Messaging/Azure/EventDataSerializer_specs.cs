@@ -35,7 +35,7 @@
         [TestMethod]
         public void Serialize_serializes_message_correctly()
         {
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = sut.Serialize(envelope);
@@ -50,7 +50,7 @@
         [TestMethod]
         public void Serialize_sets_MessageId_property_as_string_correctly()
         {
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = sut.Serialize(envelope);
@@ -66,7 +66,7 @@
         public void Serialize_sets_OperationId_property_as_string_correctly()
         {
             var operationId = Guid.NewGuid();
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 operationId,
@@ -87,7 +87,7 @@
         public void Serialize_sets_CorrelationId_property_as_string_correctly()
         {
             var correlationId = Guid.NewGuid();
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 operationId: default,
@@ -131,7 +131,7 @@
             var operationId = Guid.NewGuid();
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);
             EventData eventData = sut.Serialize(envelope);
 
@@ -143,7 +143,7 @@
         [TestMethod]
         public void Deserialize_creates_new_MessageId_if_property_not_set()
         {
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Messaging.Envelope.MessageId");
@@ -157,7 +157,7 @@
         [TestMethod]
         public void Deserialize_not_fails_even_if_CorrelationId_property_not_set()
         {
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Messaging.Envelope.CorrelationId");
@@ -172,7 +172,7 @@
         [TestMethod]
         public void Deserialize_not_fails_even_if_Contributor_property_not_set()
         {
-            var message = fixture.Create<BlogPostCreated>();
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("Khala.Messaging.Envelope.Contributor");

@@ -23,14 +23,14 @@
         [TestMethod]
         public void sut_implements_IMessageHandler()
         {
-            var sut = Mock.Of<InterfaceAwareHandler>();
+            InterfaceAwareHandler sut = Mock.Of<InterfaceAwareHandler>();
             sut.Should().BeAssignableTo<IMessageHandler>();
         }
 
         [TestMethod]
         public void sut_has_guard_clauses()
         {
-            var builder = new Fixture().Customize(new AutoMoqCustomization());
+            IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
             var assertion = new GuardClauseAssertion(builder);
             assertion.Verify(typeof(InterfaceAwareHandler));
         }
@@ -54,9 +54,9 @@
         {
             var mock = new Mock<BlogEventHandler> { CallBase = true };
             BlogEventHandler sut = mock.Object;
-            Guid messageId = Guid.NewGuid();
-            Guid operationId = Guid.NewGuid();
-            Guid correlationId = Guid.NewGuid();
+            var messageId = Guid.NewGuid();
+            var operationId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             object message = new BlogPostCreated();
             var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);

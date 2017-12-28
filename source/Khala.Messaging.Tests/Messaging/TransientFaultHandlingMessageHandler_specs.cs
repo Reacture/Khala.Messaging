@@ -23,16 +23,16 @@
         [TestMethod]
         public void sut_has_guard_clauses()
         {
-            var builder = new Fixture().Customize(new AutoMoqCustomization());
+            IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
             new GuardClauseAssertion(builder).Verify(typeof(TransientFaultHandlingMessageHandler));
         }
 
         [TestMethod]
         public void constructor_sets_properties_correctly()
         {
-            var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            var retryPolicy = fixture.Create<RetryPolicy>();
-            var messageHandler = fixture.Create<IMessageHandler>();
+            IFixture fixture = new Fixture().Customize(new AutoMoqCustomization());
+            RetryPolicy retryPolicy = fixture.Create<RetryPolicy>();
+            IMessageHandler messageHandler = fixture.Create<IMessageHandler>();
 
             var sut = new TransientFaultHandlingMessageHandler(retryPolicy, messageHandler);
 
@@ -46,8 +46,8 @@
         public async Task Handle_relays_to_retry_policy(bool canceled)
         {
             var cancellationToken = new CancellationToken(canceled);
-            var retryPolicy = Mock.Of<IRetryPolicy>();
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IRetryPolicy retryPolicy = Mock.Of<IRetryPolicy>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             var sut = new TransientFaultHandlingMessageHandler(retryPolicy, messageHandler);
             var envelope = new Envelope(new object());
 

@@ -38,8 +38,8 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            var connectionString = (string)context.Properties[ConnectionStringParam];
-            var entityPath = (string)context.Properties[EntityPathParam];
+            string connectionString = (string)context.Properties[ConnectionStringParam];
+            string entityPath = (string)context.Properties[EntityPathParam];
 
             if (string.IsNullOrWhiteSpace(connectionString) ||
                 string.IsNullOrWhiteSpace(entityPath))
@@ -229,7 +229,7 @@ References
             var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
 
             var messageId = Guid.NewGuid();
-            var contributor = Guid.NewGuid().ToString();
+            string contributor = Guid.NewGuid().ToString();
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId,

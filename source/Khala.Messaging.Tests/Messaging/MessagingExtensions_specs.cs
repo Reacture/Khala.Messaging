@@ -16,8 +16,8 @@
         [TestMethod]
         public void sut_has_guard_clauses()
         {
-            var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            new GuardClauseAssertion(fixture).Verify(typeof(MessagingExtensions));
+            IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
+            new GuardClauseAssertion(builder).Verify(typeof(MessagingExtensions));
         }
 
         [TestMethod]
@@ -25,7 +25,7 @@
         {
             var task = Task.FromResult(true);
             var envelope = new Envelope(new object());
-            var messageBus = Mock.Of<IMessageBus>(
+            IMessageBus messageBus = Mock.Of<IMessageBus>(
                 x => x.Send(envelope, CancellationToken.None) == task);
 
             Task result = messageBus.Send(envelope);
@@ -38,8 +38,8 @@
         public void Send_with_envelopes_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);
-            var envelopes = new Envelope[] { };
-            var messageBus = Mock.Of<IMessageBus>(
+            Envelope[] envelopes = new Envelope[] { };
+            IMessageBus messageBus = Mock.Of<IMessageBus>(
                 x => x.Send(envelopes, CancellationToken.None) == task);
 
             Task result = messageBus.Send(envelopes);
@@ -53,7 +53,7 @@
         {
             var task = Task.FromResult(true);
             var envelope = new Envelope(new object());
-            var messageHandler = Mock.Of<IMessageHandler>(
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(
                 x => x.Handle(envelope, CancellationToken.None) == task);
 
             Task result = messageHandler.Handle(envelope);
@@ -67,7 +67,7 @@
         {
             var task = Task.FromResult(true);
             var envelope = new Envelope<object>(Guid.NewGuid(), default, default, default, new object());
-            var handles = Mock.Of<IHandles<object>>(
+            IHandles<object> handles = Mock.Of<IHandles<object>>(
                 x => x.Handle(envelope, CancellationToken.None) == task);
 
             Task result = handles.Handle(envelope);

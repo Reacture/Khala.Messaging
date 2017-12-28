@@ -255,7 +255,7 @@ References
             EventHubMessageBus messageBus = GetMessageBus();
             for (int i = 0; i < messageCount; i++)
             {
-                var message = new Fixture().Create<Message>();
+                Message message = new Fixture().Create<Message>();
                 await messageBus.Send(new Envelope(message));
             }
 
@@ -286,8 +286,8 @@ References
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
             var completion = new TaskCompletionSource<bool>();
-            var messageHandler = Mock.Of<IMessageHandler>();
-            var handled = false;
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            bool handled = false;
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .Callback(() => handled = true)
@@ -299,7 +299,7 @@ References
                 CancellationToken.None);
 
             // Act
-            var message = new Fixture().Create<Message>();
+            Message message = new Fixture().Create<Message>();
             await GetMessageBus().Send(new Envelope(message));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
@@ -375,7 +375,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .ThrowsAsync(new InvalidOperationException());
@@ -386,7 +386,7 @@ References
                 CancellationToken.None);
 
             // Act
-            var message = new Fixture().Create<Message>();
+            Message message = new Fixture().Create<Message>();
             await GetMessageBus().Send(new Envelope(message));
 
             EventProcessorHost processorHost = GetEventProcessorHost();
@@ -419,7 +419,7 @@ References
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
             EventProcessingExceptionContext exceptionContext = null;
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            IEventProcessingExceptionHandler exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
             Mock.Get(exceptionHandler)
                 .Setup(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()))
                 .Callback<EventProcessingExceptionContext>(p => exceptionContext = p)
@@ -468,14 +468,14 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             Exception exception = new InvalidOperationException();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .ThrowsAsync(exception);
 
             EventProcessingExceptionContext exceptionContext = null;
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            IEventProcessingExceptionHandler exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
             Mock.Get(exceptionHandler)
                 .Setup(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()))
                 .Callback<EventProcessingExceptionContext>(p => exceptionContext = p)
@@ -524,7 +524,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            IEventProcessingExceptionHandler exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
             Mock.Get(exceptionHandler)
                 .Setup(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()))
                 .ThrowsAsync(new InvalidOperationException());
@@ -568,7 +568,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .ThrowsAsync(new TaskCanceledException());
@@ -611,14 +611,14 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             Exception exception = new TaskCanceledException();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .ThrowsAsync(exception);
 
             EventProcessingExceptionContext exceptionContext = null;
-            var exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
+            IEventProcessingExceptionHandler exceptionHandler = Mock.Of<IEventProcessingExceptionHandler>();
             Mock.Get(exceptionHandler)
                 .Setup(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()))
                 .Callback<EventProcessingExceptionContext>(p => exceptionContext = p)
@@ -666,7 +666,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            var messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
             var cancellationToken = new CancellationToken(canceled);
             var sut = new EventProcessorFactory(
                 messageHandler,

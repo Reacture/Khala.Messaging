@@ -23,9 +23,8 @@
         [TestMethod]
         public void class_has_guard_clauses()
         {
-            var fixture = new Fixture().Customize(new AutoMoqCustomization());
-            var assertion = new GuardClauseAssertion(fixture);
-            assertion.Verify(typeof(CompositeMessageHandler));
+            IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
+            new GuardClauseAssertion(builder).Verify(typeof(CompositeMessageHandler));
         }
 
         [TestMethod]
@@ -43,10 +42,10 @@
         [TestMethod]
         public async Task Handle_sends_message_to_all_handlers()
         {
-            var handler1 = Mock.Of<IMessageHandler>();
-            var handler2 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>();
             var sut = new CompositeMessageHandler(handler1, handler2);
-            var message = new object();
+            object message = new object();
             var envelope = new Envelope(message);
 
             await sut.Handle(envelope, CancellationToken.None);
@@ -60,10 +59,10 @@
         [TestMethod]
         public async Task Handle_sends_message_to_all_handlers_even_if_some_handler_fails()
         {
-            var handler1 = Mock.Of<IMessageHandler>();
-            var handler2 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>();
             var sut = new CompositeMessageHandler(handler1, handler2);
-            var message = new object();
+            object message = new object();
             var envelope = new Envelope(message);
             Mock.Get(handler1)
                 .Setup(x => x.Handle(envelope, CancellationToken.None))
@@ -87,12 +86,12 @@
         public void Handle_throws_aggregate_exception_if_handler_fails()
         {
             // Arrange
-            var handler1 = Mock.Of<IMessageHandler>();
-            var handler2 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>();
 
             var sut = new CompositeMessageHandler(handler1, handler2);
 
-            var message = new object();
+            object message = new object();
             var envelope = new Envelope(message);
 
             var exception1 = new InvalidOperationException();

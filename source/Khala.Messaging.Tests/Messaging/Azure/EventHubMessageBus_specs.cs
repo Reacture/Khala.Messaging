@@ -86,7 +86,7 @@ References
 
             while (true)
             {
-                var received = await receiver.ReceiveAsync(10, waitTime);
+                IEnumerable<EventData> received = await receiver.ReceiveAsync(10, waitTime);
                 if (received == null)
                 {
                     break;
@@ -130,7 +130,7 @@ References
         {
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
             var sut = new EventHubMessageBus(eventHubClient);
-            var message = new Fixture().Create<PartitionedMessage>();
+            PartitionedMessage message = new Fixture().Create<PartitionedMessage>();
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
 
             await sut.Send(new Envelope(message), CancellationToken.None);
@@ -149,7 +149,7 @@ References
             var serializer = new EventDataSerializer();
             var sut = new EventHubMessageBus(eventHubClient, serializer);
 
-            List<Envelope> envelopes = new Fixture()
+            var envelopes = new Fixture()
                 .CreateMany<Message>()
                 .Select(message => new Envelope(message))
                 .ToList();
@@ -181,7 +181,7 @@ References
             var sut = new EventHubMessageBus(eventHubClient, serializer);
 
             string partitionKey = Guid.NewGuid().ToString();
-            List<Envelope> envelopes = new Fixture()
+            var envelopes = new Fixture()
                 .Build<PartitionedMessage>()
                 .With(message => message.PartitionKey, partitionKey)
                 .CreateMany()
@@ -216,7 +216,7 @@ References
             var sut = new EventHubMessageBus(eventHubClient, serializer);
 
             string partitionKey = Guid.NewGuid().ToString();
-            List<Envelope> envelopes = new Fixture()
+            var envelopes = new Fixture()
                 .Build<PartitionedMessage>()
                 .With(message => message.PartitionKey, partitionKey)
                 .CreateMany()

@@ -89,7 +89,7 @@
         {
             // Arrange
             var sut = new JsonMessageSerializer();
-            var message = fixture.Create<MutableMessage>();
+            MutableMessage message = fixture.Create<MutableMessage>();
             string serialized = sut.Serialize(message);
             TestContext.WriteLine(serialized);
 
@@ -106,7 +106,7 @@
         {
             // Arrange
             var sut = new JsonMessageSerializer();
-            var message = fixture.Create<ImmutableMessage>();
+            ImmutableMessage message = fixture.Create<ImmutableMessage>();
             string serialized = sut.Serialize(message);
             TestContext.WriteLine(serialized);
 
@@ -123,9 +123,9 @@
         {
             // Arrange
             string prop = $"{Guid.NewGuid()}";
-            var json = $"{{ \"$type\": \"UnknownNamespace.UnknownMessage, UnknownAssembly\", \"Prop\": \"{prop}\" }}";
+            string json = $"{{ \"$type\": \"UnknownNamespace.UnknownMessage, UnknownAssembly\", \"Prop\": \"{prop}\" }}";
             var sut = new JsonMessageSerializer();
-            var actual = default(object);
+            object actual = default(object);
 
             // Act
             Action action = () => actual = sut.Deserialize(json);
@@ -141,9 +141,9 @@
         {
             // Arrange
             string prop = $"{Guid.NewGuid()}";
-            var json = $"{{ \"Prop\": \"{prop}\" }}";
+            string json = $"{{ \"Prop\": \"{prop}\" }}";
             var sut = new JsonMessageSerializer();
-            var actual = default(object);
+            object actual = default(object);
 
             // Act
             Action action = () => actual = sut.Deserialize(json);
