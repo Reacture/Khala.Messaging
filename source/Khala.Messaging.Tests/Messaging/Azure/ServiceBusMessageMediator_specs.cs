@@ -93,10 +93,10 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                message: fixture.Create<SomeMessage>(),
                 operationId: Guid.NewGuid(),
                 correlationId: Guid.NewGuid(),
-                contributor: fixture.Create<string>(),
-                message: fixture.Create<SomeMessage>());
+                contributor: fixture.Create<string>());
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
@@ -129,10 +129,9 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
-                operationId: default,
+                message: fixture.Create<SomeMessage>(),
                 correlationId: Guid.NewGuid(),
-                contributor: fixture.Create<string>(),
-                message: fixture.Create<SomeMessage>());
+                contributor: fixture.Create<string>());
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
@@ -165,10 +164,9 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                message: fixture.Create<SomeMessage>(),
                 operationId: Guid.NewGuid(),
-                correlationId: default,
-                contributor: fixture.Create<string>(),
-                message: fixture.Create<SomeMessage>());
+                contributor: fixture.Create<string>());
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
@@ -199,10 +197,9 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
+                message: new Fixture().Create<SomeMessage>(),
                 operationId: Guid.NewGuid(),
-                correlationId: Guid.NewGuid(),
-                contributor: default,
-                message: new Fixture().Create<SomeMessage>());
+                correlationId: Guid.NewGuid());
 
             // Act
             Func<Task> closeFunction = ServiceBusMessageMediator.Start(_connectionStringBuilder, messageBus, serializer);
@@ -233,9 +230,6 @@ References
 
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
-                operationId: default,
-                correlationId: default,
-                contributor: default,
                 message: new Fixture().Create<SomeMessage>());
 
             // Act

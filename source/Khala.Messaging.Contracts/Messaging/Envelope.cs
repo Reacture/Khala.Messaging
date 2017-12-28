@@ -8,23 +8,14 @@
     public sealed class Envelope
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope"/> class with the message object.
-        /// </summary>
-        /// <param name="message">The message object.</param>
-        public Envelope(object message)
-            : this(messageId: Guid.NewGuid(), operationId: default, correlationId: default, contributor: default, message)
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the operation, the identifier of the correlation, information of the contributor to the message and the message object.
         /// </summary>
         /// <param name="messageId">The identifier of the message.</param>
+        /// <param name="message">The message object.</param>
         /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
-        /// <param name="message">The message object.</param>
-        public Envelope(Guid messageId, Guid? operationId, Guid? correlationId, string contributor, object message)
+        public Envelope(Guid messageId, object message, Guid? operationId = default, Guid? correlationId = default, string contributor = default)
         {
             if (messageId == Guid.Empty)
             {
@@ -52,6 +43,15 @@
             CorrelationId = correlationId;
             Contributor = contributor;
             Message = message ?? throw new ArgumentNullException(nameof(message));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Envelope"/> class with the message object.
+        /// </summary>
+        /// <param name="message">The message object.</param>
+        public Envelope(object message)
+            : this(messageId: Guid.NewGuid(), message)
+        {
         }
 
         /// <summary>

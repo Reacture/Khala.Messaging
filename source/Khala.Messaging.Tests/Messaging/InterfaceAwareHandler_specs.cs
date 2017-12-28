@@ -59,7 +59,7 @@
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             object message = new BlogPostCreated();
-            var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);
+            var envelope = new Envelope(messageId, message, operationId, correlationId, contributor);
 
             await sut.Handle(envelope, CancellationToken.None);
 

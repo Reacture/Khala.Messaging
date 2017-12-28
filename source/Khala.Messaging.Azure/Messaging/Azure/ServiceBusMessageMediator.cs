@@ -45,10 +45,10 @@
             {
                 var envelope = new Envelope(
                     Guid.Parse(message.MessageId),
+                    serializer.Deserialize(Encoding.UTF8.GetString(message.Body)),
                     GetOperationId(message),
                     GetCorrelationId(message),
-                    GetContributor(message),
-                    serializer.Deserialize(Encoding.UTF8.GetString(message.Body)));
+                    GetContributor(message));
 
                 await messageBus.Send(envelope);
 

@@ -178,10 +178,8 @@ References
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId: Guid.NewGuid(),
-                    operationId,
-                    correlationId: default,
-                    contributor: default,
-                    new Fixture().Create<SomeMessage>()),
+                    message: new Fixture().Create<SomeMessage>(),
+                    operationId: operationId),
                 DateTimeOffset.Now);
 
             // Act
@@ -205,10 +203,8 @@ References
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId: Guid.NewGuid(),
-                    operationId: default,
-                    correlationId,
-                    contributor: default,
-                    new Fixture().Create<SomeMessage>()),
+                    message: new Fixture().Create<SomeMessage>(),
+                    correlationId: correlationId),
                 DateTimeOffset.Now);
 
             // Act
@@ -233,10 +229,8 @@ References
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId,
-                    operationId: default,
-                    correlationId: default,
-                    contributor,
-                    new Fixture().Create<SomeMessage>()),
+                    message: new Fixture().Create<SomeMessage>(),
+                    contributor: contributor),
                 DateTimeOffset.Now);
 
             // Act

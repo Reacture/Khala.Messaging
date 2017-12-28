@@ -11,7 +11,7 @@
         public void constructor_has_guard_clause_against_empty_messageId()
         {
             Action action = () =>
-            new Envelope(messageId: Guid.Empty, default, default, default, new object());
+            new Envelope(messageId: Guid.Empty, message: new object());
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "messageId");
         }
@@ -20,7 +20,7 @@
         public void constructor_has_guard_clause_against_empty_operationId()
         {
             Action action = () =>
-            new Envelope(Guid.NewGuid(), operationId: Guid.Empty, default, default, new object());
+            new Envelope(Guid.NewGuid(), new object(), operationId: Guid.Empty);
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "operationId");
         }
@@ -29,7 +29,7 @@
         public void constructor_allows_null_operationId()
         {
             Action action = () =>
-            new Envelope(Guid.NewGuid(), operationId: null, default, default, new object());
+            new Envelope(Guid.NewGuid(), new object(), operationId: null);
             action.ShouldNotThrow();
         }
 
@@ -37,7 +37,7 @@
         public void constructor_has_guard_clause_against_empty_correlationId()
         {
             Action action = () =>
-            new Envelope(Guid.NewGuid(), default, correlationId: Guid.Empty, default, new object());
+            new Envelope(Guid.NewGuid(), new object(), correlationId: Guid.Empty);
             action.ShouldThrow<ArgumentException>()
                 .Where(x => x.ParamName == "correlationId");
         }
@@ -46,7 +46,7 @@
         public void constructor_allows_null_correlationId()
         {
             Action action = () =>
-            new Envelope(Guid.NewGuid(), default, correlationId: null, default, new object());
+            new Envelope(Guid.NewGuid(), new object(), correlationId: null);
             action.ShouldNotThrow();
         }
     }

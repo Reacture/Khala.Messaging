@@ -79,10 +79,10 @@
 
             return new Envelope(
                 GetMessageId(data.Properties),
+                DeserializeMessage(data.Body),
                 GetOperationId(data.Properties),
                 GetCorrelationId(data.Properties),
-                GetContributor(data.Properties),
-                DeserializeMessage(data.Body));
+                GetContributor(data.Properties));
         }
 
         private object DeserializeMessage(ArraySegment<byte> body)

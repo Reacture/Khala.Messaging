@@ -69,10 +69,8 @@
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
-                operationId,
-                correlationId: default,
-                contributor: default,
-                message);
+                message,
+                operationId: operationId);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -90,10 +88,8 @@
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
-                operationId: default,
-                correlationId,
-                contributor: default,
-                message);
+                message,
+                correlationId: correlationId);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -111,10 +107,8 @@
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
-                operationId: default,
-                correlationId: default,
-                contributor,
-                message);
+                message,
+                contributor: contributor);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -132,7 +126,7 @@
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(messageId, operationId, correlationId, contributor, message);
+            var envelope = new Envelope(messageId, message, operationId, correlationId, contributor);
             EventData eventData = sut.Serialize(envelope);
 
             Envelope actual = sut.Deserialize(eventData);
