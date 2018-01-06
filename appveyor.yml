@@ -1,4 +1,4 @@
-version: 0.17.{build}
+version: 0.18.{build}
 image: Visual Studio 2017
 configuration: Release
 before_build:
@@ -12,8 +12,6 @@ after_build:
     nuget pack nuget\Khala.Messaging.Abstraction.nuspec
 
     nuget pack nuget\Khala.Messaging.Azure.nuspec
-
-    nuget pack nuget\Khala.Messaging.Azure.Owin.nuspec
 test:
   assemblies: '**\*.tests.dll'
 artifacts:
