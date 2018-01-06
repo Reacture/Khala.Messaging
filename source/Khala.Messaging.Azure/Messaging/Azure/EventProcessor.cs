@@ -59,7 +59,7 @@
         {
             try
             {
-                var context = envelope == null
+                EventProcessingExceptionContext context = envelope == null
                     ? new EventProcessingExceptionContext(eventData, exception)
                     : new EventProcessingExceptionContext(eventData, envelope, exception);
                 await _exceptionHandler.Handle(context);

@@ -39,10 +39,10 @@
             }
 
             MessageId = messageId;
+            Message = message ?? throw new ArgumentNullException(nameof(message));
             OperationId = operationId;
             CorrelationId = correlationId;
             Contributor = contributor;
-            Message = message ?? throw new ArgumentNullException(nameof(message));
         }
 
         /// <summary>
@@ -61,6 +61,14 @@
         /// The identifier of the message.
         /// </value>
         public Guid MessageId { get; }
+
+        /// <summary>
+        /// Gets the message object.
+        /// </summary>
+        /// <value>
+        /// The message object.
+        /// </value>
+        public object Message { get; }
 
         /// <summary>
         /// Gets the identifier of the message.
@@ -85,13 +93,5 @@
         /// Information of the contributor to the message.
         /// </value>
         public string Contributor { get; }
-
-        /// <summary>
-        /// Gets the message object.
-        /// </summary>
-        /// <value>
-        /// The message object.
-        /// </value>
-        public object Message { get; }
     }
 }

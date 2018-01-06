@@ -13,11 +13,19 @@
             Action action = () =>
             new Envelope<Message>(
                 messageId: Guid.Empty,
+                message: new Message(),
                 operationId: default,
                 correlationId: default,
-                contributor: default,
-                message: new Message());
+                contributor: default);
             action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "messageId");
+        }
+
+        [TestMethod]
+        public void constructor_has_guard_clause_against_null_message()
+        {
+            Action action = () =>
+            new Envelope<Message>(Guid.NewGuid(), message: null, operationId: default, correlationId: default, contributor: default);
+            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "message");
         }
 
         [TestMethod]
@@ -26,10 +34,10 @@
             Action action = () =>
             new Envelope<Message>(
                 messageId: Guid.NewGuid(),
+                message: new Message(),
                 operationId: Guid.Empty,
                 correlationId: default,
-                contributor: default,
-                message: new Message());
+                contributor: default);
             action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "operationId");
         }
 
@@ -39,19 +47,11 @@
             Action action = () =>
             new Envelope<Message>(
                 messageId: Guid.NewGuid(),
+                message: new Message(),
                 operationId: default,
                 correlationId: Guid.Empty,
-                contributor: default,
-                message: new Message());
+                contributor: default);
             action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "correlationId");
-        }
-
-        [TestMethod]
-        public void constructor_has_guard_clause_against_null_message()
-        {
-            Action action = () =>
-            new Envelope<Message>(Guid.NewGuid(), default, default, default, message: null);
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "message");
         }
 
         public class Message
