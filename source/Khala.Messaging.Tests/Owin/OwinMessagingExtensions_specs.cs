@@ -25,6 +25,7 @@
     using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
+    [Ignore("Khala.Messaging.Azure.Owin 프로젝트는 더이상 지원되지 않는다. 이후 ASP.NET Core를 위한 유사 프로젝트가 지원될 계획이다.")]
     public class OwinMessagingExtensions_specs
     {
         public const string EventHubConnectionStringParam = "OwinMessagingExtensions/EventHubConnectionString";
