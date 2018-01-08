@@ -49,8 +49,11 @@
         /// Initializes a new instance of the <see cref="Envelope"/> class with the message object.
         /// </summary>
         /// <param name="message">The message object.</param>
-        public Envelope(object message)
-            : this(messageId: Guid.NewGuid(), message)
+        /// <param name="operationId">The identifier of the operation.</param>
+        /// <param name="correlationId">The identifier of the correlation.</param>
+        /// <param name="contributor">Information of the contributor to the message.</param>
+        public Envelope(object message, Guid? operationId = default, Guid? correlationId = default, string contributor = default)
+            : this(messageId: Guid.NewGuid(), message, operationId, correlationId, contributor)
         {
         }
 
