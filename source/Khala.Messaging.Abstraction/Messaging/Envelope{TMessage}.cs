@@ -16,7 +16,7 @@
         /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
-        public Envelope(Guid messageId, TMessage message, Guid? operationId, Guid? correlationId, string contributor)
+        public Envelope(Guid messageId, TMessage message, Guid? operationId = default, Guid? correlationId = default, string contributor = default)
         {
             if (messageId == Guid.Empty)
             {
