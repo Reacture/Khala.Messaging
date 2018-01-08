@@ -6,7 +6,7 @@
     /// Contains a strongly-typed message object and related properties. Generally this class is used by <see cref="IMessageHandler"/> implementors.
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
-    public sealed class Envelope<TMessage>
+    public sealed class Envelope<TMessage> : IEnvelope
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Envelope{TMessage}"/> class.

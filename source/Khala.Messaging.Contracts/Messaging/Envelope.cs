@@ -5,7 +5,7 @@
     /// <summary>
     /// Contains a message object and related properties.
     /// </summary>
-    public sealed class Envelope
+    public sealed class Envelope : IEnvelope
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Envelope"/> class with the identifier of the message, the identifier of the operation, the identifier of the correlation, information of the contributor to the message and the message object.

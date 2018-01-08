@@ -8,6 +8,12 @@
     public class EnvelopeT_specs
     {
         [TestMethod]
+        public void sut_implements_IEnvelope()
+        {
+            typeof(Envelope<>).Should().Implement<IEnvelope>();
+        }
+
+        [TestMethod]
         public void constructor_has_guard_clause_against_empty_message_id()
         {
             Action action = () =>
