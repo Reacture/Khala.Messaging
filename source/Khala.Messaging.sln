@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{233BCB29-1F2E-432C-B825-7F54FF4BD64E}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,11 +14,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Contracts",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Abstraction", "Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj", "{627A5BA8-EB5D-484E-A1AD-22DF556521D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure", "Khala.Messaging.Azure\Khala.Messaging.Azure.csproj", "{A05BC51B-67D8-4DB8-B789-102C370A6C5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Azure", "Khala.Messaging.Azure\Khala.Messaging.Azure.csproj", "{A05BC51B-67D8-4DB8-B789-102C370A6C5D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Tests", "Khala.Messaging.Tests\Khala.Messaging.Tests.csproj", "{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure.Owin", "Khala.Messaging.Azure.Owin\Khala.Messaging.Azure.Owin.csproj", "{86F451DA-8011-4DF3-A762-F8517BF0FC54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure.AspNetCore", "Khala.Messaging.Azure.AspNetCore\Khala.Messaging.Azure.AspNetCore.csproj", "{195B0A02-006A-47E7-B50A-B7529E4DDB55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{86F451DA-8011-4DF3-A762-F8517BF0FC54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86F451DA-8011-4DF3-A762-F8517BF0FC54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86F451DA-8011-4DF3-A762-F8517BF0FC54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

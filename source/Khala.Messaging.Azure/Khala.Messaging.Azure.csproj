@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Khala.Messaging.Abstraction\Khala.Messaging.Abstraction.csproj" />
-    <ProjectReference Include="..\Khala.Messaging.Contracts\Khala.Messaging.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
