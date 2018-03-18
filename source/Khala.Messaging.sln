@@ -20,7 +20,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Tests", "Kh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure.Owin", "Khala.Messaging.Azure.Owin\Khala.Messaging.Azure.Owin.csproj", "{86F451DA-8011-4DF3-A762-F8517BF0FC54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Azure.AspNetCore", "Khala.Messaging.Azure.AspNetCore\Khala.Messaging.Azure.AspNetCore.csproj", "{195B0A02-006A-47E7-B50A-B7529E4DDB55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Azure.AspNetCore", "Khala.Messaging.Azure.AspNetCore\Khala.Messaging.Azure.AspNetCore.csproj", "{195B0A02-006A-47E7-B50A-B7529E4DDB55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Net47.Tests", "Khala.Messaging.Net47.Tests\Khala.Messaging.Net47.Tests.csproj", "{5540D19A-A867-4C07-9A3C-3131C0C1AF9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{195B0A02-006A-47E7-B50A-B7529E4DDB55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5540D19A-A867-4C07-9A3C-3131C0C1AF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5540D19A-A867-4C07-9A3C-3131C0C1AF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5540D19A-A867-4C07-9A3C-3131C0C1AF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5540D19A-A867-4C07-9A3C-3131C0C1AF9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
