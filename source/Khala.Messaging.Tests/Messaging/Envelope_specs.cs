@@ -18,7 +18,7 @@
         {
             Action action = () =>
             new Envelope(messageId: Guid.Empty, message: new object());
-            action.ShouldThrow<ArgumentException>()
+            action.Should().Throw<ArgumentException>()
                 .Where(x => x.ParamName == "messageId");
         }
 
@@ -27,7 +27,7 @@
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), new object(), operationId: Guid.Empty);
-            action.ShouldThrow<ArgumentException>()
+            action.Should().Throw<ArgumentException>()
                 .Where(x => x.ParamName == "operationId");
         }
 
@@ -36,7 +36,7 @@
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), new object(), operationId: null);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), new object(), correlationId: Guid.Empty);
-            action.ShouldThrow<ArgumentException>()
+            action.Should().Throw<ArgumentException>()
                 .Where(x => x.ParamName == "correlationId");
         }
 
@@ -53,7 +53,7 @@
         {
             Action action = () =>
             new Envelope(Guid.NewGuid(), new object(), correlationId: null);
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
         }
     }
 }

@@ -6,12 +6,12 @@
     using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class EventHubMessageBus_specs
@@ -40,14 +40,19 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _connectionString = (string)context.Properties[ConnectionStringParam];
+            if (context.Properties.TryGetValue(ConnectionStringParam, out object connectionString))
+            {
+                _connectionString = (string)connectionString;
+            }
 
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
                 Assert.Inconclusive(ConnectionParametersRequired);
             }
 
-            _consumerGroupName = (string)context.Properties[ConsumerGroupNameParam] ?? PartitionReceiver.DefaultConsumerGroupName;
+            _consumerGroupName = context.Properties.TryGetValue(ConsumerGroupNameParam, out object consumerGroupName)
+                ? (string)consumerGroupName
+                : PartitionReceiver.DefaultConsumerGroupName;
         }
 
         private static async Task<IReadOnlyList<PartitionReceiver>> GetReceivers(EventHubClient eventHubClient, string consumerGroupName)
@@ -122,7 +127,7 @@ References
             await eventHubClient.CloseAsync();
             received.Should().HaveCount(1);
             Envelope actual = serializer.Deserialize(received.Single());
-            actual.ShouldBeEquivalentTo(envelope);
+            actual.Should().BeEquivalentTo(envelope);
         }
 
         [TestMethod]
@@ -166,7 +171,7 @@ References
             IEnumerable<Envelope> actual = from eventData in received
                                            select serializer.Deserialize(eventData);
 
-            actual.ShouldAllBeEquivalentTo(
+            actual.Should().BeEquivalentTo(
                 envelopes,
                 opts =>
                 opts.RespectingRuntimeTypes());
@@ -200,7 +205,7 @@ References
             IEnumerable<Envelope> actual = from eventData in received
                                            select serializer.Deserialize(eventData);
 
-            actual.ShouldAllBeEquivalentTo(
+            actual.Should().BeEquivalentTo(
                 envelopes,
                 opts =>
                 opts.WithStrictOrdering()
@@ -246,7 +251,7 @@ References
             {
                 new Envelope(new object()),
                 new Envelope(new object()),
-                default
+                default,
             };
             var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
             var random = new Random();
@@ -258,7 +263,7 @@ References
                 select e,
                 CancellationToken.None);
 
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "envelopes");
         }
 
         [TestMethod]
@@ -279,7 +284,7 @@ References
 
             Func<Task> action = () => sut.Send(envelopes, CancellationToken.None);
 
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "envelopes");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "envelopes");
         }
 
         public class Message

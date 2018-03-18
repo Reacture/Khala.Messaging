@@ -66,7 +66,7 @@
         {
             if (messageHandler == null)
             {
-                throw new ArgumentNullException(nameof(envelope));
+                throw new ArgumentNullException(nameof(messageHandler));
             }
 
             if (envelope == null)

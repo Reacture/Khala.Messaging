@@ -6,13 +6,13 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class ServiceBusMessageBus_specs
@@ -38,19 +38,18 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            string connectionString = (string)context.Properties[ConnectionStringParam];
-            string entityPath = (string)context.Properties[EntityPathParam];
-
-            if (string.IsNullOrWhiteSpace(connectionString) ||
-                string.IsNullOrWhiteSpace(entityPath))
+            if (context.Properties.TryGetValue(ConnectionStringParam, out object connectionString) &&
+                context.Properties.TryGetValue(EntityPathParam, out object entityPath))
+            {
+                _connectionStringBuilder = new ServiceBusConnectionStringBuilder((string)connectionString)
+                {
+                    EntityPath = (string)entityPath,
+                };
+            }
+            else
             {
                 Assert.Inconclusive(ConnectionParametersRequired);
             }
-
-            _connectionStringBuilder = new ServiceBusConnectionStringBuilder(connectionString)
-            {
-                EntityPath = entityPath
-            };
         }
 
         public TestContext TestContext { get; set; }
@@ -137,7 +136,7 @@ References
             received.CorrelationId.Should().Be(null);
 
             object message = serializer.Deserialize(Encoding.UTF8.GetString(received.Body));
-            message.ShouldBeEquivalentTo(scheduled.Envelope.Message);
+            message.Should().BeEquivalentTo(scheduled.Envelope.Message);
         }
 
         [TestMethod]
@@ -162,7 +161,7 @@ References
             receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTime.UtcDateTime.AddTicks(-precision.Ticks));
 
             object message = serializer.Deserialize(Encoding.UTF8.GetString(received.Body));
-            message.ShouldBeEquivalentTo(scheduled.Envelope.Message);
+            message.Should().BeEquivalentTo(scheduled.Envelope.Message);
         }
 
         [TestMethod]
@@ -250,7 +249,7 @@ References
 
             var scheduled = new ScheduledEnvelope(new Envelope(new object()), DateTimeOffset.Now);
             Func<Task> action = () => sut.Send(scheduled, CancellationToken.None);
-            action.ShouldThrow<Exception>();
+            action.Should().Throw<Exception>();
         }
 
         public class SomeMessage

@@ -5,13 +5,13 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Khala.TransientFaultHandling;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class TransientFaultHandlingMessageBus_specs

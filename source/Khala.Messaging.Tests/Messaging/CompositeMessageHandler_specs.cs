@@ -3,12 +3,12 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class CompositeMessageHandler_specs
@@ -35,7 +35,7 @@
                 default(IMessageHandler),
                 Mock.Of<IMessageHandler>());
 
-            action.ShouldThrow<ArgumentException>()
+            action.Should().Throw<ArgumentException>()
                 .Where(x => x.ParamName == "handlers");
         }
 
@@ -108,11 +108,9 @@
             Func<Task> action = () => sut.Handle(envelope, CancellationToken.None);
 
             // Arrange
-            action.ShouldThrow<AggregateException>()
-                .Which.InnerExceptions.Should().ContainSingle()
-                .Which.Should().BeOfType<AggregateException>()
+            action.Should().Throw<AggregateException>()
                 .Which.InnerExceptions
-                .ShouldAllBeEquivalentTo(new[] { exception1, exception2 });
+                .Should().BeEquivalentTo(exception1, exception2);
         }
     }
 }

@@ -23,7 +23,7 @@
                 operationId: default,
                 correlationId: default,
                 contributor: default);
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "messageId");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "messageId");
         }
 
         [TestMethod]
@@ -31,7 +31,7 @@
         {
             Action action = () =>
             new Envelope<Message>(Guid.NewGuid(), message: null, operationId: default, correlationId: default, contributor: default);
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "message");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "message");
         }
 
         [TestMethod]
@@ -44,7 +44,7 @@
                 operationId: Guid.Empty,
                 correlationId: default,
                 contributor: default);
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "operationId");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "operationId");
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@
                 operationId: default,
                 correlationId: Guid.Empty,
                 contributor: default);
-            action.ShouldThrow<ArgumentException>().Where(x => x.ParamName == "correlationId");
+            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "correlationId");
         }
 
         public class Message

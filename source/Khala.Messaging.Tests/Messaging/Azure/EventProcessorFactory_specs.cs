@@ -8,6 +8,9 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Khala.TransientFaultHandling;
     using Microsoft.Azure.EventHubs;
@@ -17,9 +20,6 @@
     using Microsoft.WindowsAzure.Storage.Blob;
     using Moq;
     using Newtonsoft.Json;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class EventProcessorFactory_specs
@@ -79,7 +79,7 @@ References
             var factory = new CheckpointerFactory(() => new Checkpointer
             {
                 OnOpen = partitionContext => leasedPartitionIds.Add(partitionContext.PartitionId),
-                OnCheckpoint = eventData => stopwatch.Restart()
+                OnCheckpoint = eventData => stopwatch.Restart(),
             });
             await processorHost.RegisterEventProcessorFactoryAsync(factory);
 
@@ -156,7 +156,7 @@ References
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             CloudBlobContainer blobContainer = blobClient.GetContainerReference(_leaseContainerName);
             ICloudBlob blob = await blobContainer.GetBlobReferenceFromServerAsync($"{_consumerGroupName}/{partitionId}");
-            using (Stream stream = await blob.OpenReadAsync())
+            using (Stream stream = await blob.OpenReadAsync(new AccessCondition(), new BlobRequestOptions(), new OperationContext()))
             using (var reader = new StreamReader(stream))
             {
                 string content = await reader.ReadToEndAsync();
@@ -178,9 +178,20 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            _eventHubConnectionString = (string)context.Properties[EventHubConnectionStringParam];
-            _storageConnectionString = (string)context.Properties[StorageConnectionStringParam];
-            _leaseContainerName = (string)context.Properties[LeaseContainerNameParam];
+            if (context.Properties.TryGetValue(EventHubConnectionStringParam, out object eventHubConnectionString))
+            {
+                _eventHubConnectionString = (string)eventHubConnectionString;
+            }
+
+            if (context.Properties.TryGetValue(StorageConnectionStringParam, out object storageConnectionString))
+            {
+                _storageConnectionString = (string)storageConnectionString;
+            }
+
+            if (context.Properties.TryGetValue(LeaseContainerNameParam, out object leaseContainerName))
+            {
+                _leaseContainerName = (string)leaseContainerName;
+            }
 
             if (string.IsNullOrWhiteSpace(_eventHubConnectionString) ||
                 string.IsNullOrWhiteSpace(_storageConnectionString) ||
@@ -231,7 +242,7 @@ References
             // Assert
             messageHandler.Handled.Should().ContainSingle();
             Envelope actual = messageHandler.Handled.Single();
-            actual.ShouldBeEquivalentTo(envelope);
+            actual.Should().BeEquivalentTo(envelope);
         }
 
         [TestMethod]
@@ -510,8 +521,8 @@ References
             // Assert
             Mock.Get(exceptionHandler).Verify(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()), Times.Once());
             exceptionContext.EventData.Should().NotBeNull();
-            exceptionContext.EventData.Body.ShouldBeEquivalentTo(new EventDataSerializer().Serialize(envelope).Body);
-            exceptionContext.Envelope.ShouldBeEquivalentTo(envelope);
+            exceptionContext.EventData.Body.Should().BeEquivalentTo(new EventDataSerializer().Serialize(envelope).Body);
+            exceptionContext.Envelope.Should().BeEquivalentTo(envelope);
             exceptionContext.Exception.Should().BeSameAs(exception);
         }
 
@@ -650,8 +661,8 @@ References
             // Assert
             Mock.Get(exceptionHandler).Verify(x => x.Handle(It.IsAny<EventProcessingExceptionContext>()), Times.Once());
             exceptionContext.EventData.Should().NotBeNull();
-            exceptionContext.EventData.Body.ShouldBeEquivalentTo(new EventDataSerializer().Serialize(envelope).Body);
-            exceptionContext.Envelope.ShouldBeEquivalentTo(envelope);
+            exceptionContext.EventData.Body.Should().BeEquivalentTo(new EventDataSerializer().Serialize(envelope).Body);
+            exceptionContext.Envelope.Should().BeEquivalentTo(envelope);
             exceptionContext.Exception.Should().BeSameAs(exception);
         }
 

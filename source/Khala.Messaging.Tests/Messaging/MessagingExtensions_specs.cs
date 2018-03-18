@@ -3,12 +3,12 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class MessagingExtensions_specs
@@ -38,7 +38,7 @@
         public void Send_with_envelopes_relays_with_none_cancellation_token()
         {
             var task = Task.FromResult(true);
-            Envelope[] envelopes = new Envelope[] { };
+            var envelopes = new Envelope[] { };
             IMessageBus messageBus = Mock.Of<IMessageBus>(
                 x => x.Send(envelopes, CancellationToken.None) == task);
 

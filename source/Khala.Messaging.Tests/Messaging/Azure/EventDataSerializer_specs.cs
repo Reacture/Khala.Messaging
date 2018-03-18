@@ -2,13 +2,13 @@
 {
     using System;
     using System.Text;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FakeBlogEngine;
     using FluentAssertions;
     using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class EventDataSerializer_specs
@@ -44,7 +44,7 @@
             string value = Encoding.UTF8.GetString(body.Array, body.Offset, body.Count);
             object actual = messageSerializer.Deserialize(value);
             actual.Should().BeOfType<BlogPostCreated>();
-            actual.ShouldBeEquivalentTo(message);
+            actual.Should().BeEquivalentTo(message);
         }
 
         [TestMethod]
@@ -131,7 +131,7 @@
 
             Envelope actual = sut.Deserialize(eventData);
 
-            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
 
         [TestMethod]
@@ -159,8 +159,8 @@
             Envelope actual = null;
             Action action = () => actual = sut.Deserialize(eventData);
 
-            action.ShouldNotThrow();
-            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            action.Should().NotThrow();
+            actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
 
         [TestMethod]
@@ -174,8 +174,8 @@
             Envelope actual = null;
             Action action = () => actual = sut.Deserialize(eventData);
 
-            action.ShouldNotThrow();
-            actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+            action.Should().NotThrow();
+            actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
         }
     }
 }

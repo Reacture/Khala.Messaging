@@ -4,13 +4,13 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class ServiceBusMessageMediator_specs
@@ -36,19 +36,18 @@ References
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            string connectionString = (string)context.Properties[ConnectionStringParam];
-            string entityPath = (string)context.Properties[EntityPathParam];
-
-            if (string.IsNullOrWhiteSpace(connectionString) ||
-                string.IsNullOrWhiteSpace(entityPath))
+            if (context.Properties.TryGetValue(ConnectionStringParam, out object connectionString) &&
+                context.Properties.TryGetValue(EntityPathParam, out object entityPath))
+            {
+                _connectionStringBuilder = new ServiceBusConnectionStringBuilder((string)connectionString)
+                {
+                    EntityPath = (string)entityPath,
+                };
+            }
+            else
             {
                 Assert.Inconclusive(ConnectionParametersRequired);
             }
-
-            _connectionStringBuilder = new ServiceBusConnectionStringBuilder(connectionString)
-            {
-                EntityPath = entityPath
-            };
         }
 
         public TestContext TestContext { get; set; }
@@ -108,7 +107,7 @@ References
                 await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
                 messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
                 Envelope actual = await messageBus.SentMessage;
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -143,7 +142,7 @@ References
                 await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
                 messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
                 Envelope actual = await messageBus.SentMessage;
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -178,7 +177,7 @@ References
                 await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
                 messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
                 Envelope actual = await messageBus.SentMessage;
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {
@@ -211,7 +210,7 @@ References
                 await Task.WhenAny(Task.Delay(TimeSpan.FromMilliseconds(3000)), messageBus.SentMessage);
                 messageBus.SentMessage.Status.Should().Be(TaskStatus.RanToCompletion);
                 Envelope actual = await messageBus.SentMessage;
-                actual.ShouldBeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+                actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
             }
             finally
             {

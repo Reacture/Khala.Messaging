@@ -2,10 +2,10 @@
 {
     using System;
     using System.Reflection;
+    using AutoFixture;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class JsonMessageSerializer_specs
@@ -98,7 +98,7 @@
 
             // Assert
             actual.Should().BeOfType<MutableMessage>();
-            actual.ShouldBeEquivalentTo(message);
+            actual.Should().BeEquivalentTo(message);
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@
 
             // Assert
             actual.Should().BeOfType<ImmutableMessage>();
-            actual.ShouldBeEquivalentTo(message);
+            actual.Should().BeEquivalentTo(message);
         }
 
         [TestMethod]
@@ -131,7 +131,7 @@
             Action action = () => actual = sut.Deserialize(json);
 
             // Assert
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
             actual.Should().NotBeNull();
             ((string)((dynamic)actual).Prop).Should().Be(prop);
         }
@@ -149,7 +149,7 @@
             Action action = () => actual = sut.Deserialize(json);
 
             // Assert
-            action.ShouldNotThrow();
+            action.Should().NotThrow();
             actual.Should().NotBeNull();
             ((string)((dynamic)actual).Prop).Should().Be(prop);
         }
@@ -160,7 +160,7 @@
             // Arrange
             var message = new MessageWithDateTimeOffsetProperty
             {
-                DateTimeOffsetProp = fixture.Create<DateTimeOffset>()
+                DateTimeOffsetProp = fixture.Create<DateTimeOffset>(),
             };
             var sut = new JsonMessageSerializer();
 
@@ -171,7 +171,7 @@
 
             // Assert
             actual.Should().BeOfType<MessageWithDateTimeOffsetProperty>();
-            actual.ShouldBeEquivalentTo(message);
+            actual.Should().BeEquivalentTo(message);
         }
     }
 }

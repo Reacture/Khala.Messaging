@@ -1,10 +1,10 @@
 ﻿namespace Khala.Messaging.Azure
 {
     using System.Reflection;
+    using AutoFixture;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class EventProcessingExceptionContext_specs
