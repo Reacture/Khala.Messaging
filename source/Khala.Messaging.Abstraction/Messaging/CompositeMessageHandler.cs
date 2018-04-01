@@ -65,7 +65,7 @@
             {
                 try
                 {
-                    await handler.Handle(envelope, cancellationToken);
+                    await handler.Handle(envelope, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

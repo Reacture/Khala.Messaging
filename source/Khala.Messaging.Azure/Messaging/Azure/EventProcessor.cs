@@ -39,11 +39,11 @@
                 try
                 {
                     envelope = _serializer.Deserialize(eventData);
-                    await _messageHandler.Handle(envelope, _cancellationToken);
+                    await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
-                    await HandleExceptionFaultTolerantly(eventData, envelope, exception);
+                    await HandleExceptionFaultTolerantly(eventData, envelope, exception).ConfigureAwait(false);
 
                     if (exception is TaskCanceledException)
                     {
@@ -51,7 +51,7 @@
                     }
                 }
 
-                await context.CheckpointAsync(eventData);
+                await context.CheckpointAsync(eventData).ConfigureAwait(false);
             }
         }
 
@@ -62,7 +62,7 @@
                 EventProcessingExceptionContext context = envelope == null
                     ? new EventProcessingExceptionContext(eventData, exception)
                     : new EventProcessingExceptionContext(eventData, envelope, exception);
-                await _exceptionHandler.Handle(context);
+                await _exceptionHandler.Handle(context).ConfigureAwait(false);
             }
             catch
             {

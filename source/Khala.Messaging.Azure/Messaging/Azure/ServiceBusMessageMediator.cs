@@ -50,9 +50,9 @@
                     GetCorrelationId(message),
                     GetContributor(message));
 
-                await messageBus.Send(envelope);
+                await messageBus.Send(envelope).ConfigureAwait(false);
 
-                await queueClient.CompleteAsync(message.SystemProperties.LockToken);
+                await queueClient.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
             }
 
             Task HandleException(ExceptionReceivedEventArgs exceptionReceived) => Task.CompletedTask;
