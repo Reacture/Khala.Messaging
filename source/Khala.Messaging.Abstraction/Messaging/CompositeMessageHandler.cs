@@ -39,6 +39,14 @@
         }
 
         /// <summary>
+        /// Gets inner message handlers.
+        /// </summary>
+        /// <value>
+        /// Inner message handlers.
+        /// </value>
+        public IEnumerable<IMessageHandler> Handlers => _handlers;
+
+        /// <summary>
         /// Handles a message.
         /// </summary>
         /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>

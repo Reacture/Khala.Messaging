@@ -40,6 +40,18 @@
         }
 
         [TestMethod]
+        public void constructor_sets_Handles_correctly()
+        {
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>();
+            IMessageHandler handler3 = Mock.Of<IMessageHandler>();
+
+            var sut = new CompositeMessageHandler(handler1, handler2, handler3);
+
+            sut.Handlers.Should().Equal(handler1, handler2, handler3);
+        }
+
+        [TestMethod]
         public async Task Handle_sends_message_to_all_handlers()
         {
             IMessageHandler handler1 = Mock.Of<IMessageHandler>();
