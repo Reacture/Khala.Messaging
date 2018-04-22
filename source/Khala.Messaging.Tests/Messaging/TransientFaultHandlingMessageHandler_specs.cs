@@ -28,6 +28,22 @@
         }
 
         [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Accepts_replays_to_MessageHandler(bool accepts)
+        {
+            Envelope envelope = new Fixture().Create<Envelope>();
+            IMessageHandler handler = Mock.Of<IMessageHandler>(
+                x => x.Accepts(envelope) == accepts);
+            var sut = new TransientFaultHandlingMessageHandler(
+                Mock.Of<IRetryPolicy>(), handler);
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().Be(accepts);
+        }
+
+        [TestMethod]
         public void constructor_sets_properties_correctly()
         {
             IFixture fixture = new Fixture().Customize(new AutoMoqCustomization());

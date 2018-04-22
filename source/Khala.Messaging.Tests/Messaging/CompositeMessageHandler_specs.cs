@@ -52,6 +52,54 @@
         }
 
         [TestMethod]
+        public void Accepts_returns_true_if_all_handlers_accept_message()
+        {
+            Envelope envelope = new Fixture().Create<Envelope>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == true);
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == true);
+            IMessageHandler handler3 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == true);
+            var sut = new CompositeMessageHandler(handler1, handler2, handler3);
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().BeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(true, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(false, false, true)]
+        [DataRow(true, true, false)]
+        [DataRow(true, false, true)]
+        [DataRow(false, true, true)]
+        public void Accepts_returns_true_if_some_handlers_accept_message(bool accepts1, bool accepts2, bool accepts3)
+        {
+            Envelope envelope = new Fixture().Create<Envelope>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == accepts1);
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == accepts2);
+            IMessageHandler handler3 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == accepts3);
+            var sut = new CompositeMessageHandler(handler1, handler2, handler3);
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void Accepts_returns_false_if_no_handler_accepts_message()
+        {
+            Envelope envelope = new Fixture().Create<Envelope>();
+            IMessageHandler handler1 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == false);
+            IMessageHandler handler2 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == false);
+            IMessageHandler handler3 = Mock.Of<IMessageHandler>(x => x.Accepts(envelope) == false);
+            var sut = new CompositeMessageHandler(handler1, handler2, handler3);
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().BeFalse();
+        }
+
+        [TestMethod]
         public async Task Handle_sends_message_to_all_handlers()
         {
             IMessageHandler handler1 = Mock.Of<IMessageHandler>();

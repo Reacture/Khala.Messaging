@@ -46,6 +46,25 @@
         /// </value>
         public IEnumerable<IMessageHandler> Handlers => _handlers;
 
+        /// <inheritdoc/>
+        public bool Accepts(Envelope envelope)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            foreach (IMessageHandler handler in Handlers)
+            {
+                if (handler.Accepts(envelope))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Handles a message.
         /// </summary>

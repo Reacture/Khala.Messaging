@@ -9,6 +9,13 @@
     public interface IMessageHandler
     {
         /// <summary>
+        /// Determines whether to accept the specified message.
+        /// </summary>
+        /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>
+        /// <returns><c>true</c> if the message handler accepts the message; otherwise, <c>false</c>.</returns>
+        bool Accepts(Envelope envelope);
+
+        /// <summary>
         /// Handles a message.
         /// </summary>
         /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>

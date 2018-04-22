@@ -49,6 +49,34 @@
                 CancellationToken cancellationToken);
         }
 
+        public class UnknownMessage
+        {
+        }
+
+        [TestMethod]
+        public void Accepts_returns_true_if_sut_handles_message()
+        {
+            var message = new BlogPostCreated();
+            var envelope = new Envelope(message);
+            BlogEventHandler sut = Mock.Of<BlogEventHandler>();
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void Accepts_returns_false_if_sut_does_not_handle_message()
+        {
+            var message = new UnknownMessage();
+            var envelope = new Envelope(message);
+            BlogEventHandler sut = Mock.Of<BlogEventHandler>();
+
+            bool actual = sut.Accepts(envelope);
+
+            actual.Should().BeFalse();
+        }
+
         [TestMethod]
         public async Task sut_invokes_correct_handler_method()
         {

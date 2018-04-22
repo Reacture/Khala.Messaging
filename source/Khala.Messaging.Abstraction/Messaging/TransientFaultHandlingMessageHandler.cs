@@ -37,6 +37,17 @@
         /// </value>
         public IMessageHandler MessageHandler { get; }
 
+        /// <inheritdoc/>
+        public bool Accepts(Envelope envelope)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            return MessageHandler.Accepts(envelope);
+        }
+
         /// <summary>
         /// Handles a message appling <see cref="RetryPolicy"/>.
         /// </summary>

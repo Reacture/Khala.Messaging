@@ -336,6 +336,8 @@ References
 
             public Task<Envelope> ReceiveMessage => _receiveMessageSource.Task;
 
+            public bool Accepts(Envelope envelope) => true;
+
             public Task Handle(Envelope envelope, CancellationToken cancellationToken)
             {
                 Task.Factory.StartNew(() => _receiveMessageSource.TrySetResult(envelope));

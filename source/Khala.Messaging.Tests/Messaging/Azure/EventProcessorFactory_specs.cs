@@ -715,6 +715,8 @@ References
 
             public IReadOnlyCollection<Envelope> Handled => _handled;
 
+            public bool Accepts(Envelope envelope) => true;
+
             public Task Handle(Envelope envelope, CancellationToken cancellationToken)
             {
                 _handled.Enqueue(envelope);

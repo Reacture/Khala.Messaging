@@ -92,6 +92,17 @@
             };
         }
 
+        /// <inheritdoc/>
+        public bool Accepts(Envelope envelope)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            return _handlers.ContainsKey(envelope.Message.GetType());
+        }
+
         /// <summary>
         /// Handles a message with a strong-typed message handler.
         /// </summary>
