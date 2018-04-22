@@ -39,7 +39,10 @@
                 try
                 {
                     envelope = _serializer.Deserialize(eventData);
-                    await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
+                    if (_messageHandler.Accepts(envelope))
+                    {
+                        await _messageHandler.Handle(envelope, _cancellationToken).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception exception)
                 {

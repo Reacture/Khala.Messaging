@@ -288,7 +288,7 @@ References
         }
 
         [TestMethod]
-        public async Task event_processor_checkpoints_after_message_handled()
+        public async Task event_processor_does_not_checkpoint_before_message_handled()
         {
             // Arrange
             EventHubRuntimeInformation runtimeInformation = await GetRuntimeInformation();
@@ -297,7 +297,7 @@ References
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
             var completion = new TaskCompletionSource<bool>();
-            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             bool handled = false;
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
@@ -479,7 +479,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             Exception exception = new InvalidOperationException();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
@@ -579,7 +579,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
                 .ThrowsAsync(new TaskCanceledException());
@@ -622,7 +622,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             Exception exception = new TaskCanceledException();
             Mock.Get(messageHandler)
                 .Setup(x => x.Handle(It.IsAny<Envelope>(), CancellationToken.None))
@@ -677,7 +677,7 @@ References
 
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
-            IMessageHandler messageHandler = Mock.Of<IMessageHandler>();
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             var cancellationToken = new CancellationToken(canceled);
             var sut = new EventProcessorFactory(
                 messageHandler,
@@ -705,6 +705,45 @@ References
 
             // Assert
             Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task event_processor_does_not_invoke_message_handler_if_message_is_not_accepted()
+        {
+            // Arrange
+            EventHubRuntimeInformation runtimeInformation = await GetRuntimeInformation();
+            await CheckpointLatest(runtimeInformation);
+
+            IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
+
+            IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == false);
+            CancellationToken cancellationToken = CancellationToken.None;
+            var sut = new EventProcessorFactory(
+                messageHandler,
+                Mock.Of<IEventProcessingExceptionHandler>(),
+                cancellationToken);
+
+            // Act
+            await GetMessageBus().Send(new Envelope(new Fixture().Create<Message>()));
+
+            EventProcessorHost processorHost = GetEventProcessorHost();
+            await processorHost.RegisterEventProcessorFactoryAsync(sut);
+
+            await RetryPolicy<int>
+                .LinearTransientDefault(5, TimeSpan.FromMilliseconds(500))
+                .Run(async () =>
+                {
+                    IEnumerable<int> diffs = from first in partitionLeases
+                                             join second in await GetPartitionLeases(runtimeInformation)
+                                             on first.PartitionId equals second.PartitionId
+                                             select second.SequenceNumber - first.SequenceNumber;
+                    return diffs.Sum();
+                });
+
+            await processorHost.UnregisterEventProcessorAsync();
+
+            // Assert
+            Mock.Get(messageHandler).Verify(x => x.Handle(It.IsAny<Envelope>(), cancellationToken), Times.Never());
         }
 
         public class MessageHandler : IMessageHandler
