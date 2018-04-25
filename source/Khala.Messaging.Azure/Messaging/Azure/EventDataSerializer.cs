@@ -33,8 +33,7 @@
         /// Serializes <see cref="Envelope"/> instance into <see cref="EventData"/>.
         /// </summary>
         /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
-        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="EventData"/> that contains serialized data.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Serialize() method returns EventData asynchronously.")]
+        /// <returns>An <see cref="EventData"/> that contains serialized data.</returns>
         public EventData Serialize(Envelope envelope)
         {
             if (envelope == null)
@@ -64,7 +63,7 @@
         /// Deserializes <see cref="Envelope"/> from <see cref="EventData"/>.
         /// </summary>
         /// <param name="data"><see cref="EventData"/> that contains serialized data.</param>
-        /// <returns>A task representing the asynchronous operation. The task result contains an <see cref="Envelope"/> instance deserialized.</returns>
+        /// <returns>An <see cref="Envelope"/> instance deserialized.</returns>
         public Envelope Deserialize(EventData data)
         {
             if (data == null)
