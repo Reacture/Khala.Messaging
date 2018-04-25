@@ -87,53 +87,37 @@
 
         private static Guid GetMessageId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(nameof(Envelope.MessageId), out object value);
-            switch (value)
-            {
-                case Guid messageId:
-                    return messageId;
-
-                default:
-                    return Guid.NewGuid();
-            }
+            return GetProperty(properties, nameof(Envelope.MessageId), Guid.NewGuid());
         }
 
-        private static Guid? GetOperationId(IDictionary<string, object> properties)
+        internal static Guid? GetOperationId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(nameof(Envelope.OperationId), out object value);
-            switch (value)
-            {
-                case Guid operationId:
-                    return operationId;
-
-                default:
-                    return null;
-            }
+            return GetProperty<Guid?>(properties, nameof(Envelope.OperationId));
         }
 
         private static Guid? GetCorrelationId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(nameof(Envelope.CorrelationId), out object value);
-            switch (value)
-            {
-                case Guid correlationId:
-                    return correlationId;
-
-                default:
-                    return null;
-            }
+            return GetProperty<Guid?>(properties, nameof(Envelope.CorrelationId));
         }
 
         private static string GetContributor(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(nameof(Envelope.Contributor), out object value);
+            return GetProperty<string>(properties, nameof(Envelope.Contributor));
+        }
+
+        private static T GetProperty<T>(
+            IDictionary<string, object> properties,
+            string propertyName,
+            T defaultValue = default)
+        {
+            properties.TryGetValue(propertyName, out object value);
             switch (value)
             {
-                case string contributor:
-                    return contributor;
+                case T property:
+                    return property;
 
                 default:
-                    return null;
+                    return defaultValue;
             }
         }
     }
