@@ -172,7 +172,8 @@ References
         private static EventHubMessageBus GetMessageBus()
         {
             var eventHubClient = EventHubClient.CreateFromConnectionString(_eventHubConnectionString);
-            return new EventHubMessageBus(eventHubClient);
+            var eventSender = new EventDataSender(eventHubClient);
+            return new EventHubMessageBus(eventSender);
         }
 
         [ClassInitialize]

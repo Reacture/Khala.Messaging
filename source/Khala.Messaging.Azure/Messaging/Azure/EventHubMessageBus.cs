@@ -29,10 +29,21 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="EventHubClient"/> and an <see cref="EventDataSerializer"/>.
+        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="IEventDataSender"/>.
+        /// </summary>
+        /// <param name="eventDataSender">An <see cref="IEventDataSender"/>.</param>
+        public EventHubMessageBus(IEventDataSender eventDataSender)
+            : this(eventDataSender, new EventDataSerializer())
+        {
+        }
+
+#pragma warning disable SA1642 // Constructor summary documentation must begin with standard text
+        /// <summary>
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(IEventDataSender, EventDataSerializer)"/> instead.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
         /// <param name="serializer">An <see cref="EventDataSerializer"/> to serialize messages.</param>
+        [Obsolete("Use EventHubMessageBus(IEventDataSender, EventDataSerializer) instead. This constructor will be removed in version 1.0.0.")]
         public EventHubMessageBus(
             EventHubClient eventHubClient,
             EventDataSerializer serializer)
@@ -41,14 +52,12 @@
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
-#pragma warning disable SA1642 // Constructor summary documentation must begin with standard text
         /// <summary>
-        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventHubClient, EventDataSerializer)"/> instead.
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(IEventDataSender, EventDataSerializer)"/> instead.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
         /// <param name="messageSerializer">An <see cref="IMessageSerializer"/> to serialize messages.</param>
-        [Obsolete("Use EventHubMessageBus(EventHubClient, EventDataSerializer) instead. This method will be removed in version 1.0.0.")]
-#pragma warning restore SA1642 // Constructor summary documentation must begin with standard text
+        [Obsolete("Use EventHubMessageBus(IEventDataSender, EventDataSerializer) instead. This constructor will be removed in version 1.0.0.")]
         public EventHubMessageBus(
             EventHubClient eventHubClient,
             IMessageSerializer messageSerializer)
@@ -57,13 +66,15 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="EventHubClient"/>.
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventHubClient)"/> instead.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
+        [Obsolete("Use EventHubMessageBus(IEventDataSender) instead. This constructor will be removed in version 1.0.0.")]
         public EventHubMessageBus(EventHubClient eventHubClient)
             : this(eventHubClient, new EventDataSerializer())
         {
         }
+#pragma warning restore SA1642 // Constructor summary documentation must begin with standard text
 
         /// <summary>
         /// Sends a single enveloped message to event hub.

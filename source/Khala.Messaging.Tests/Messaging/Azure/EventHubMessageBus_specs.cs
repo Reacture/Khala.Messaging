@@ -116,8 +116,9 @@ References
         public async Task Send_sends_message_correctly()
         {
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
             var serializer = new EventDataSerializer();
-            var sut = new EventHubMessageBus(eventHubClient, serializer);
+            var sut = new EventHubMessageBus(eventSender, serializer);
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message: new Fixture().Create<Message>(),
@@ -139,7 +140,8 @@ References
         public async Task Send_sets_partition_key_correctly()
         {
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
-            var sut = new EventHubMessageBus(eventHubClient);
+            var eventSender = new EventDataSender(eventHubClient);
+            var sut = new EventHubMessageBus(eventSender);
             PartitionedMessage message = new Fixture().Create<PartitionedMessage>();
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
 
@@ -156,8 +158,9 @@ References
         {
             // Arrange
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
             var serializer = new EventDataSerializer();
-            var sut = new EventHubMessageBus(eventHubClient, serializer);
+            var sut = new EventHubMessageBus(eventSender, serializer);
 
             var envelopes = new Fixture()
                 .CreateMany<Message>()
@@ -192,8 +195,9 @@ References
         {
             // Arrange
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
             var serializer = new EventDataSerializer();
-            var sut = new EventHubMessageBus(eventHubClient, serializer);
+            var sut = new EventHubMessageBus(eventSender, serializer);
 
             string partitionKey = Guid.NewGuid().ToString();
             var envelopes = new Fixture()
@@ -232,8 +236,9 @@ References
         {
             // Arrange
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
             var serializer = new EventDataSerializer();
-            var sut = new EventHubMessageBus(eventHubClient, serializer);
+            var sut = new EventHubMessageBus(eventSender, serializer);
 
             string partitionKey = Guid.NewGuid().ToString();
             var envelopes = new Fixture()
@@ -268,7 +273,9 @@ References
                 new Envelope(new object()),
                 default,
             };
-            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
+            var sut = new EventHubMessageBus(eventSender);
             var random = new Random();
 
             Func<Task> action = () =>
@@ -284,15 +291,21 @@ References
         [TestMethod]
         public void given_empty_envelopes_Send_returns_CompletedTask()
         {
-            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
+            var sut = new EventHubMessageBus(eventSender);
+
             Task actual = sut.Send(Enumerable.Empty<Envelope>(), CancellationToken.None);
+
             actual.Should().BeSameAs(Task.CompletedTask);
         }
 
         [TestMethod]
         public void Send_has_guard_clause_against_partition_key_conflict()
         {
-            var sut = new EventHubMessageBus(EventHubClient.CreateFromConnectionString(_connectionString));
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var eventSender = new EventDataSender(eventHubClient);
+            var sut = new EventHubMessageBus(eventSender);
             var envelopes = new List<Envelope>(
                 from message in new Fixture().CreateMany<PartitionedMessage>()
                 select new Envelope(message));
