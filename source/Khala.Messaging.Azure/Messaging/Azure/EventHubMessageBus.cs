@@ -12,8 +12,21 @@
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {
-        private readonly EventHubClient _eventHubClient;
+        private readonly IEventDataSender _eventDataSender;
         private readonly EventDataSerializer _serializer;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="IEventDataSender"/> and an <see cref="EventDataSerializer"/>.
+        /// </summary>
+        /// <param name="eventDataSender">An <see cref="IEventDataSender"/>.</param>
+        /// <param name="serializer">An <see cref="EventDataSerializer"/> to serialize messages.</param>
+        public EventHubMessageBus(
+            IEventDataSender eventDataSender,
+            EventDataSerializer serializer)
+        {
+            _eventDataSender = eventDataSender ?? throw new ArgumentNullException(nameof(eventDataSender));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="EventHubClient"/> and an <see cref="EventDataSerializer"/>.
@@ -24,7 +37,7 @@
             EventHubClient eventHubClient,
             EventDataSerializer serializer)
         {
-            _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
+            _eventDataSender = new EventDataSender(eventHubClient);
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
@@ -70,8 +83,8 @@
             EventData eventData = _serializer.Serialize(envelope);
             string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
             return partitionKey == null
-                ? _eventHubClient.SendAsync(eventData)
-                : _eventHubClient.SendAsync(eventData, partitionKey);
+                ? _eventDataSender.Send(new[] { eventData })
+                : _eventDataSender.Send(new[] { eventData }, partitionKey);
         }
 
         /// <summary>
@@ -125,7 +138,9 @@
                 from envelope in envelopeList
                 select _serializer.Serialize(envelope);
 
-            return _eventHubClient.SendAsync(messages, partitionKey);
+            return partitionKey == null
+                ? _eventDataSender.Send(messages)
+                : _eventDataSender.Send(messages, partitionKey);
         }
     }
 }
