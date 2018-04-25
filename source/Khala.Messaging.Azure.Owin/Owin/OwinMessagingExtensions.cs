@@ -19,6 +19,7 @@
         /// <param name="eventProcessorHost">An <see cref="EventProcessorHost"/> for processing event data.</param>
         /// <param name="messageHandler">A message handler object.</param>
         /// <param name="exceptionHandler">An exception handler object.</param>
+        [Obsolete("This project is deprecated.")]
         public static void UseEventProcessor(
             this IAppBuilder appBuilder,
             EventProcessorHost eventProcessorHost,

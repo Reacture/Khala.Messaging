@@ -222,7 +222,7 @@ References
 
             var messageHandler = new MessageHandler();
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -257,7 +257,7 @@ References
 
             var messageHandler = new MessageHandler();
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -306,7 +306,7 @@ References
                 .Returns(completion.Task);
 
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -349,7 +349,7 @@ References
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IMessageHandler>(),
+                Mock.Of<IEventMessageProcessor>(),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -393,7 +393,7 @@ References
                 .ThrowsAsync(new InvalidOperationException());
 
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -438,7 +438,7 @@ References
                 .Returns(Task.CompletedTask);
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IMessageHandler>(),
+                Mock.Of<IEventMessageProcessor>(),
                 exceptionHandler,
                 CancellationToken.None);
 
@@ -494,7 +494,7 @@ References
                 .Returns(Task.CompletedTask);
 
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 exceptionHandler,
                 CancellationToken.None);
 
@@ -542,7 +542,7 @@ References
                 .ThrowsAsync(new InvalidOperationException());
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IMessageHandler>(),
+                Mock.Of<IEventMessageProcessor>(),
                 exceptionHandler,
                 CancellationToken.None);
 
@@ -586,7 +586,7 @@ References
                 .ThrowsAsync(new TaskCanceledException());
 
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -637,7 +637,7 @@ References
                 .Returns(Task.CompletedTask);
 
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 exceptionHandler,
                 CancellationToken.None);
 
@@ -681,7 +681,7 @@ References
             IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == true);
             var cancellationToken = new CancellationToken(canceled);
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 cancellationToken);
 
@@ -709,7 +709,7 @@ References
         }
 
         [TestMethod]
-        public async Task event_processor_does_not_invoke_message_handler_if_message_is_not_accepted()
+        public async Task event_processor_does_not_invoke_message_handler_if_message_is_unacceptable()
         {
             // Arrange
             EventHubRuntimeInformation runtimeInformation = await GetRuntimeInformation();
@@ -720,7 +720,7 @@ References
             IMessageHandler messageHandler = Mock.Of<IMessageHandler>(x => x.Accepts(It.IsAny<Envelope>()) == false);
             CancellationToken cancellationToken = CancellationToken.None;
             var sut = new EventProcessorFactory(
-                messageHandler,
+                new EventMessageProcessor(messageHandler),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 cancellationToken);
 
