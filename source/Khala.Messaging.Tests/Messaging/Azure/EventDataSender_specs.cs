@@ -5,8 +5,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using AutoFixture;
-    using AutoFixture.AutoMoq;
-    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -114,15 +112,55 @@ References
         }
 
         [TestMethod]
-        public void sut_has_guard_clauses()
+        public async Task Send_sends_messages_with_partition_key_correctly()
         {
-            IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
-            builder.Inject(EventHubClient.CreateFromConnectionString(_connectionString));
-            new GuardClauseAssertion(builder).Verify(typeof(EventDataSender));
+            // Arrange
+            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
+            var serializer = new EventDataSerializer();
+            var sut = new EventDataSender(eventHubClient);
+
+            var envelopes = new Fixture()
+                .Build<Message>()
+                .CreateMany()
+                .Select(message => new Envelope(
+                    messageId: Guid.NewGuid(),
+                    message,
+                    operationId: Guid.NewGuid(),
+                    correlationId: Guid.NewGuid(),
+                    contributor: $"{Guid.NewGuid()}"))
+                .ToList();
+
+            IEnumerable<EventData> events =
+                from envelope in envelopes
+                select serializer.Serialize(envelope);
+
+            string partitionKey = Guid.NewGuid().ToString();
+
+            IEnumerable<PartitionReceiver> receivers =
+                await GetReceivers(eventHubClient, _consumerGroupName);
+
+            // Act
+            await sut.Send(events, partitionKey);
+
+            // Assert
+            var received = new List<EventData>(await ReceiveAll(receivers));
+            await eventHubClient.CloseAsync();
+
+            IEnumerable<Envelope> actual = from eventData in received
+                                           select serializer.Deserialize(eventData);
+
+            actual.Should().BeEquivalentTo(
+                envelopes,
+                opts =>
+                opts.WithStrictOrdering().RespectingRuntimeTypes());
+
+            received.Should().OnlyContain(
+                eventData =>
+                eventData.SystemProperties.PartitionKey == partitionKey);
         }
 
         [TestMethod]
-        public async Task Send_sends_messages_correctly()
+        public async Task Send_sends_messages_without_partition_key_correctly()
         {
             // Arrange
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
@@ -139,9 +177,9 @@ References
                     contributor: $"{Guid.NewGuid()}"))
                 .ToList();
 
-            var events = envelopes
-                .Select(envelope => serializer.Serialize(envelope))
-                .ToList();
+            IEnumerable<EventData> events =
+                from envelope in envelopes
+                select serializer.Serialize(envelope);
 
             IEnumerable<PartitionReceiver> receivers =
                 await GetReceivers(eventHubClient, _consumerGroupName);
@@ -191,88 +229,6 @@ References
             var sut = new EventDataSender(eventHubClient);
 
             Func<Task> action = () => sut.Send(new EventData[] { });
-
-            action.Should().NotThrow();
-        }
-
-        [TestMethod]
-        public async Task Send_sends_messages_with_partition_key_correctly()
-        {
-            // Arrange
-            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
-            var serializer = new EventDataSerializer();
-            var sut = new EventDataSender(eventHubClient);
-
-            var envelopes = new Fixture()
-                .Build<Message>()
-                .CreateMany()
-                .Select(message => new Envelope(
-                    messageId: Guid.NewGuid(),
-                    message,
-                    operationId: Guid.NewGuid(),
-                    correlationId: Guid.NewGuid(),
-                    contributor: $"{Guid.NewGuid()}"))
-                .ToList();
-
-            var events = envelopes
-                .Select(envelope => serializer.Serialize(envelope))
-                .ToList();
-
-            string partitionKey = Guid.NewGuid().ToString();
-
-            IEnumerable<PartitionReceiver> receivers =
-                await GetReceivers(eventHubClient, _consumerGroupName);
-
-            // Act
-            await sut.Send(events, partitionKey);
-
-            // Assert
-            var received = new List<EventData>(await ReceiveAll(receivers));
-            await eventHubClient.CloseAsync();
-
-            IEnumerable<Envelope> actual = from eventData in received
-                                           select serializer.Deserialize(eventData);
-
-            actual.Should().BeEquivalentTo(
-                envelopes,
-                opts =>
-                opts.WithStrictOrdering().RespectingRuntimeTypes());
-
-            received.Should().OnlyContain(
-                eventData =>
-                eventData.SystemProperties.PartitionKey == partitionKey);
-        }
-
-        [TestMethod]
-        public void Send_with_partition_key_has_guard_clause_against_null_element()
-        {
-            var builder = new Fixture();
-            EventData[] envelopes = new[]
-            {
-                builder.Create<EventData>(),
-                builder.Create<EventData>(),
-                default,
-            };
-            var sut = new EventDataSender(EventHubClient.CreateFromConnectionString(_connectionString));
-            var random = new Random();
-
-            Func<Task> action = () =>
-            sut.Send(
-                from e in envelopes
-                orderby random.Next()
-                select e,
-                "partition key");
-
-            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "events");
-        }
-
-        [TestMethod]
-        public void Send_with_partition_key_does_not_fail_even_if_events_is_empty()
-        {
-            var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
-            var sut = new EventDataSender(eventHubClient);
-
-            Func<Task> action = () => sut.Send(new EventData[] { }, "partition key");
 
             action.Should().NotThrow();
         }

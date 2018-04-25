@@ -93,9 +93,7 @@
 
             EventData eventData = _serializer.Serialize(envelope);
             string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
-            return partitionKey == null
-                ? _eventDataSender.Send(new[] { eventData })
-                : _eventDataSender.Send(new[] { eventData }, partitionKey);
+            return _eventDataSender.Send(new[] { eventData }, partitionKey);
         }
 
         /// <summary>
@@ -113,26 +111,27 @@
                 throw new ArgumentNullException(nameof(envelopes));
             }
 
-            var envelopeList = new List<Envelope>();
-
-            foreach (Envelope envelope in envelopes)
-            {
-                if (envelope == null)
-                {
-                    throw new ArgumentException(
-                        $"{nameof(envelopes)} cannot contain null.",
-                        nameof(envelopes));
-                }
-
-                envelopeList.Add(envelope);
-            }
+            IReadOnlyList<Envelope> envelopeList =
+                envelopes as IReadOnlyList<Envelope> ?? envelopes.ToList();
 
             if (envelopeList.Count == 0)
             {
                 return Task.CompletedTask;
             }
 
-            string partitionKey = (envelopeList[0].Message as IPartitioned)?.PartitionKey;
+            for (int i = 0; i < envelopeList.Count; i++)
+            {
+                Envelope envelope = envelopeList[i];
+                if (envelope == null)
+                {
+                    throw new ArgumentException(
+                        $"{nameof(envelopes)} cannot contain null.",
+                        nameof(envelopes));
+                }
+            }
+
+            object firstMessage = envelopeList[0].Message;
+            string partitionKey = (firstMessage as IPartitioned)?.PartitionKey;
 
             for (int i = 1; i < envelopeList.Count; i++)
             {
@@ -149,9 +148,7 @@
                 from envelope in envelopeList
                 select _serializer.Serialize(envelope);
 
-            return partitionKey == null
-                ? _eventDataSender.Send(messages)
-                : _eventDataSender.Send(messages, partitionKey);
+            return _eventDataSender.Send(messages, partitionKey);
         }
     }
 }

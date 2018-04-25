@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.EventHubs;
 
@@ -22,65 +23,31 @@
         }
 
         /// <inheritdoc/>
-        public Task Send(IEnumerable<EventData> events)
+        public Task Send(
+            IEnumerable<EventData> events, string partitionKey = default)
         {
             if (events == null)
             {
                 throw new ArgumentNullException(nameof(events));
             }
 
-            var eventDataList = new List<EventData>();
-
-            foreach (EventData eventData in events)
-            {
-                if (eventData == null)
-                {
-                    throw new ArgumentException(
-                        $"{nameof(events)} cannot contain null.",
-                        nameof(events));
-                }
-
-                eventDataList.Add(eventData);
-            }
+            IReadOnlyList<EventData> eventDataList =
+                events as IReadOnlyList<EventData> ?? events.ToList();
 
             if (eventDataList.Count == 0)
             {
                 return Task.CompletedTask;
             }
 
-            return _eventHubClient.SendAsync(eventDataList);
-        }
-
-        /// <inheritdoc/>
-        public Task Send(IEnumerable<EventData> events, string partitionKey)
-        {
-            if (events == null)
+            for (int i = 0; i < eventDataList.Count; i++)
             {
-                throw new ArgumentNullException(nameof(events));
-            }
-
-            if (partitionKey == null)
-            {
-                throw new ArgumentNullException(nameof(partitionKey));
-            }
-
-            var eventDataList = new List<EventData>();
-
-            foreach (EventData eventData in events)
-            {
+                EventData eventData = eventDataList[i];
                 if (eventData == null)
                 {
                     throw new ArgumentException(
                         $"{nameof(events)} cannot contain null.",
                         nameof(events));
                 }
-
-                eventDataList.Add(eventData);
-            }
-
-            if (eventDataList.Count == 0)
-            {
-                return Task.CompletedTask;
             }
 
             return _eventHubClient.SendAsync(eventDataList, partitionKey);
