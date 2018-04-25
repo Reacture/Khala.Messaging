@@ -91,25 +91,25 @@
             return _messageSerializer.Deserialize(value);
         }
 
-        private Guid GetMessageId(IDictionary<string, object> properties)
+        private static Guid GetMessageId(IDictionary<string, object> properties)
         {
             properties.TryGetValue(MessageIdName, out object value);
             return Guid.TryParse(value?.ToString(), out Guid messageId) ? messageId : Guid.NewGuid();
         }
 
-        private Guid? GetOperationId(IDictionary<string, object> properties)
+        private static Guid? GetOperationId(IDictionary<string, object> properties)
         {
             properties.TryGetValue(OperationIdName, out object value);
             return Guid.TryParse(value?.ToString(), out Guid operationId) ? operationId : default(Guid?);
         }
 
-        private Guid? GetCorrelationId(IDictionary<string, object> properties)
+        private static Guid? GetCorrelationId(IDictionary<string, object> properties)
         {
             properties.TryGetValue(CorrelationIdName, out object value);
             return Guid.TryParse(value?.ToString(), out Guid correlationId) ? correlationId : default(Guid?);
         }
 
-        private string GetContributor(IDictionary<string, object> properties)
+        private static string GetContributor(IDictionary<string, object> properties)
         {
             properties.TryGetValue(ContributorName, out object value);
             return value?.ToString();
