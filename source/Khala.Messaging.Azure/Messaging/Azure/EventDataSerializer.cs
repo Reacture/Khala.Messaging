@@ -10,11 +10,6 @@
     /// </summary>
     public sealed class EventDataSerializer
     {
-        private const string MessageIdName = "Khala.Messaging.Envelope.MessageId";
-        private const string OperationIdName = "Khala.Messaging.Envelope.OperationId";
-        private const string CorrelationIdName = "Khala.Messaging.Envelope.CorrelationId";
-        private const string ContributorName = "Khala.Messaging.Envelope.Contributor";
-
         private readonly IMessageSerializer _messageSerializer;
 
         /// <summary>
@@ -51,10 +46,10 @@
             {
                 Properties =
                 {
-                    [MessageIdName] = envelope.MessageId.ToString("n"),
-                    [OperationIdName] = envelope.OperationId?.ToString("n"),
-                    [CorrelationIdName] = envelope.CorrelationId?.ToString("n"),
-                    [ContributorName] = envelope.Contributor
+                    [nameof(Envelope.MessageId)] = envelope.MessageId,
+                    [nameof(Envelope.OperationId)] = envelope.OperationId,
+                    [nameof(Envelope.CorrelationId)] = envelope.CorrelationId,
+                    [nameof(Envelope.Contributor)] = envelope.Contributor
                 }
             };
         }
@@ -93,26 +88,54 @@
 
         private static Guid GetMessageId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(MessageIdName, out object value);
-            return Guid.TryParse(value?.ToString(), out Guid messageId) ? messageId : Guid.NewGuid();
+            properties.TryGetValue(nameof(Envelope.MessageId), out object value);
+            switch (value)
+            {
+                case Guid messageId:
+                    return messageId;
+
+                default:
+                    return Guid.NewGuid();
+            }
         }
 
         private static Guid? GetOperationId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(OperationIdName, out object value);
-            return Guid.TryParse(value?.ToString(), out Guid operationId) ? operationId : default(Guid?);
+            properties.TryGetValue(nameof(Envelope.OperationId), out object value);
+            switch (value)
+            {
+                case Guid operationId:
+                    return operationId;
+
+                default:
+                    return null;
+            }
         }
 
         private static Guid? GetCorrelationId(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(CorrelationIdName, out object value);
-            return Guid.TryParse(value?.ToString(), out Guid correlationId) ? correlationId : default(Guid?);
+            properties.TryGetValue(nameof(Envelope.CorrelationId), out object value);
+            switch (value)
+            {
+                case Guid correlationId:
+                    return correlationId;
+
+                default:
+                    return null;
+            }
         }
 
         private static string GetContributor(IDictionary<string, object> properties)
         {
-            properties.TryGetValue(ContributorName, out object value);
-            return value?.ToString();
+            properties.TryGetValue(nameof(Envelope.Contributor), out object value);
+            switch (value)
+            {
+                case string contributor:
+                    return contributor;
+
+                default:
+                    return null;
+            }
         }
     }
 }

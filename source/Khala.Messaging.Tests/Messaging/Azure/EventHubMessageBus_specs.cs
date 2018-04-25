@@ -118,7 +118,12 @@ References
             var eventHubClient = EventHubClient.CreateFromConnectionString(_connectionString);
             var serializer = new EventDataSerializer();
             var sut = new EventHubMessageBus(eventHubClient, serializer);
-            var envelope = new Envelope(new Fixture().Create<Message>());
+            var envelope = new Envelope(
+                messageId: Guid.NewGuid(),
+                message: new Fixture().Create<Message>(),
+                operationId: Guid.NewGuid(),
+                correlationId: Guid.NewGuid(),
+                contributor: $"{Guid.NewGuid()}");
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
 
             await sut.Send(envelope, CancellationToken.None);
@@ -156,7 +161,12 @@ References
 
             var envelopes = new Fixture()
                 .CreateMany<Message>()
-                .Select(message => new Envelope(message))
+                .Select(message => new Envelope(
+                    messageId: Guid.NewGuid(),
+                    message,
+                    operationId: Guid.NewGuid(),
+                    correlationId: Guid.NewGuid(),
+                    contributor: $"{Guid.NewGuid()}"))
                 .ToList();
 
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
@@ -190,7 +200,12 @@ References
                 .Build<PartitionedMessage>()
                 .With(message => message.PartitionKey, partitionKey)
                 .CreateMany()
-                .Select(message => new Envelope(message))
+                .Select(message => new Envelope(
+                    messageId: Guid.NewGuid(),
+                    message,
+                    operationId: Guid.NewGuid(),
+                    correlationId: Guid.NewGuid(),
+                    contributor: $"{Guid.NewGuid()}"))
                 .ToList();
 
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);

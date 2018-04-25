@@ -122,7 +122,7 @@ References
 
             var scheduled = new ScheduledEnvelope(
                 new Envelope(new Fixture().Create<SomeMessage>()),
-                DateTimeOffset.Now.Add(TimeSpan.FromMilliseconds(5000)));
+                DateTimeOffset.Now.Add(TimeSpan.FromMilliseconds(10000)));
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);

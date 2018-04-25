@@ -48,41 +48,39 @@
         }
 
         [TestMethod]
-        public void Serialize_sets_MessageId_property_as_string_correctly()
+        public void Serialize_sets_MessageId_property_correctly()
         {
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = sut.Serialize(envelope);
 
-            string propertyName = "Khala.Messaging.Envelope.MessageId";
+            string propertyName = nameof(Envelope.MessageId);
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
-            actual.Should().BeOfType<string>();
-            Guid.Parse((string)actual).Should().Be(envelope.MessageId);
+            actual.Should().Be(envelope.MessageId);
         }
 
         [TestMethod]
-        public void Serialize_sets_OperationId_property_as_string_correctly()
+        public void Serialize_sets_OperationId_property_correctly()
         {
             var operationId = Guid.NewGuid();
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message,
-                operationId: operationId);
+                operationId);
 
             EventData eventData = sut.Serialize(envelope);
 
-            string propertyName = "Khala.Messaging.Envelope.OperationId";
+            string propertyName = nameof(Envelope.OperationId);
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
-            actual.Should().BeOfType<string>();
-            Guid.Parse((string)actual).Should().Be(operationId);
+            actual.Should().Be(operationId);
         }
 
         [TestMethod]
-        public void Serialize_sets_CorrelationId_property_as_string_correctly()
+        public void Serialize_sets_CorrelationId_property_correctly()
         {
             var correlationId = Guid.NewGuid();
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
@@ -93,11 +91,10 @@
 
             EventData eventData = sut.Serialize(envelope);
 
-            string propertyName = "Khala.Messaging.Envelope.CorrelationId";
+            string propertyName = nameof(Envelope.CorrelationId);
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
-            actual.Should().BeOfType<string>();
-            Guid.Parse((string)actual).Should().Be(correlationId);
+            actual.Should().Be(correlationId);
         }
 
         [TestMethod]
@@ -112,7 +109,7 @@
 
             EventData eventData = sut.Serialize(envelope);
 
-            string propertyName = "Khala.Messaging.Envelope.Contributor";
+            string propertyName = nameof(Envelope.Contributor);
             eventData.Properties.Keys.Should().Contain(propertyName);
             object actual = eventData.Properties[propertyName];
             actual.Should().BeOfType<string>().Which.Should().Be(contributor);
@@ -140,7 +137,7 @@
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
-            eventData.Properties.Remove("Khala.Messaging.Envelope.MessageId");
+            eventData.Properties.Remove("MessageId");
 
             Envelope actual = sut.Deserialize(eventData);
 
@@ -149,12 +146,27 @@
         }
 
         [TestMethod]
+        public void Deserialize_not_fails_even_if_OperationId_property_not_set()
+        {
+            BlogPostCreated message = fixture.Create<BlogPostCreated>();
+            var envelope = new Envelope(message);
+            EventData eventData = sut.Serialize(envelope);
+            eventData.Properties.Remove("OperationId");
+
+            Envelope actual = null;
+            Action action = () => actual = sut.Deserialize(eventData);
+
+            action.Should().NotThrow();
+            actual.Should().BeEquivalentTo(envelope, opts => opts.RespectingRuntimeTypes());
+        }
+
+        [TestMethod]
         public void Deserialize_not_fails_even_if_CorrelationId_property_not_set()
         {
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
-            eventData.Properties.Remove("Khala.Messaging.Envelope.CorrelationId");
+            eventData.Properties.Remove("CorrelationId");
 
             Envelope actual = null;
             Action action = () => actual = sut.Deserialize(eventData);
@@ -169,7 +181,7 @@
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
-            eventData.Properties.Remove("Khala.Messaging.Envelope.Contributor");
+            eventData.Properties.Remove("Contributor");
 
             Envelope actual = null;
             Action action = () => actual = sut.Deserialize(eventData);
