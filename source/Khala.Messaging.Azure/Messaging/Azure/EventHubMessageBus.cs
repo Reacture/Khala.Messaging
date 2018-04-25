@@ -8,7 +8,7 @@
     using Microsoft.Azure.EventHubs;
 
     /// <summary>
-    /// Provides the implementation of <see cref="IMessageBus"/> for Azure Event hubs.
+    /// Provides the implementation of <see cref="IMessageBus"/> for Azure Event Hubs.
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {

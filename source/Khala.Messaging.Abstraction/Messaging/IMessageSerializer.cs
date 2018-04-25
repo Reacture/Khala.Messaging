@@ -1,7 +1,7 @@
 ﻿namespace Khala.Messaging
 {
     /// <summary>
-    /// Represents a message serializer that serialize and deserialize message objects into and from <see cref="string"/>.
+    /// Represents a message serializer that serializes and deserializes message objects into and from <see cref="string"/>.
     /// </summary>
     public interface IMessageSerializer
     {
