@@ -71,12 +71,13 @@
                 throw new ArgumentNullException(nameof(data));
             }
 
-            return new Envelope(
-                GetMessageId(data.Properties),
-                DeserializeMessage(data.Body),
-                GetOperationId(data.Properties),
-                GetCorrelationId(data.Properties),
-                GetContributor(data.Properties));
+            Guid messageId = GetMessageId(data.Properties) ?? Guid.NewGuid();
+            object message = DeserializeMessage(data.Body);
+            Guid? operationId = GetOperationId(data.Properties);
+            Guid? correlationId = GetCorrelationId(data.Properties);
+            string contributor = GetContributor(data.Properties);
+
+            return new Envelope(messageId, message, operationId, correlationId, contributor);
         }
 
         private object DeserializeMessage(ArraySegment<byte> body)
@@ -85,12 +86,12 @@
             return _messageSerializer.Deserialize(value);
         }
 
-        private static Guid GetMessageId(IDictionary<string, object> properties)
+        private static Guid? GetMessageId(IDictionary<string, object> properties)
         {
-            return GetProperty(properties, nameof(Envelope.MessageId), Guid.NewGuid());
+            return GetProperty<Guid?>(properties, nameof(Envelope.MessageId));
         }
 
-        internal static Guid? GetOperationId(IDictionary<string, object> properties)
+        private static Guid? GetOperationId(IDictionary<string, object> properties)
         {
             return GetProperty<Guid?>(properties, nameof(Envelope.OperationId));
         }
@@ -106,9 +107,7 @@
         }
 
         private static T GetProperty<T>(
-            IDictionary<string, object> properties,
-            string propertyName,
-            T defaultValue = default)
+            IDictionary<string, object> properties, string propertyName)
         {
             properties.TryGetValue(propertyName, out object value);
             switch (value)
@@ -117,7 +116,7 @@
                     return property;
 
                 default:
-                    return defaultValue;
+                    return default;
             }
         }
     }

@@ -7,10 +7,11 @@
     using Microsoft.Azure.EventHubs;
 
     /// <summary>
-    /// Provides the default implementation of <see cref="IEventDataSender"/>.
+    /// Provides an event data sender that sends <see cref="EventData"/> to EventHub.
     /// </summary>
-    public class EventDataSender : IEventDataSender
+    public class EventDataSender
     {
+        private readonly EventDataSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
 
         /// <summary>
@@ -19,38 +20,41 @@
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
         public EventDataSender(EventHubClient eventHubClient)
         {
+            _serializer = new EventDataSerializer();
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
         }
 
-        /// <inheritdoc/>
-        public Task Send(
-            IEnumerable<EventData> events, string partitionKey = default)
+        internal Task Send(
+            IEnumerable<Envelope> envelopes, string partitionKey)
         {
-            if (events == null)
-            {
-                throw new ArgumentNullException(nameof(events));
-            }
+            IReadOnlyCollection<EventData> events =
+                new List<EventData>(
+                    from envelope in envelopes
+                    select Serialize(envelope));
 
-            IReadOnlyList<EventData> eventDataList =
-                events as IReadOnlyList<EventData> ?? events.ToList();
+            return Send(events, partitionKey);
+        }
 
-            if (eventDataList.Count == 0)
-            {
-                return Task.CompletedTask;
-            }
+        /// <summary>
+        /// Serializes <see cref="Envelope"/> instance into <see cref="EventData"/>.
+        /// </summary>
+        /// <param name="envelope"><see cref="Envelope"/> to serialize.</param>
+        /// <returns>An <see cref="EventData"/> that contains serialized data.</returns>
+        protected virtual EventData Serialize(Envelope envelope)
+        {
+            return _serializer.Serialize(envelope);
+        }
 
-            for (int i = 0; i < eventDataList.Count; i++)
-            {
-                EventData eventData = eventDataList[i];
-                if (eventData == null)
-                {
-                    throw new ArgumentException(
-                        $"{nameof(events)} cannot contain null.",
-                        nameof(events));
-                }
-            }
-
-            return _eventHubClient.SendAsync(eventDataList, partitionKey);
+        /// <summary>
+        /// Send a batch of <see cref="EventData" /> with the same partitionKey to EventHub. All <see cref="EventData" /> with a partitionKey are guaranteed to land on the same partition.
+        /// </summary>
+        /// <param name="events">A batch of events to send to EventHub</param>
+        /// <param name="partitionKey">The partitionKey will be hashed to determine the partitionId to send the <see cref="EventData" /> to. On the Received message this can be accessed at <see cref="EventData.SystemPropertiesCollection.PartitionKey" />.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        protected virtual Task Send(
+            IReadOnlyCollection<EventData> events, string partitionKey)
+        {
+            return _eventHubClient.SendAsync(events, partitionKey);
         }
     }
 }
