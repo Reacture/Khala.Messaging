@@ -349,7 +349,7 @@ References
             IReadOnlyCollection<PartitionLease> partitionLeases = await GetPartitionLeases(runtimeInformation);
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IEventMessageProcessor>(),
+                new EventMessageProcessor(Mock.Of<IMessageHandler>()),
                 Mock.Of<IEventProcessingExceptionHandler>(),
                 CancellationToken.None);
 
@@ -438,7 +438,7 @@ References
                 .Returns(Task.CompletedTask);
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IEventMessageProcessor>(),
+                new EventMessageProcessor(Mock.Of<IMessageHandler>()),
                 exceptionHandler,
                 CancellationToken.None);
 
@@ -542,7 +542,7 @@ References
                 .ThrowsAsync(new InvalidOperationException());
 
             var sut = new EventProcessorFactory(
-                Mock.Of<IEventMessageProcessor>(),
+                new EventMessageProcessor(Mock.Of<IMessageHandler>()),
                 exceptionHandler,
                 CancellationToken.None);
 

@@ -14,12 +14,6 @@
     public class EventMessageProcessor_specs
     {
         [TestMethod]
-        public void sut_implements_IEventMessageProcessor()
-        {
-            typeof(EventMessageProcessor).Should().Implement<IEventMessageProcessor>();
-        }
-
-        [TestMethod]
         public void sut_has_guard_clauses()
         {
             IFixture builder = new Fixture().Customize(new AutoMoqCustomization());
@@ -45,7 +39,7 @@
         }
 
         [TestMethod]
-        public async Task Process_does_not_invoke_message_handler_for_unacceptable_message()
+        public async Task Process_invokes_message_handler_even_if_message_is_unacceptable()
         {
             var envelope = new Envelope(new object());
             var properties = new Dictionary<string, object>();
@@ -58,7 +52,7 @@
             await sut.Process(envelope, properties, cancellationToken);
 
             Mock.Get(messageHandler)
-                .Verify(x => x.Handle(It.IsAny<Envelope>(), It.IsAny<CancellationToken>()), Times.Never());
+                .Verify(x => x.Handle(envelope, cancellationToken), Times.Once());
         }
     }
 }

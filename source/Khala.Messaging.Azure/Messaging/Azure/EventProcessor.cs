@@ -10,12 +10,12 @@
     internal class EventProcessor : IEventProcessor
     {
         private readonly EventDataSerializer _serializer;
-        private readonly IEventMessageProcessor _messageProcessor;
+        private readonly EventMessageProcessor _messageProcessor;
         private readonly IEventProcessingExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         public EventProcessor(
-            IEventMessageProcessor messageProcessor,
+            EventMessageProcessor messageProcessor,
             IEventProcessingExceptionHandler exceptionHandler,
             CancellationToken cancellationToken)
         {
@@ -39,7 +39,10 @@
                 try
                 {
                     envelope = _serializer.Deserialize(eventData);
-                    await _messageProcessor.Process(envelope, eventData.Properties, _cancellationToken).ConfigureAwait(false);
+                    if (_messageProcessor.MessageHandler.Accepts(envelope))
+                    {
+                        await _messageProcessor.Process(envelope, eventData.Properties, _cancellationToken).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception exception)
                 {

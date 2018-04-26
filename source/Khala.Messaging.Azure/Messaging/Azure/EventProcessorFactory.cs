@@ -9,18 +9,18 @@
     /// </summary>
     public sealed class EventProcessorFactory : IEventProcessorFactory
     {
-        private readonly IEventMessageProcessor _messageProcessor;
+        private readonly EventMessageProcessor _messageProcessor;
         private readonly IEventProcessingExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessorFactory"/> class.
         /// </summary>
-        /// <param name="messageProcessor">An <see cref="IEventMessageProcessor"/>.</param>
+        /// <param name="messageProcessor">An <see cref="EventMessageProcessor"/>.</param>
         /// <param name="exceptionHandler">An exception handler object.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while event processors working.</param>
         public EventProcessorFactory(
-            IEventMessageProcessor messageProcessor,
+            EventMessageProcessor messageProcessor,
             IEventProcessingExceptionHandler exceptionHandler,
             CancellationToken cancellationToken)
         {
@@ -31,7 +31,7 @@
 
 #pragma warning disable SA1642 // Constructor summary documentation must begin with standard text
         /// <summary>
-        /// This constructor is obsolete. Use <see cref="EventProcessorFactory(IEventMessageProcessor, IEventProcessingExceptionHandler, CancellationToken)"/> instead.
+        /// This constructor is obsolete. Use <see cref="EventProcessorFactory(EventMessageProcessor, IEventProcessingExceptionHandler, CancellationToken)"/> instead.
         /// </summary>
         /// <param name="messageHandler">A message handler object.</param>
         /// <param name="exceptionHandler">An exception handler object.</param>
