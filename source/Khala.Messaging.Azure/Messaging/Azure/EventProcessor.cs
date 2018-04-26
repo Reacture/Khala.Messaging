@@ -10,17 +10,17 @@
     internal class EventProcessor : IEventProcessor
     {
         private readonly EventDataSerializer _serializer;
-        private readonly EventMessageProcessor _messageProcessor;
+        private readonly EventMessageProcessor _processor;
         private readonly IEventProcessingExceptionHandler _exceptionHandler;
         private readonly CancellationToken _cancellationToken;
 
         public EventProcessor(
-            EventMessageProcessor messageProcessor,
+            EventMessageProcessor processor,
             IEventProcessingExceptionHandler exceptionHandler,
             CancellationToken cancellationToken)
         {
             _serializer = new EventDataSerializer();
-            _messageProcessor = messageProcessor;
+            _processor = processor;
             _exceptionHandler = exceptionHandler;
             _cancellationToken = cancellationToken;
         }
@@ -35,26 +35,27 @@
         {
             foreach (EventData eventData in messages)
             {
-                Envelope envelope = null;
-                try
-                {
-                    envelope = _serializer.Deserialize(eventData);
-                    if (_messageProcessor.MessageHandler.Accepts(envelope))
-                    {
-                        await _messageProcessor.Process(envelope, eventData.Properties, _cancellationToken).ConfigureAwait(false);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    await HandleExceptionFaultTolerantly(eventData, envelope, exception).ConfigureAwait(false);
-
-                    if (exception is TaskCanceledException)
-                    {
-                        throw;
-                    }
-                }
-
+                await ProcessEvent(eventData).ConfigureAwait(false);
                 await context.CheckpointAsync(eventData).ConfigureAwait(false);
+            }
+        }
+
+        private async Task ProcessEvent(EventData eventData)
+        {
+            Envelope envelope = null;
+            try
+            {
+                envelope = _serializer.Deserialize(eventData);
+                IDictionary<string, object> properties = eventData.Properties;
+                await _processor.Process(envelope, properties, _cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                await HandleExceptionFaultTolerantly(eventData, envelope, exception).ConfigureAwait(false);
+                if (exception is TaskCanceledException)
+                {
+                    throw;
+                }
             }
         }
 

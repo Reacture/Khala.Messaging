@@ -22,31 +22,32 @@
             _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
         }
 
-        internal IMessageHandler MessageHandler => _messageHandler;
-
-        /// <summary>
-        /// Process a message.
-        /// </summary>
-        /// <param name="envelope">An <see cref="Envelope"/> that contains the message object and related properties.</param>
-        /// <param name="properties">A property bag from <see cref="EventData"/>.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for a task to complete.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        public virtual Task Process(
+        internal Task Process(
             Envelope envelope,
             IDictionary<string, object> properties,
             CancellationToken cancellationToken)
         {
-            if (envelope == null)
+            if (_messageHandler.Accepts(envelope))
             {
-                throw new ArgumentNullException(nameof(envelope));
+                var context = new EventContext(envelope, properties);
+                return ProcessAcceptedEvent(context, cancellationToken);
             }
 
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
+            return Task.CompletedTask;
+        }
 
-            return _messageHandler.Handle(envelope, cancellationToken);
+        /// <summary>
+        /// Process a message.
+        /// </summary>
+        /// <param name="context">An <see cref="EventContext"/> object that contains an <see cref="Envelope"/> and a property bag from <see cref="EventData"/>.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for a task to complete.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <remarks>This method is not called by the framework for unacceptable message.</remarks>
+        protected virtual Task ProcessAcceptedEvent(
+            EventContext context,
+            CancellationToken cancellationToken)
+        {
+            return _messageHandler.Handle(context.Envelope, cancellationToken);
         }
     }
 }
