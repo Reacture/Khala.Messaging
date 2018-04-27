@@ -9,16 +9,16 @@
     /// <summary>
     /// Provides an event data sender that sends <see cref="EventData"/> to EventHub.
     /// </summary>
-    public class EventDataSender
+    public class EventMessageSender
     {
         private readonly EventDataSerializer _serializer;
         private readonly EventHubClient _eventHubClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventDataSender"/> class.
+        /// Initializes a new instance of the <see cref="EventMessageSender"/> class.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
-        public EventDataSender(EventHubClient eventHubClient)
+        public EventMessageSender(EventHubClient eventHubClient)
         {
             _serializer = new EventDataSerializer();
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
@@ -46,7 +46,7 @@
         }
 
         /// <summary>
-        /// Send a batch of <see cref="EventData" /> with the same partitionKey to EventHub. All <see cref="EventData" /> with a partitionKey are guaranteed to land on the same partition.
+        /// Sends a batch of <see cref="EventData" /> with the same partitionKey to EventHub. All <see cref="EventData" /> with a partitionKey are guaranteed to land on the same partition.
         /// </summary>
         /// <param name="events">A batch of events to send to EventHub</param>
         /// <param name="partitionKey">The partitionKey will be hashed to determine the partitionId to send the <see cref="EventData" /> to. On the Received message this can be accessed at <see cref="EventData.SystemPropertiesCollection.PartitionKey" />.</param>

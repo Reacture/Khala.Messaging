@@ -37,7 +37,7 @@
         }
 
         /// <summary>
-        /// Process a message.
+        /// Processes a message.
         /// </summary>
         /// <param name="context">An <see cref="EventContext"/> object that contains an <see cref="Envelope"/> and a property bag from <see cref="EventData"/>.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for a task to complete.</param>

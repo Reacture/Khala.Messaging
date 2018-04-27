@@ -12,33 +12,38 @@
     /// </summary>
     public sealed class EventHubMessageBus : IMessageBus
     {
-        private readonly EventDataSender _eventDataSender;
+        private readonly EventMessageSender _eventSender;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class with an <see cref="EventDataSender"/>.
+        /// Initializes a new instance of the <see cref="EventHubMessageBus"/> class.
         /// </summary>
-        /// <param name="eventDataSender">An <see cref="EventDataSender"/>.</param>
-        public EventHubMessageBus(EventDataSender eventDataSender)
+        /// <param name="eventSender">An <see cref="EventMessageSender"/>.</param>
+        public EventHubMessageBus(EventMessageSender eventSender)
         {
-            _eventDataSender = eventDataSender ?? throw new ArgumentNullException(nameof(eventDataSender));
+            _eventSender = eventSender ?? throw new ArgumentNullException(nameof(eventSender));
         }
 
 #pragma warning disable SA1642 // Constructor summary documentation must begin with standard text
         /// <summary>
-        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventDataSender)"/> instead.
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventMessageSender)"/> instead.
         /// </summary>
-        /// <param name="eventDataSender">An <see cref="EventDataSender"/>.</param>
+        /// <param name="eventSender">An <see cref="EventMessageSender"/>.</param>
         /// <param name="serializer">An <see cref="EventDataSerializer"/> to serialize messages.</param>
         [Obsolete("Use EventHubMessageBus(EventDataSender) instead. This constructor will be removed in version 1.0.0.")]
         public EventHubMessageBus(
-            EventDataSender eventDataSender,
+            EventMessageSender eventSender,
             EventDataSerializer serializer)
         {
-            _eventDataSender = eventDataSender ?? throw new ArgumentNullException(nameof(eventDataSender));
+            if (serializer == null)
+            {
+                throw new ArgumentNullException(nameof(serializer));
+            }
+
+            _eventSender = eventSender ?? throw new ArgumentNullException(nameof(eventSender));
         }
 
         /// <summary>
-        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventDataSender)"/> instead.
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventMessageSender)"/> instead.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
         /// <param name="serializer">An <see cref="EventDataSerializer"/> to serialize messages.</param>
@@ -46,12 +51,12 @@
         public EventHubMessageBus(
             EventHubClient eventHubClient,
             EventDataSerializer serializer)
+            : this(new EventMessageSender(eventHubClient), serializer)
         {
-            _eventDataSender = new EventDataSender(eventHubClient);
         }
 
         /// <summary>
-        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventDataSender)"/> instead.
+        /// This constructor is obsolete. Use <see cref="EventHubMessageBus(EventMessageSender)"/> instead.
         /// </summary>
         /// <param name="eventHubClient">An <see cref="EventHubClient"/>.</param>
         /// <param name="messageSerializer">An <see cref="IMessageSerializer"/> to serialize messages.</param>
@@ -90,7 +95,7 @@
             }
 
             string partitionKey = (envelope.Message as IPartitioned)?.PartitionKey;
-            return _eventDataSender.Send(new[] { envelope }, partitionKey);
+            return _eventSender.Send(new[] { envelope }, partitionKey);
         }
 
         /// <summary>
@@ -141,7 +146,7 @@
                 }
             }
 
-            return _eventDataSender.Send(envelopeList, partitionKey);
+            return _eventSender.Send(envelopeList, partitionKey);
         }
     }
 }
