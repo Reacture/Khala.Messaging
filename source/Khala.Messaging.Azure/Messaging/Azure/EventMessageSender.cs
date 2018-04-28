@@ -24,6 +24,14 @@
             _eventHubClient = eventHubClient ?? throw new ArgumentNullException(nameof(eventHubClient));
         }
 
+        /// <summary>
+        /// Gets the <see cref="EventHubClient"/>.
+        /// </summary>
+        /// <value>
+        /// The <see cref="EventHubClient"/>.
+        /// </value>
+        protected EventHubClient EventHubClient => _eventHubClient;
+
         internal Task Send(
             IEnumerable<Envelope> envelopes, string partitionKey)
         {
