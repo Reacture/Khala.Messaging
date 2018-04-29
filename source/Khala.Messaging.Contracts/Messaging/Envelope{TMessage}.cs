@@ -51,22 +51,6 @@
             Contributor = contributor;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Envelope{TMessage}"/> class.
-        /// </summary>
-        /// <param name="message">The strongly-typed message object.</param>
-        /// <param name="operationId">The identifier of the operation.</param>
-        /// <param name="correlationId">The identifier of the correlation.</param>
-        /// <param name="contributor">Information of the contributor to the message.</param>
-        public Envelope(
-            TMessage message,
-            string operationId = default,
-            Guid? correlationId = default,
-            string contributor = default)
-            : this(messageId: Guid.NewGuid(), message, operationId, correlationId, contributor)
-        {
-        }
-
         /// <inheritdoc/>
         public Guid MessageId { get; }
 

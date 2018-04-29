@@ -1,8 +1,11 @@
 ﻿namespace Khala.Messaging
 {
     using System;
+    using AutoFixture;
+    using AutoFixture.Kernel;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Newtonsoft.Json;
 
     [TestClass]
     public class EnvelopeT_specs
@@ -45,6 +48,20 @@
                 correlationId: Guid.Empty,
                 contributor: default);
             action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "correlationId");
+        }
+
+        [TestMethod]
+        public void sut_is_json_serializable()
+        {
+            var factory = new MethodInvoker(new GreedyConstructorQuery());
+            var builder = new Fixture();
+            builder.Customize<Envelope<Message>>(c => c.FromFactory(factory));
+            Envelope<Message> sut = builder.Create<Envelope<Message>>();
+            string json = JsonConvert.SerializeObject(sut);
+
+            Envelope<Message> actual = JsonConvert.DeserializeObject<Envelope<Message>>(json);
+
+            actual.Should().BeEquivalentTo(sut);
         }
 
         public class Message
