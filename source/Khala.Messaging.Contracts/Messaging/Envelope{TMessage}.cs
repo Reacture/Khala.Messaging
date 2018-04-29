@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// Contains a strongly-typed message object and related properties. Generally this class is used by <see cref="IMessageHandler"/> implementors.
+    /// Contains a strongly-typed message object and related properties.
     /// </summary>
     /// <typeparam name="TMessage">The type of the message.</typeparam>
     public sealed class Envelope<TMessage> : IEnvelope

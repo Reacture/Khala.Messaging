@@ -16,10 +16,10 @@
         Guid MessageId { get; }
 
         /// <summary>
-        /// Gets the identifier of the message.
+        /// Gets the identifier of the operation.
         /// </summary>
         /// <value>
-        /// The identifier of the message.
+        /// The identifier of the operation.
         /// </value>
         Guid? OperationId { get; }
 
