@@ -60,9 +60,9 @@
             return queueClient.CloseAsync;
         }
 
-        private static Guid? GetOperationId(Message message)
+        private static string GetOperationId(Message message)
             => message.UserProperties.TryGetValue("Khala.Messaging.Envelope.OperationId", out object value)
-            ? value as Guid?
+            ? value as string
             : default;
 
         private static Guid? GetCorrelationId(Message message)

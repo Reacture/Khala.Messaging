@@ -121,7 +121,7 @@ References
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message: new Fixture().Create<Message>(),
-                operationId: Guid.NewGuid(),
+                operationId: $"{Guid.NewGuid()}",
                 correlationId: Guid.NewGuid(),
                 contributor: $"{Guid.NewGuid()}");
             IEnumerable<PartitionReceiver> receivers = await GetReceivers(eventHubClient, _consumerGroupName);
@@ -166,7 +166,7 @@ References
                 .Select(message => new Envelope(
                     messageId: Guid.NewGuid(),
                     message,
-                    operationId: Guid.NewGuid(),
+                    operationId: $"{Guid.NewGuid()}",
                     correlationId: Guid.NewGuid(),
                     contributor: $"{Guid.NewGuid()}"))
                 .ToList();
@@ -206,7 +206,7 @@ References
                 .Select(message => new Envelope(
                     messageId: Guid.NewGuid(),
                     message,
-                    operationId: Guid.NewGuid(),
+                    operationId: $"{Guid.NewGuid()}",
                     correlationId: Guid.NewGuid(),
                     contributor: $"{Guid.NewGuid()}"))
                 .ToList();

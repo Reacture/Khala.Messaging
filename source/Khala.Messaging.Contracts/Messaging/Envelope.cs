@@ -15,20 +15,18 @@
         /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
-        public Envelope(Guid messageId, object message, Guid? operationId = default, Guid? correlationId = default, string contributor = default)
+        public Envelope(
+            Guid messageId,
+            object message,
+            string operationId = default,
+            Guid? correlationId = default,
+            string contributor = default)
         {
             if (messageId == Guid.Empty)
             {
                 throw new ArgumentException(
                     $"{nameof(messageId)} cannot be empty.",
                     nameof(messageId));
-            }
-
-            if (operationId == Guid.Empty)
-            {
-                throw new ArgumentException(
-                    $"{nameof(correlationId)} cannot be empty.",
-                    nameof(operationId));
             }
 
             if (correlationId == Guid.Empty)
@@ -52,17 +50,16 @@
         /// <param name="operationId">The identifier of the operation.</param>
         /// <param name="correlationId">The identifier of the correlation.</param>
         /// <param name="contributor">Information of the contributor to the message.</param>
-        public Envelope(object message, Guid? operationId = default, Guid? correlationId = default, string contributor = default)
+        public Envelope(
+            object message,
+            string operationId = default,
+            Guid? correlationId = default,
+            string contributor = default)
             : this(messageId: Guid.NewGuid(), message, operationId, correlationId, contributor)
         {
         }
 
-        /// <summary>
-        /// Gets the identifier of the message.
-        /// </summary>
-        /// <value>
-        /// The identifier of the message.
-        /// </value>
+        /// <inheritdoc/>
         public Guid MessageId { get; }
 
         /// <summary>
@@ -73,28 +70,13 @@
         /// </value>
         public object Message { get; }
 
-        /// <summary>
-        /// Gets the identifier of the message.
-        /// </summary>
-        /// <value>
-        /// The identifier of the message.
-        /// </value>
-        public Guid? OperationId { get; }
+        /// <inheritdoc/>
+        public string OperationId { get; }
 
-        /// <summary>
-        /// Gets the identifier of the correlation.
-        /// </summary>
-        /// <value>
-        /// The identifier of the correlation.
-        /// </value>
+        /// <inheritdoc/>
         public Guid? CorrelationId { get; }
 
-        /// <summary>
-        /// Gets information of the contributor to the message.
-        /// </summary>
-        /// <value>
-        /// Information of the contributor to the message.
-        /// </value>
+        /// <inheritdoc/>
         public string Contributor { get; }
     }
 }

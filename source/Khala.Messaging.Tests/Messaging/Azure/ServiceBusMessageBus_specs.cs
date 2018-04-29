@@ -173,7 +173,7 @@ References
             IMessageSerializer serializer = new JsonMessageSerializer();
             var sut = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
 
-            var operationId = Guid.NewGuid();
+            string operationId = Guid.NewGuid().ToString();
             var scheduled = new ScheduledEnvelope(
                 new Envelope(
                     messageId: Guid.NewGuid(),

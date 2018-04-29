@@ -83,7 +83,7 @@
             var mock = new Mock<BlogEventHandler> { CallBase = true };
             BlogEventHandler sut = mock.Object;
             var messageId = Guid.NewGuid();
-            var operationId = Guid.NewGuid();
+            string operationId = Guid.NewGuid().ToString();
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             object message = new BlogPostCreated();

@@ -64,7 +64,7 @@
         [TestMethod]
         public void Serialize_sets_OperationId_property_correctly()
         {
-            var operationId = Guid.NewGuid();
+            string operationId = $"{Guid.NewGuid()}";
             BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
@@ -119,7 +119,7 @@
         public void Deserialize_deserializes_envelope_correctly()
         {
             var messageId = Guid.NewGuid();
-            var operationId = Guid.NewGuid();
+            string operationId = Guid.NewGuid().ToString();
             var correlationId = Guid.NewGuid();
             string contributor = Guid.NewGuid().ToString();
             BlogPostCreated message = fixture.Create<BlogPostCreated>();

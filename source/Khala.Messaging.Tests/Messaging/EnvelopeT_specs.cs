@@ -35,19 +35,6 @@
         }
 
         [TestMethod]
-        public void constructor_has_guard_clause_against_empty_operation_id()
-        {
-            Action action = () =>
-            new Envelope<Message>(
-                messageId: Guid.NewGuid(),
-                message: new Message(),
-                operationId: Guid.Empty,
-                correlationId: default,
-                contributor: default);
-            action.Should().Throw<ArgumentException>().Where(x => x.ParamName == "operationId");
-        }
-
-        [TestMethod]
         public void constructor_has_guard_clause_against_empty_correlation_id()
         {
             Action action = () =>

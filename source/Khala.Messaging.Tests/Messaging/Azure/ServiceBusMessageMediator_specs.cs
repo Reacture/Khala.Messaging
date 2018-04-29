@@ -93,7 +93,7 @@ References
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message: fixture.Create<SomeMessage>(),
-                operationId: Guid.NewGuid(),
+                operationId: fixture.Create<string>(),
                 correlationId: Guid.NewGuid(),
                 contributor: fixture.Create<string>());
 
@@ -164,7 +164,7 @@ References
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message: fixture.Create<SomeMessage>(),
-                operationId: Guid.NewGuid(),
+                operationId: fixture.Create<string>(),
                 contributor: fixture.Create<string>());
 
             // Act
@@ -197,7 +197,7 @@ References
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message: new Fixture().Create<SomeMessage>(),
-                operationId: Guid.NewGuid(),
+                operationId: $"{Guid.NewGuid()}",
                 correlationId: Guid.NewGuid());
 
             // Act

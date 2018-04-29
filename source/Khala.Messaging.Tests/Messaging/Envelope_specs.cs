@@ -23,15 +23,6 @@
         }
 
         [TestMethod]
-        public void constructor_has_guard_clause_against_empty_operationId()
-        {
-            Action action = () =>
-            new Envelope(Guid.NewGuid(), new object(), operationId: Guid.Empty);
-            action.Should().Throw<ArgumentException>()
-                .Where(x => x.ParamName == "operationId");
-        }
-
-        [TestMethod]
         public void constructor_allows_null_operationId()
         {
             Action action = () =>

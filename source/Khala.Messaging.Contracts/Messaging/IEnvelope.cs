@@ -21,7 +21,7 @@
         /// <value>
         /// The identifier of the operation.
         /// </value>
-        Guid? OperationId { get; }
+        string OperationId { get; }
 
         /// <summary>
         /// Gets the identifier of the correlation.

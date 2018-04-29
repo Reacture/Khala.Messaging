@@ -73,7 +73,7 @@
 
             Guid messageId = GetMessageId(data.Properties) ?? Guid.NewGuid();
             object message = DeserializeMessage(data.Body);
-            Guid? operationId = GetOperationId(data.Properties);
+            string operationId = GetOperationId(data.Properties);
             Guid? correlationId = GetCorrelationId(data.Properties);
             string contributor = GetContributor(data.Properties);
 
@@ -91,9 +91,9 @@
             return GetProperty<Guid?>(properties, nameof(Envelope.MessageId));
         }
 
-        private static Guid? GetOperationId(IDictionary<string, object> properties)
+        private static string GetOperationId(IDictionary<string, object> properties)
         {
-            return GetProperty<Guid?>(properties, nameof(Envelope.OperationId));
+            return GetProperty<string>(properties, nameof(Envelope.OperationId));
         }
 
         private static Guid? GetCorrelationId(IDictionary<string, object> properties)
