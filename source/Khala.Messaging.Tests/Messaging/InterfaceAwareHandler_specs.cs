@@ -35,18 +35,24 @@
             assertion.Verify(typeof(InterfaceAwareHandler));
         }
 
-        public abstract class BlogEventHandler :
+        public class BlogEventHandler :
             InterfaceAwareHandler,
             IHandles<BlogPostCreated>,
             IHandles<CommentedOnBlogPost>
         {
-            public abstract Task Handle(
+            public virtual Task Handle(
                 Envelope<BlogPostCreated> envelope,
-                CancellationToken cancellationToken);
+                CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
 
-            public abstract Task Handle(
+            public virtual Task Handle(
                 Envelope<CommentedOnBlogPost> envelope,
-                CancellationToken cancellationToken);
+                CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
         }
 
         public class UnknownMessage
@@ -58,7 +64,7 @@
         {
             var message = new BlogPostCreated();
             var envelope = new Envelope(message);
-            BlogEventHandler sut = Mock.Of<BlogEventHandler>();
+            var sut = new BlogEventHandler();
 
             bool actual = sut.Accepts(envelope);
 
@@ -75,6 +81,12 @@
             bool actual = sut.Accepts(envelope);
 
             actual.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void Accepts_is_virtual()
+        {
+            typeof(InterfaceAwareHandler).GetMethod("Accepts").Should().BeVirtual();
         }
 
         [TestMethod]

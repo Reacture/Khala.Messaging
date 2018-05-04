@@ -93,7 +93,7 @@
         }
 
         /// <inheritdoc/>
-        public bool Accepts(Envelope envelope)
+        public virtual bool Accepts(Envelope envelope)
         {
             if (envelope == null)
             {
