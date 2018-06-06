@@ -62,12 +62,7 @@
         /// <inheritdoc/>
         public Guid MessageId { get; }
 
-        /// <summary>
-        /// Gets the message object.
-        /// </summary>
-        /// <value>
-        /// The message object.
-        /// </value>
+        /// <inheritdoc/>
         public object Message { get; }
 
         /// <inheritdoc/>

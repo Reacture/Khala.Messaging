@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// Represents an envelope that contains properties for messaging.
+    /// Represents an envelope that contains data for messaging.
     /// </summary>
     public interface IEnvelope
     {
@@ -14,6 +14,14 @@
         /// The identifier of the message.
         /// </value>
         Guid MessageId { get; }
+
+        /// <summary>
+        /// Gets the message object.
+        /// </summary>
+        /// <value>
+        /// The message object.
+        /// </value>
+        object Message { get; }
 
         /// <summary>
         /// Gets the identifier of the operation.

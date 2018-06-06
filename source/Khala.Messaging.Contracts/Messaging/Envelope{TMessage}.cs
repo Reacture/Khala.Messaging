@@ -70,5 +70,7 @@
 
         /// <inheritdoc/>
         public string Contributor { get; }
+
+        object IEnvelope.Message => Message;
     }
 }
