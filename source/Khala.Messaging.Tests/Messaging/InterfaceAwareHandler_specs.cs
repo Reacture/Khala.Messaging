@@ -6,7 +6,6 @@
     using AutoFixture;
     using AutoFixture.AutoMoq;
     using AutoFixture.Idioms;
-    using FakeBlogEngine;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
@@ -35,20 +34,28 @@
             assertion.Verify(typeof(InterfaceAwareHandler));
         }
 
-        public class BlogEventHandler :
+        public class FooMessage
+        {
+        }
+
+        public class BarMessage
+        {
+        }
+
+        public class MessageHandler :
             InterfaceAwareHandler,
-            IHandles<BlogPostCreated>,
-            IHandles<CommentedOnBlogPost>
+            IHandles<FooMessage>,
+            IHandles<BarMessage>
         {
             public virtual Task Handle(
-                Envelope<BlogPostCreated> envelope,
+                Envelope<FooMessage> envelope,
                 CancellationToken cancellationToken)
             {
                 return Task.CompletedTask;
             }
 
             public virtual Task Handle(
-                Envelope<CommentedOnBlogPost> envelope,
+                Envelope<BarMessage> envelope,
                 CancellationToken cancellationToken)
             {
                 return Task.CompletedTask;
@@ -62,9 +69,9 @@
         [TestMethod]
         public void Accepts_returns_true_if_sut_handles_message()
         {
-            var message = new BlogPostCreated();
+            var message = new FooMessage();
             var envelope = new Envelope(message);
-            var sut = new BlogEventHandler();
+            var sut = new MessageHandler();
 
             bool actual = sut.Accepts(envelope);
 
@@ -76,7 +83,7 @@
         {
             var message = new UnknownMessage();
             var envelope = new Envelope(message);
-            BlogEventHandler sut = Mock.Of<BlogEventHandler>();
+            MessageHandler sut = Mock.Of<MessageHandler>();
 
             bool actual = sut.Accepts(envelope);
 
@@ -90,15 +97,16 @@
         }
 
         [TestMethod]
-        public async Task sut_invokes_correct_handler_method()
+        [AutoData]
+        public async Task sut_invokes_correct_handler_method(
+            Guid messageId,
+            FooMessage message,
+            string operationId,
+            Guid correlationId,
+            string contributor)
         {
-            var mock = new Mock<BlogEventHandler> { CallBase = true };
-            BlogEventHandler sut = mock.Object;
-            var messageId = Guid.NewGuid();
-            string operationId = Guid.NewGuid().ToString();
-            var correlationId = Guid.NewGuid();
-            string contributor = Guid.NewGuid().ToString();
-            object message = new BlogPostCreated();
+            var mock = new Mock<MessageHandler> { CallBase = true };
+            MessageHandler sut = mock.Object;
             var envelope = new Envelope(messageId, message, operationId, correlationId, contributor);
 
             await sut.Handle(envelope, CancellationToken.None);
@@ -106,7 +114,7 @@
             Mock.Get(sut).Verify(
                 x =>
                 x.Handle(
-                    It.Is<Envelope<BlogPostCreated>>(
+                    It.Is<Envelope<FooMessage>>(
                         p =>
                         p.MessageId == messageId &&
                         p.OperationId == operationId &&

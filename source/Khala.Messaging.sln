@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Azure", "Kh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Khala.Messaging.Tests", "Khala.Messaging.Tests\Khala.Messaging.Tests.csproj", "{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.Messaging.Tests.Integration", "Khala.Messaging.Tests.Integration\Khala.Messaging.Tests.Integration.csproj", "{6077EB85-7941-4C38-A466-8B9A16FA98F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A619E521-3C1A-4210-9B5E-A285DAF7F5BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6077EB85-7941-4C38-A466-8B9A16FA98F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6077EB85-7941-4C38-A466-8B9A16FA98F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6077EB85-7941-4C38-A466-8B9A16FA98F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6077EB85-7941-4C38-A466-8B9A16FA98F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

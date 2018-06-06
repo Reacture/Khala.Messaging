@@ -1,6 +1,5 @@
 ﻿namespace Khala.Messaging
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoFixture;
@@ -63,10 +62,10 @@
         }
 
         [TestMethod]
-        public void HandleTMessage_releys_with_non_cancellation_token()
+        [AutoData]
+        public void HandleTMessage_releys_with_non_cancellation_token(Envelope<object> envelope)
         {
             var task = Task.FromResult(true);
-            var envelope = new Envelope<object>(Guid.NewGuid(), new object(), default, default, default);
             IHandles<object> handles = Mock.Of<IHandles<object>>(
                 x => x.Handle(envelope, CancellationToken.None) == task);
 

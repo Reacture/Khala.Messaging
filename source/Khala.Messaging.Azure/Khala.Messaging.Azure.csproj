@@ -22,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.EventHubs.Processor" Version="1.0.3" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="1.0.0" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
   </ItemGroup>
 
   <ItemGroup>

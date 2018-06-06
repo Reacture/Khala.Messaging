@@ -2,10 +2,7 @@
 {
     using System;
     using System.Text;
-    using AutoFixture;
-    using AutoFixture.AutoMoq;
     using AutoFixture.Idioms;
-    using FakeBlogEngine;
     using FluentAssertions;
     using Microsoft.Azure.EventHubs;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,44 +10,40 @@
     [TestClass]
     public class EventDataSerializer_specs
     {
-        private IFixture fixture;
-        private IMessageSerializer messageSerializer;
-        private EventDataSerializer sut;
-
-        [TestInitialize]
-        public void TestInitialize()
+        public class Message
         {
-            fixture = new Fixture().Customize(new AutoMoqCustomization());
-            messageSerializer = new JsonMessageSerializer();
-            sut = new EventDataSerializer(messageSerializer);
+            public int Foo { get; set; }
+
+            public string Bar { get; set; }
         }
 
         [TestMethod]
-        public void class_has_guard_clauses()
+        [AutoData]
+        public void class_has_guard_clauses(GuardClauseAssertion assertion)
         {
-            var assertion = new GuardClauseAssertion(fixture);
             assertion.Verify(typeof(EventDataSerializer));
         }
 
         [TestMethod]
-        public void Serialize_serializes_message_correctly()
+        [AutoData]
+        public void Serialize_serializes_message_correctly(Message message, JsonMessageSerializer serializer)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
+            var sut = new EventDataSerializer(serializer);
             var envelope = new Envelope(message);
 
             EventData eventData = sut.Serialize(envelope);
 
             ArraySegment<byte> body = eventData.Body;
             string value = Encoding.UTF8.GetString(body.Array, body.Offset, body.Count);
-            object actual = messageSerializer.Deserialize(value);
-            actual.Should().BeOfType<BlogPostCreated>();
+            object actual = serializer.Deserialize(value);
+            actual.Should().BeOfType<Message>();
             actual.Should().BeEquivalentTo(message);
         }
 
         [TestMethod]
-        public void Serialize_sets_MessageId_property_correctly()
+        [AutoData]
+        public void Serialize_sets_MessageId_property_correctly(EventDataSerializer sut, Message message)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
 
             EventData eventData = sut.Serialize(envelope);
@@ -62,14 +55,11 @@
         }
 
         [TestMethod]
-        public void Serialize_sets_OperationId_property_correctly()
+        [AutoData]
+        public void Serialize_sets_OperationId_property_correctly(
+            EventDataSerializer sut, Guid messageId, Message message, string operationId)
         {
-            string operationId = $"{Guid.NewGuid()}";
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
-            var envelope = new Envelope(
-                messageId: Guid.NewGuid(),
-                message,
-                operationId);
+            var envelope = new Envelope(messageId, message, operationId);
 
             EventData eventData = sut.Serialize(envelope);
 
@@ -80,10 +70,10 @@
         }
 
         [TestMethod]
-        public void Serialize_sets_CorrelationId_property_correctly()
+        [AutoData]
+        public void Serialize_sets_CorrelationId_property_correctly(
+            EventDataSerializer sut, Guid messageId, Message message, Guid correlationId)
         {
-            var correlationId = Guid.NewGuid();
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message,
@@ -98,10 +88,10 @@
         }
 
         [TestMethod]
-        public void Serialize_sets_Contributor_property_correctly()
+        [AutoData]
+        public void Serialize_sets_Contributor_property_correctly(
+            EventDataSerializer sut, Guid messageId, Message message, string contributor)
         {
-            string contributor = Guid.NewGuid().ToString();
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(
                 messageId: Guid.NewGuid(),
                 message,
@@ -116,13 +106,15 @@
         }
 
         [TestMethod]
-        public void Deserialize_deserializes_envelope_correctly()
+        [AutoData]
+        public void Deserialize_deserializes_envelope_correctly(
+            EventDataSerializer sut,
+            Guid messageId,
+            Message message,
+            string operationId,
+            Guid correlationId,
+            string contributor)
         {
-            var messageId = Guid.NewGuid();
-            string operationId = Guid.NewGuid().ToString();
-            var correlationId = Guid.NewGuid();
-            string contributor = Guid.NewGuid().ToString();
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(messageId, message, operationId, correlationId, contributor);
             EventData eventData = sut.Serialize(envelope);
 
@@ -132,9 +124,10 @@
         }
 
         [TestMethod]
-        public void Deserialize_creates_new_MessageId_if_property_not_set()
+        [AutoData]
+        public void Deserialize_creates_new_MessageId_if_property_not_set(
+            EventDataSerializer sut, Message message)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("MessageId");
@@ -146,9 +139,10 @@
         }
 
         [TestMethod]
-        public void Deserialize_not_fails_even_if_OperationId_property_not_set()
+        [AutoData]
+        public void Deserialize_not_fails_even_if_OperationId_property_not_set(
+            EventDataSerializer sut, Message message)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("OperationId");
@@ -161,9 +155,10 @@
         }
 
         [TestMethod]
-        public void Deserialize_not_fails_even_if_CorrelationId_property_not_set()
+        [AutoData]
+        public void Deserialize_not_fails_even_if_CorrelationId_property_not_set(
+            EventDataSerializer sut, Message message)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("CorrelationId");
@@ -176,9 +171,10 @@
         }
 
         [TestMethod]
-        public void Deserialize_not_fails_even_if_Contributor_property_not_set()
+        [AutoData]
+        public void Deserialize_not_fails_even_if_Contributor_property_not_set(
+            EventDataSerializer sut, Message message)
         {
-            BlogPostCreated message = fixture.Create<BlogPostCreated>();
             var envelope = new Envelope(message);
             EventData eventData = sut.Serialize(envelope);
             eventData.Properties.Remove("Contributor");
