@@ -66,7 +66,7 @@ References
         private static async Task SendMessage(Envelope envelope, JsonMessageSerializer serializer)
         {
             var messageBus = new ServiceBusMessageBus(_connectionStringBuilder, serializer);
-            await messageBus.Send(new ScheduledEnvelope(envelope, DateTimeOffset.Now.AddMinutes(-1.0)), default);
+            await messageBus.Send(new ScheduledEnvelope(envelope, DateTime.UtcNow.AddMinutes(-1.0)), default);
             await messageBus.Close();
         }
 

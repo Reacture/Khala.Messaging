@@ -122,7 +122,7 @@ References
 
             var scheduled = new ScheduledEnvelope(
                 new Envelope(new Fixture().Create<SomeMessage>()),
-                DateTimeOffset.Now.Add(TimeSpan.FromMilliseconds(10000)));
+                DateTime.UtcNow.Add(TimeSpan.FromMilliseconds(10000)));
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);
@@ -130,7 +130,7 @@ References
             // Assert
             (Message received, DateTime receivedAt) = await ReceiveSingle();
             var precision = TimeSpan.FromMilliseconds(1000);
-            receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTime.UtcDateTime.AddTicks(-precision.Ticks));
+            receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTimeUtc.AddTicks(-precision.Ticks));
 
             received.MessageId.Should().Be(scheduled.Envelope.MessageId.ToString("n"));
             received.CorrelationId.Should().Be(null);
@@ -150,7 +150,7 @@ References
 
             var scheduled = new ScheduledEnvelope(
                 new Envelope(new Fixture().Create<SomeMessage>()),
-                DateTimeOffset.Now.AddTicks(-TimeSpan.FromDays(1).Ticks));
+                DateTime.UtcNow.AddTicks(-TimeSpan.FromDays(1).Ticks));
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);
@@ -158,7 +158,7 @@ References
             // Assert
             (Message received, DateTime receivedAt) = await ReceiveSingle();
             var precision = TimeSpan.FromMilliseconds(1000);
-            receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTime.UtcDateTime.AddTicks(-precision.Ticks));
+            receivedAt.Should().BeOnOrAfter(scheduled.ScheduledTimeUtc.AddTicks(-precision.Ticks));
 
             object message = serializer.Deserialize(Encoding.UTF8.GetString(received.Body));
             message.Should().BeEquivalentTo(scheduled.Envelope.Message);
@@ -179,7 +179,7 @@ References
                     messageId: Guid.NewGuid(),
                     message: new Fixture().Create<SomeMessage>(),
                     operationId: operationId),
-                DateTimeOffset.Now);
+                DateTime.UtcNow);
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);
@@ -204,7 +204,7 @@ References
                     messageId: Guid.NewGuid(),
                     message: new Fixture().Create<SomeMessage>(),
                     correlationId: correlationId),
-                DateTimeOffset.Now);
+                DateTime.UtcNow);
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);
@@ -230,7 +230,7 @@ References
                     messageId,
                     message: new Fixture().Create<SomeMessage>(),
                     contributor: contributor),
-                DateTimeOffset.Now);
+                DateTime.UtcNow);
 
             // Act
             await sut.Send(scheduled, CancellationToken.None);
@@ -247,7 +247,7 @@ References
 
             await sut.Close();
 
-            var scheduled = new ScheduledEnvelope(new Envelope(new object()), DateTimeOffset.Now);
+            var scheduled = new ScheduledEnvelope(new Envelope(new object()), DateTime.UtcNow);
             Func<Task> action = () => sut.Send(scheduled, CancellationToken.None);
             action.Should().Throw<Exception>();
         }

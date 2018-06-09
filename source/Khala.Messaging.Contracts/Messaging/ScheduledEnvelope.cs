@@ -11,11 +11,11 @@
         /// Initializes a new instance of the <see cref="ScheduledEnvelope"/> class.
         /// </summary>
         /// <param name="envelope">An envelope object.</param>
-        /// <param name="scheduledTime">The time at which <paramref name="scheduledTime"/> will be sent.</param>
-        public ScheduledEnvelope(Envelope envelope, DateTimeOffset scheduledTime)
+        /// <param name="scheduledTimeUtc">The time at which <paramref name="envelope"/> will be sent.</param>
+        public ScheduledEnvelope(Envelope envelope, DateTime scheduledTimeUtc)
         {
             Envelope = envelope ?? throw new ArgumentNullException(nameof(envelope));
-            ScheduledTime = scheduledTime;
+            ScheduledTimeUtc = scheduledTimeUtc;
         }
 
         /// <summary>
@@ -27,11 +27,11 @@
         public Envelope Envelope { get; }
 
         /// <summary>
-        /// Gets the time at which <see cref="Envelope"/> will be sent.
+        /// Gets the time in UTC at which <see cref="Envelope"/> will be sent.
         /// </summary>
         /// <value>
-        /// The time at which <see cref="Envelope"/> will be sent.
+        /// The time in UTC at which <see cref="Envelope"/> will be sent.
         /// </value>
-        public DateTimeOffset ScheduledTime { get; }
+        public DateTime ScheduledTimeUtc { get; }
     }
 }

@@ -49,14 +49,14 @@
             return _sender.SendAsync(new Message
             {
                 Body = Encoding.UTF8.GetBytes(_serializer.Serialize(envelope.Envelope.Message)),
-                ScheduledEnqueueTimeUtc = envelope.ScheduledTime.UtcDateTime,
+                ScheduledEnqueueTimeUtc = envelope.ScheduledTimeUtc,
                 MessageId = envelope.Envelope.MessageId.ToString("n"),
                 CorrelationId = envelope.Envelope.CorrelationId?.ToString("n"),
                 UserProperties =
                 {
                     ["Khala.Messaging.Envelope.OperationId"] = envelope.Envelope.OperationId,
-                    ["Khala.Messaging.Envelope.Contributor"] = envelope.Envelope.Contributor
-                }
+                    ["Khala.Messaging.Envelope.Contributor"] = envelope.Envelope.Contributor,
+                },
             });
         }
 

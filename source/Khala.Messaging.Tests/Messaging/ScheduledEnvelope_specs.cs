@@ -29,7 +29,7 @@
         {
             typeof(ScheduledEnvelope)
                 .Should()
-                .HaveProperty<DateTimeOffset>("ScheduledTime")
+                .HaveProperty<DateTime>("ScheduledTimeUtc")
                 .Which.Should().NotBeWritable();
         }
 
@@ -45,12 +45,12 @@
         {
             var fixture = new Fixture();
             Envelope envelope = fixture.Create<Envelope>();
-            DateTimeOffset scheduledTime = fixture.Create<DateTimeOffset>();
+            DateTime scheduledTimeUtc = fixture.Create<DateTime>().ToUniversalTime();
 
-            var sut = new ScheduledEnvelope(envelope, scheduledTime);
+            var sut = new ScheduledEnvelope(envelope, scheduledTimeUtc);
 
             sut.Envelope.Should().BeSameAs(envelope);
-            sut.ScheduledTime.Should().Be(scheduledTime);
+            sut.ScheduledTimeUtc.Should().Be(scheduledTimeUtc);
         }
     }
 }
