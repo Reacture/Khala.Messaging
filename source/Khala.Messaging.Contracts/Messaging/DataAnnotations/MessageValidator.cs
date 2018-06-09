@@ -10,6 +10,7 @@
     /// <summary>
     /// Provides a helper class that can be used to validate message objects. Unlike <see cref="Validator"/>, <see cref="MessageValidator"/> traverses an object graph and uses full paths of properties as member names for <see cref="ValidationResult"/>.
     /// </summary>
+    [Obsolete("Use Khala.Messaging.DataAnnotations.ObjectValidator class instead. This class will be removed in version 1.0.0.")]
     public static class MessageValidator
     {
         /// <summary>
