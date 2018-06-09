@@ -37,14 +37,14 @@
             object instance,
             out ValidationResult validationResult)
         {
-            ValidationResult result = ValidationResult.Success;
+            ValidationResult captured = ValidationResult.Success;
 
             Visitor.Visit(
                 instance,
                 breakOnFirstError: true,
-                onError: error => result = error.ValidationResult);
+                onError: error => captured = error.ValidationResult);
 
-            validationResult = result;
+            validationResult = captured;
             return validationResult == ValidationResult.Success;
         }
 
