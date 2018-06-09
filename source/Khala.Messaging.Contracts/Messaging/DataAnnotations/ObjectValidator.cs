@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides a helper class that can be used to validate objects. Unlike <see cref="Validator"/>, <see cref="ObjectValidator"/> traverses an object graph and uses full paths of properties as member names for <see cref="ValidationResult"/>.
     /// </summary>
-    public class ObjectValidator
+    public static class ObjectValidator
     {
         /// <summary>
         /// Determines whether the specified object is valid. If not valid a <see cref="ValidationException"/> is thrown.
