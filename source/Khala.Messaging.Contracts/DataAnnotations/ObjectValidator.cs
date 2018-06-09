@@ -1,4 +1,4 @@
-﻿namespace Khala.Messaging.DataAnnotations
+﻿namespace Khala.DataAnnotations
 {
     using System;
     using System.Collections;
