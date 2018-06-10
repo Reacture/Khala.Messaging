@@ -14,11 +14,11 @@
         /// Initializes a new instance of the <see cref="TransientFaultHandlingMessageHandler"/> class.
         /// </summary>
         /// <param name="retryPolicy">An <see cref="IRetryPolicy"/> object.</param>
-        /// <param name="messageHandler">As <see cref="IMessageHandler"/> object.</param>
-        public TransientFaultHandlingMessageHandler(IRetryPolicy retryPolicy, IMessageHandler messageHandler)
+        /// <param name="handler">As <see cref="IMessageHandler"/> object.</param>
+        public TransientFaultHandlingMessageHandler(IRetryPolicy retryPolicy, IMessageHandler handler)
         {
             RetryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
-            MessageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+            Handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         /// <summary>
@@ -35,7 +35,16 @@
         /// <value>
         /// The message handler.
         /// </value>
-        public IMessageHandler MessageHandler { get; }
+        [Obsolete("Use Handler property instead. This property will be removed in version 1.0.0.")]
+        public IMessageHandler MessageHandler => Handler;
+
+        /// <summary>
+        /// Gets the inner message handler.
+        /// </summary>
+        /// <value>
+        /// The inner message handler.
+        /// </value>
+        public IMessageHandler Handler { get; }
 
         /// <inheritdoc/>
         public bool Accepts(Envelope envelope)
@@ -45,7 +54,7 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return MessageHandler.Accepts(envelope);
+            return Handler.Accepts(envelope);
         }
 
         /// <summary>
@@ -61,7 +70,7 @@
                 throw new ArgumentNullException(nameof(envelope));
             }
 
-            return RetryPolicy.Run(MessageHandler.Handle, envelope, cancellationToken);
+            return RetryPolicy.Run(Handler.Handle, envelope, cancellationToken);
         }
     }
 }

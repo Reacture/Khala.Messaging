@@ -53,7 +53,7 @@
             var sut = new TransientFaultHandlingMessageHandler(retryPolicy, messageHandler);
 
             sut.RetryPolicy.Should().BeSameAs(retryPolicy);
-            sut.MessageHandler.Should().BeSameAs(messageHandler);
+            sut.Handler.Should().BeSameAs(messageHandler);
         }
 
         [TestMethod]
