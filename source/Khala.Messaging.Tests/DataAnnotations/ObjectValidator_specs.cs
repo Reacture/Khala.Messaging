@@ -40,6 +40,16 @@
             public object ObjectProperty { get; set; } = new object();
         }
 
+        public class WriteOnlyObject
+        {
+            public int WriteOnlyInt32Property
+            {
+                set
+                {
+                }
+            }
+        }
+
         public interface ICollector
         {
             void Collect(ValidationResult validationResult);
@@ -351,6 +361,56 @@
             successful.Should().BeFalse();
             validationResults.Should().HaveSameCount(expectedMemberNames);
             validationResults.SelectMany(r => r.MemberNames).Should().BeEquivalentTo(expectedMemberNames);
+        }
+
+        [TestMethod]
+        public void given_write_only_property_then_Validate_succeeds()
+        {
+            var instance = new RootObject
+            {
+                CollectionProperty = new[]
+                {
+                    new WriteOnlyObject(),
+                },
+            };
+
+            Action action = () => ObjectValidator.Validate(instance);
+
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
+        [Timeout(10)]
+        public void given_DateTime_element_then_Validate_does_not_enter_infinite_recursion()
+        {
+            var instance = new RootObject
+            {
+                CollectionProperty = new[]
+                {
+                    DateTime.Now,
+                },
+            };
+
+            Action action = () => ObjectValidator.Validate(instance);
+
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
+        [Timeout(10)]
+        public void given_DateTimeOffset_element_then_Validate_does_not_enter_infinite_recursion()
+        {
+            var instance = new RootObject
+            {
+                CollectionProperty = new[]
+                {
+                    DateTimeOffset.Now,
+                },
+            };
+
+            Action action = () => ObjectValidator.Validate(instance);
+
+            action.Should().NotThrow();
         }
     }
 }

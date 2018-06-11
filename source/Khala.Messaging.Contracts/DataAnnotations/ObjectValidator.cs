@@ -12,6 +12,11 @@
     /// </summary>
     public static class ObjectValidator
     {
+        private interface IVisitorStrategy
+        {
+            bool ShouldVisitProperty(object instance, PropertyInfo property);
+        }
+
         /// <summary>
         /// Determines whether the specified object is valid. If not valid a <see cref="ValidationException"/> is thrown.
         /// </summary>
@@ -74,35 +79,6 @@
             return hasError == false;
         }
 
-        private static IEnumerable<PropertyInfo> GetProperties(object instance)
-        {
-            return from type in AscendTypeHierarchy(instance)
-                   from property in GetDeclaredProperties(type)
-                   select property;
-        }
-
-        private static IEnumerable<Type> AscendTypeHierarchy(object instance)
-        {
-            Type type = instance.GetType();
-            while (type != null)
-            {
-                yield return type;
-                type = type.GetTypeInfo().BaseType;
-            }
-        }
-
-        private static IEnumerable<PropertyInfo> GetDeclaredProperties(Type type)
-        {
-            return from p in type.GetTypeInfo().DeclaredProperties
-                   where IsIndex(p) == false
-                   select p;
-        }
-
-        private static bool IsIndex(PropertyInfo property) => property.GetIndexParameters().Any();
-
-        private static IEnumerable<ValidationAttribute> GetValidators(PropertyInfo property)
-            => property.GetCustomAttributes<ValidationAttribute>();
-
         private struct ValidationError
         {
             public ValidationError(
@@ -125,16 +101,87 @@
                 => new ValidationException(ValidationResult, ValidationAttribute, Value);
         }
 
+        private class CompositeVisitorStrategy : IVisitorStrategy
+        {
+            private readonly IVisitorStrategy[] _strategies;
+
+            public CompositeVisitorStrategy(params IVisitorStrategy[] strategies)
+            {
+                _strategies = strategies;
+            }
+
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+            {
+                foreach (IVisitorStrategy strategy in _strategies)
+                {
+                    if (strategy.ShouldVisitProperty(instance, property) == false)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        private class IndexerStrategy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => IsIndexer(property) == false;
+
+            private static bool IsIndexer(PropertyInfo property)
+                => property.GetIndexParameters().Any();
+        }
+
+        private class GetterStratrgy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => property.GetMethod?.IsStatic == false;
+        }
+
+        private class PrimitiveTypeInstanceStrategy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => instance.GetType().GetTypeInfo().IsPrimitive == false;
+        }
+
+        private class StringInstanceStratrgy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => instance is string == false;
+        }
+
+        private class DateTimeInstanceStrategy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => instance is DateTime == false;
+        }
+
+        private class DateTimeOffsetInstanceStrategy : IVisitorStrategy
+        {
+            public bool ShouldVisitProperty(object instance, PropertyInfo property)
+                => instance is DateTimeOffset == false;
+        }
+
         private class Visitor
         {
-            private readonly Stack<object> _history;
+            private readonly IVisitorStrategy _strategy =
+                new CompositeVisitorStrategy(
+                    new IndexerStrategy(),
+                    new GetterStratrgy(),
+                    new PrimitiveTypeInstanceStrategy(),
+                    new StringInstanceStratrgy(),
+                    new DateTimeInstanceStrategy(),
+                    new DateTimeOffsetInstanceStrategy());
+
+            private readonly Stack<object> _history = new Stack<object>();
+
             private readonly bool _breakOnFirstError;
             private readonly Action<ValidationError> _onError;
             private bool _hasError;
 
             private Visitor(bool breakOnFirstError, Action<ValidationError> onError)
             {
-                _history = new Stack<object>();
                 _breakOnFirstError = breakOnFirstError;
                 _onError = onError;
                 _hasError = false;
@@ -176,7 +223,7 @@
 
             private void VisitProperties(object instance, string prefix)
             {
-                foreach (PropertyInfo property in GetProperties(instance))
+                foreach (PropertyInfo property in GetVisiteeProperties(instance))
                 {
                     string memberName = string.IsNullOrWhiteSpace(prefix)
                         ? property.Name
@@ -185,6 +232,30 @@
                     VisitProperty(instance, property, memberName);
                 }
             }
+
+            private IEnumerable<PropertyInfo> GetVisiteeProperties(object instance)
+            {
+                return from type in AscendTypeHierarchy(instance)
+                       from property in GetDeclaredProperties(type)
+                       where ShouldVisit(instance, property)
+                       select property;
+            }
+
+            private IEnumerable<Type> AscendTypeHierarchy(object instance)
+            {
+                Type type = instance.GetType();
+                while (type != null)
+                {
+                    yield return type;
+                    type = type.GetTypeInfo().BaseType;
+                }
+            }
+
+            private IEnumerable<PropertyInfo> GetDeclaredProperties(Type type)
+                => type.GetTypeInfo().DeclaredProperties;
+
+            private bool ShouldVisit(object instance, PropertyInfo property)
+                => _strategy.ShouldVisitProperty(instance, property);
 
             private void VisitProperty(
                 object instance, PropertyInfo property, string memberName)
@@ -202,6 +273,9 @@
 
                 Visit(value, prefix: memberName);
             }
+
+            private static IEnumerable<ValidationAttribute> GetValidators(PropertyInfo property)
+                => property.GetCustomAttributes<ValidationAttribute>();
 
             private void ValidateProperty(
                 object instance, object value, string memberName, ValidationAttribute validator)
