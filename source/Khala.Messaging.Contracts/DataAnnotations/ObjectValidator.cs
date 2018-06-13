@@ -136,7 +136,8 @@
         private class GetterStratrgy : IVisitorStrategy
         {
             public bool ShouldVisitProperty(object instance, PropertyInfo property)
-                => property.GetMethod?.IsStatic == false;
+                => property.GetMethod?.IsStatic == false
+                && property.GetMethod?.IsPublic == true;
         }
 
         private class PrimitiveTypeInstanceStrategy : IVisitorStrategy

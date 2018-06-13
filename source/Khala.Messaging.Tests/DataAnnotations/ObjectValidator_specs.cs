@@ -8,6 +8,7 @@
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using Newtonsoft.Json;
 
     [TestClass]
     public class ObjectValidator_specs
@@ -405,6 +406,32 @@
                 CollectionProperty = new[]
                 {
                     DateTimeOffset.Now,
+                },
+            };
+
+            Action action = () => ObjectValidator.Validate(instance);
+
+            action.Should().NotThrow();
+        }
+
+        public interface IHasInt32Value
+        {
+            int Int32Value { get; }
+        }
+
+        public class HasNotSupportedExplicitProperty : IHasInt32Value
+        {
+            int IHasInt32Value.Int32Value => throw new NotSupportedException();
+        }
+
+        [TestMethod]
+        public void Validate_ignores_explicit_properties()
+        {
+            var instance = new RootObject
+            {
+                CollectionProperty = new[]
+                {
+                    new HasNotSupportedExplicitProperty(),
                 },
             };
 
