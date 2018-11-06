@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides a composite of message handlers.
     /// </summary>
-    public sealed class CompositeMessageHandler : IMessageHandler
+    public class CompositeMessageHandler : IMessageHandler
     {
         private readonly IEnumerable<IMessageHandler> _handlers;
 
