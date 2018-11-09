@@ -172,5 +172,11 @@
                 .Which.InnerExceptions
                 .Should().BeEquivalentTo(exception1, exception2);
         }
+
+        [TestMethod]
+        public void sut_is_not_sealed_class()
+        {
+            typeof(CompositeMessageHandler).Should().NotBeSealed();
+        }
     }
 }
