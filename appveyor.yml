@@ -5,14 +5,9 @@ before_build:
 - cmd: nuget restore source\Khala.Messaging.sln
 build:
   verbosity: minimal
+  project: source\Khala.Messaging.sln
 after_build:
-- cmd: >-
-    nuget pack nuget\Khala.Messaging.Contracts.nuspec
-
-    nuget pack nuget\Khala.Messaging.Abstraction.nuspec
-
-    nuget pack nuget\Khala.Messaging.Azure.nuspec
 test:
   assemblies: '**\*.tests.dll'
 artifacts:
-- path: Khala.Messaging**.nupkg
+- path: '**\Khala.Messaging**.nupkg'

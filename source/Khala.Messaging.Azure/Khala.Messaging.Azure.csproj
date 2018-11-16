@@ -2,9 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
-    <RootNamespace>Khala</RootNamespace>
+    <Product>Khala.Messaging.Azure</Product>
+    <Version>0.19.9</Version>
     <Authors>Gyuwon</Authors>
-    <Version>0.19.7</Version>
+    <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
+    <Description>Asynchronous messaging using Microsoft Azure.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Khala.Messaging.Azure</PackageId>
+    <PackageTags>Message-Driven Azure EventHub</PackageTags>
+    <PackageProjectUrl>https://github.com/Reacture/Khala.Messaging</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Reacture/Khala.Messaging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RootNamespace>Khala</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,6 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Khala.Messaging.Abstraction" Version="0.19.9" Exclude="*" />
     <PackageReference Include="Microsoft.Azure.EventHubs.Processor" Version="1.0.3" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="1.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
