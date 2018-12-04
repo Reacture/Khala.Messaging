@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <Product>Khala.Messaging.Contracts</Product>
-    <Version>0.19.9</Version>
+    <Version>0.19.10</Version>
     <Authors>Gyuwon</Authors>
     <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
     <Description>Provides contract types for messaging.</Description>
@@ -28,7 +28,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
   </ItemGroup>
 
