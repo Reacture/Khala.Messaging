@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <Product>Khala.Messaging.Azure</Product>
-    <Version>0.19.11</Version>
+    <Version>0.19.12</Version>
     <Authors>Gyuwon</Authors>
     <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
     <Description>Asynchronous messaging using Microsoft Azure.</Description>
@@ -29,7 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Khala.Messaging.Abstraction" Version="0.19.11" Exclude="*" />
+    <PackageReference Include="Khala.Messaging.Abstraction" Version="0.19.12" Exclude="*" />
     <PackageReference Include="Microsoft.Azure.EventHubs.Processor" Version="1.0.3" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="1.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006">

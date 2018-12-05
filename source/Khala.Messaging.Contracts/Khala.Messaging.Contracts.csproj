@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <Product>Khala.Messaging.Contracts</Product>
-    <Version>0.19.11</Version>
+    <Version>0.19.12</Version>
     <Authors>Gyuwon</Authors>
     <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
     <Description>Provides contract types for messaging.</Description>
